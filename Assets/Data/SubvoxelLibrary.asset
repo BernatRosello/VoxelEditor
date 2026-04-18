@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c110ef7bc2011354a8004c3ca1112aa0, type: 3}
+  m_Name: SubvoxelLibrary
+  m_EditorClassIdentifier: Assembly-CSharp::SubvoxelLibrary
+  entries:
+  - key: CCCFFF
+    mesh: {fileID: -8497284619321507983, guid: ef9fab8ca4c61fc44bfc81f03308739e, type: 3}
+  - key: FFFFFF
+    mesh: {fileID: 2700430809106758755, guid: 635af0cb0dd16fc4898aa0737ac3eba0, type: 3}
+  - key: SSSFFF
+    mesh: {fileID: 3012224216229860717, guid: 73b0fb91249e2d14eb2fc4f5d8ad0f24, type: 3}
+  - key: VCCFFF
+    mesh: {fileID: 7357962382910964417, guid: a979ac29c70ef544b8e3015ee9b4776f, type: 3}
+  - key: VCVCFF
+    mesh: {fileID: 7607554268329391994, guid: a8774b27582786d4dad9888fbc739e86, type: 3}
+  - key: VSSFFF
+    mesh: {fileID: 7624590905302163566, guid: ef50f3fcc1836cb4dbe133ad05c63e50, type: 3}
+  - key: VSVSFF
+    mesh: {fileID: -6083987161964138207, guid: c0df2a9b4c1c3524293f4745add8846d, type: 3}
+  - key: VVVCCC
+    mesh: {fileID: -9130654819708746974, guid: 8c1f49de901801941b14edfd0ab8486b, type: 3}
+  - key: VVVCCF
+    mesh: {fileID: -3253785601494972582, guid: ee8e979a3e76ea741975da5a696821e4, type: 3}
+  - key: VVVSSC
+    mesh: {fileID: 2797322645085824780, guid: 3aa8e1f001bea9b4897a88cd5c4c613e, type: 3}
+  - key: VVVSSF
+    mesh: {fileID: 331327202678995363, guid: 38d644ee8a071cb41bba63a939940792, type: 3}
+  - key: VVVSSS
+    mesh: {fileID: -6634065938345401649, guid: a90b6a8060e8fad418308d60874efb20, type: 3}
+  - key: VVVVVV
+    mesh: {fileID: 0}

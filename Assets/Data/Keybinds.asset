@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bc41bc9fc5d9424cb1c7b5ab2593e5b, type: 3}
+  m_Name: Keybinds
+  m_EditorClassIdentifier: Assembly-CSharp::SubvoxelKeybinds
+  entries:
+  - key: CCCFFF
+    keybind: 112
+  - key: FFFFFF
+    keybind: 39
+  - key: SSSFFF
+    keybind: 47
+  - key: VCCFFF
+    keybind: 111
+  - key: VCVCFF
+    keybind: 108
+  - key: VSSFFF
+    keybind: 46
+  - key: VSVSFF
+    keybind: 105
+  - key: VVVCCC
+    keybind: 260
+  - key: VVVCCF
+    keybind: 44
+  - key: VVVSSC
+    keybind: 117
+  - key: VVVSSF
+    keybind: 106
+  - key: VVVSSS
+    keybind: 109
+  - key: VVVVVV
+    keybind: 91
