@@ -21,6 +21,8 @@ public class VoxelAdjacencyAuthoringTool : EditorWindow
 
     private List<(int center, int[] cfg)> cases = new List<(int, int[])>();
     private int index = 0;
+    private int copySourceIndex = 0;
+
 
     [System.Serializable]
     public struct PlacedSubvoxel
@@ -58,6 +60,7 @@ public class VoxelAdjacencyAuthoringTool : EditorWindow
         // 7 (+,+,+) ← canonical
         Quaternion.identity
     };
+    
 
     int activeOrientation = 0;
 
@@ -72,8 +75,8 @@ public class VoxelAdjacencyAuthoringTool : EditorWindow
     private static readonly Color[] COLORS = {
         new Color(0,0,0,0),
         new Color(0.2f,0.4f,1f,0.4f),
-        new Color(1f,0.5f,0.1f,1f),
-        new Color(1f,0f,0.7f,1f)
+        new Color(1f,0.5f,0.1f,0.4f),
+        new Color(1f,0f,0.7f,0.4f)
     };
 
     Dictionary<string, Material> materialCache = new Dictionary<string, Material>();
@@ -256,13 +259,30 @@ public class VoxelAdjacencyAuthoringTool : EditorWindow
         if (GUILayout.Button("Next")) Next();
         GUILayout.EndHorizontal();
 
-        if (GUILayout.Button("Clear")) Clear();
+        GUILayout.Space(10);
+        GUILayout.Label("Load Existing Solution", EditorStyles.boldLabel);
 
-        if (GUI.changed)
+        if (database != null && database.entries != null && database.entries.Count > 0)
         {
-            LoadCurrent();
-            EditorUtility.SetDirty(keybindsAsset);
+            string[] options = database.entries
+                .Select(e => $"{(e.center == 2 ? "Smooth" : "Sharp")} [{string.Join(",", e.cfg)}]")
+                .ToArray();
+
+            copySourceIndex = EditorGUILayout.Popup("Source", copySourceIndex, options);
+            copySourceIndex = Mathf.Clamp(copySourceIndex, 0, database.entries.Count - 1);
+
+            if (GUILayout.Button("Load Into Current"))
+            {
+                LoadFromEntry(database.entries[copySourceIndex]);
+            }
         }
+        else
+        {
+            EditorGUILayout.HelpBox("No entries in database", MessageType.Info);
+        }
+
+
+        if (GUILayout.Button("Clear")) Clear();
     }
 
     void OnSceneGUI(SceneView sv)
@@ -698,5 +718,34 @@ public class VoxelAdjacencyAuthoringTool : EditorWindow
         activeOrientation = next != -1 ? next : 0;
     }
 
+    void LoadFromEntry(SubvoxelAdjacencyDatabase.Entry entry)
+    {
+        if (entry == null) return;
+
+        Debug.Log("Clearing for load");
+        Clear();
+
+        for (int i = 0; i < 8; i++)
+        {
+            if (entry.keys == null || i >= entry.keys.Length) continue;
+            if (string.IsNullOrEmpty(entry.keys[i])) continue;
+
+            int rotIndex = 0;
+
+            if (entry.orientations != null && i < entry.orientations.Length)
+                rotIndex = Mathf.Clamp(entry.orientations[i], 0, ROTS.Length - 1);
+
+            placed[i] = new PlacedSubvoxel
+            {
+                key = entry.keys[i],
+                rotation = ROTS[rotIndex],
+                orientationIndex = rotIndex
+            };
+        }
+
+        // reset orientation cursor to next free slot
+        int next = NextSlot();
+        activeOrientation = next != -1 ? next : 0;
+    }
 
 }
