@@ -45,7 +45,7 @@ public class InputController : MonoBehaviour
             lastVoxel = voxel;
             activeAxis = DragAxis.None;
 
-            ApplyTool(voxel.x, voxel.y, voxel.z, EditorState.Instance.activeTool);
+            ApplyTool(voxel.x, voxel.y, voxel.z);
         }
     }
 
@@ -101,11 +101,11 @@ public class InputController : MonoBehaviour
                     if (startDepthCoord < dragDepthCoord)
                     {
                         if (startDepthCoord < depthVoxelCoord && depthVoxelCoord < dragDepthCoord)
-                            ApplyTool(depthVoxel.Value, EditorState.Instance.activeTool);
+                            ApplyTool(depthVoxel.Value);
                     } else
                     {
                         if (dragDepthCoord < depthVoxelCoord && depthVoxelCoord < startDepthCoord)
-                            ApplyTool(depthVoxel.Value, EditorState.Instance.activeTool);
+                            ApplyTool(depthVoxel.Value);
                     }
 
                 }
@@ -121,7 +121,7 @@ public class InputController : MonoBehaviour
         if (!IsOnAxis(startVoxel.Value, voxel, activeAxis))
             return;
 
-        ApplyTool(voxel, EditorState.Instance.activeTool);
+        ApplyTool(voxel);
 
         lastVoxel = voxel;
     }
@@ -219,7 +219,7 @@ public class InputController : MonoBehaviour
     bool TryGetVoxel(Vector2 screenPos, out Vector3Int voxel)
     {
         Ray ray = cam.ScreenPointToRay(screenPos);
-        bool isDeleting = EditorState.Instance.activeTool == VoxelTool.Delete;
+        bool isDeleting = EditorState.Instance.activeMesh == VoxelMeshID.VVVVVV;
 
         var grid = gridRenderer;
 
@@ -284,28 +284,14 @@ public class InputController : MonoBehaviour
     }
 
 
-    void ApplyTool(Vector3Int voxel, VoxelTool tool) { ApplyTool(voxel.x, voxel.y, voxel.z, tool); }
-    void ApplyTool(int x, int y, int z, VoxelTool tool)
+    void ApplyTool(Vector3Int voxel) { ApplyTool(voxel.x, voxel.y, voxel.z); }
+    void ApplyTool(int x, int y, int z)
     {
         var grid = FindAnyObjectByType<VoxelGrid>();
 
-        //Debug.Log($"ActiveTool ({tool}) Coordinates: [{x},{y},{z}]");
-
-        switch (tool)
-        {
-            case VoxelTool.Delete:
-                grid.Set(x, y, z, VoxelType.Empty);
-                break;
-            case VoxelTool.Cube:
-                grid.Set(x, y, z, VoxelType.Cube);
-                break;
-            case VoxelTool.Smooth:
-                grid.Set(x, y, z, VoxelType.Smooth);
-                break;
-            case VoxelTool.Sharp:
-                grid.Set(x, y, z, VoxelType.Sharp);
-                break;
-        }
+        Voxel newVoxel = new();
+        newVoxel.meshId = EditorState.Instance.activeMesh;
+        grid.Set(x, y, z, newVoxel);
     }
     void OnDrawGizmos()
     {

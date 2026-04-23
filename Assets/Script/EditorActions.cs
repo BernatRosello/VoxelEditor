@@ -1,4 +1,6 @@
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class EditorActions : MonoBehaviour
 {
@@ -12,14 +14,19 @@ public class EditorActions : MonoBehaviour
         else if (Instance != this)
             Destroy(this);
     }
-    public static void SetTool(int toolIndex)
+    public static void SetOrientation(float rotationSlider)
     {
-        EditorState.Instance.activeTool = (VoxelTool)toolIndex;
+        EditorState.Instance.activeOrientation = (int)rotationSlider;
     }
 
-    public static void SetSliceZ(float value)
+    public static void SetReflection(int reflect)
     {
-        EditorState.Instance.sliceZ = Mathf.RoundToInt(value);
+        EditorState.Instance.activeReflection = reflect;
+    }
+
+    public static void SetActiveVoxelMesh(int voxelID)
+    {
+        EditorState.Instance.activeMesh = (VoxelMeshID)voxelID;
     }
 
 }

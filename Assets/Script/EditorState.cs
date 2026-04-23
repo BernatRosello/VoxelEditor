@@ -1,29 +1,43 @@
 using UnityEngine;
 
 
-public enum VoxelTool
-{
-    Delete,
-    Cube,
-    Smooth,
-    Sharp
-}
-
 public class EditorState : MonoBehaviour
 {
     public static EditorState Instance;
 
-    public VoxelTool activeTool = VoxelTool.Delete;
 
-    public int sliceX = 0;
-    public int sliceY = 0;
-    public int sliceZ = 0;
+    public int activeOrientation = 0;
+    public int activeReflection = 0;
+    public VoxelMeshID activeMesh;
+    public static readonly Quaternion[] ROTS = new Quaternion[8]
+    {
+        // 0 (-,-,-)
+        Quaternion.Euler(180, 0, 90),
+
+        // 1 (+,-,-)
+        Quaternion.Euler(180, 0, 0),
+
+        // 2 (-,+,-)
+        Quaternion.Euler(180, 0, 180),
+
+        // 3 (+,+,-)
+        Quaternion.Euler(180, 0, -90),
+
+        // 4 (-,-,+)
+        Quaternion.Euler(0, 0, 180),
+
+        // 5 (+,-,+)
+        Quaternion.Euler(0, 0, -90),
+
+        // 6 (-,+,+)
+        Quaternion.Euler(0, 0, 90),
+
+        // 7 (+,+,+) ← canonical
+        Quaternion.identity
+    };
 
     void Awake()
     {
-        sliceX = -1;
-        sliceY = -1;
-        sliceZ = -1;
         Instance = this;
     }
 }
