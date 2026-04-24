@@ -16,15 +16,15 @@ public class EditorActions : MonoBehaviour
     }
     public static void SetOrientation(float rotationSlider)
     {
-        Debug.Log($"Set activeOrientation: {(int)rotationSlider}, corresponding to ROTS[{(int)rotationSlider}]={EditorState.ROTS[(int)rotationSlider]}");
+        Debug.Log($"Set activeOrientation: {(int)rotationSlider}, corresponding to ROTS[{(int)rotationSlider}]={Voxel.GetOrientation((int)rotationSlider)}");
         EditorState.Instance.activeOrientation = (int)rotationSlider;
     EditorState.Instance.OnStateChanged?.Invoke();
     }
 
-    public static void SetReflection(int reflect)
+    public static void SetReflection(bool reflect)
     {
         Debug.Log($"Set activeReflection: {reflect}");
-        EditorState.Instance.activeReflection = reflect;
+        EditorState.Instance.activeReflection = reflect ? 1 : 0;
     EditorState.Instance.OnStateChanged?.Invoke();
     }
 

@@ -65,16 +65,13 @@ public class GridRenderer : MonoBehaviour
         previewInstance.SetActive(true);
         previewInstance.layer = previewVoxelParent.gameObject.layer;
 
-        // 🔹 Reset transform
+        // 🔹 Reset transform position
         previewInstance.transform.localPosition = Vector3.zero;
-        previewInstance.transform.localScale = prefabScale;
-
-        // Reflection
-        if (state.activeReflection > 0)
-            previewInstance.transform.localScale *= -1;
-
         // Rotation
-        previewInstance.transform.localRotation = EditorState.ROTS[state.activeOrientation];
+        previewInstance.transform.localRotation = Voxel.GetOrientation(state.activeOrientation);
+        // Reflection & scale
+        previewInstance.transform.localScale = Vector3.Scale(Voxel.GetReflectVector(state.activeReflection), prefabScale);
+
 
         // Color
         var renderer = previewInstance.GetComponent<Renderer>();
@@ -121,9 +118,8 @@ public class GridRenderer : MonoBehaviour
                     var voxelRender = Instantiate(prefab, originOffset);
 
                     voxelRender.transform.localPosition = new Vector3(x, y, z);
-                    voxelRender.transform.localRotation = EditorState.ROTS[voxelData.orientationId];
-                    voxelRender.transform.localScale = prefabScale;
-                    if (voxelData.reflection > 0) voxelRender.transform.localScale *= -1;
+                    voxelRender.transform.localRotation = voxelData.GetOrientation();
+                    voxelRender.transform.localScale = Vector3.Scale(voxelData.GetScale(), prefabScale);
                     voxelRender.GetComponent<Renderer>().material.color = GetColor(voxelData.meshId);
 
                     spawned.Add(voxelRender);

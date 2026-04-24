@@ -3,25 +3,36 @@ using UnityEngine;
 
 public class RotationComposerOffsetter : MonoBehaviour
 {
-    public RectTransform offsetTarget;
+    public RectTransform offsetTarget; // UI panel
     public CinemachineRotationComposer rotationComposer;
-    
+    public Vector2 adjustment;
 
-    // Update is called once per frame
-    void Update()
+    void OnEnable()
+    {
+        ApplyOffset(); // ✅ safe init (Android case)
+
+        Canvas.willRenderCanvases += ApplyOffset; // ✅ event-driven refresh
+    }
+
+    void OnDisable()
+    {
+        Canvas.willRenderCanvases -= ApplyOffset;
+    }
+
+    void ApplyOffset()
     {
         if (!offsetTarget)
         {
             Debug.LogWarning("No Offset Target bound!");
             return;
         }
+
         if (!rotationComposer)
         {
             Debug.LogWarning("No Rotation Composer bound!");
             return;
         }
-
-        // TODO NORMALIZE!!!
-        rotationComposer.TargetOffset = offsetTarget.position;
+        var parentTransform = offsetTarget.parent.GetComponent<RectTransform>();
+        rotationComposer.Composition.ScreenPosition = new Vector2(offsetTarget.rect.width/parentTransform.rect.width/2 - adjustment.x, adjustment.y);
     }
 }

@@ -17,6 +17,8 @@ public struct Voxel
     public bool IsSharp() => IsSharp(meshId);
     public bool IsCurve() => IsSharp(meshId);
     public bool IsVoid() => IsVoid(meshId);
+    public Vector3 GetScale() => GetReflectVector(reflection);
+    public Quaternion GetOrientation() => GetOrientation(orientationId);
     public static bool IsSharp(Voxel v) => IsSharp(v.meshId);
     public static bool IsSmooth(Voxel v) => IsSharp(v.meshId);
     public static bool IsVoid(Voxel v) => IsVoid(v.meshId);
@@ -63,6 +65,38 @@ public struct Voxel
     }
     public static bool IsVoid(VoxelMeshID id) { return id == VoxelMeshID.VVVVVV; }
     
+    public static readonly Quaternion[] ROTS = new Quaternion[8]
+    {
+        // 0 (+,+,-)
+        Quaternion.Euler(180, 0, -90),
+        // 1 (+,+,+) ← canonical
+        Quaternion.identity,
+        // 2 (-,+,+)
+        Quaternion.Euler(0, 0, 90),
+        // 3 (-,+,-)
+        Quaternion.Euler(180, 0, 180),
+        // 4 (+,-,-)
+        Quaternion.Euler(180, 0, 0),
+        // 5 (+,-,+)
+        Quaternion.Euler(0, 0, -90),
+        // 6 (-,-,+)
+        Quaternion.Euler(0, 0, 180),
+        // 7 (-,-,-)
+        Quaternion.Euler(180, 0, 90),
+    };
+    public static Quaternion GetOrientation(int orientation)
+    {
+        return ROTS[orientation];
+    }
+
+    public static Vector3 GetReflectVector(int reflect)
+    {
+        if (reflect > 0)
+            //return new Vector3(-1,-1,-1);
+            return EditorState.Instance.debugReflectionVector;
+        else
+            return Vector3.one;
+    }
 }
 
 public enum VoxelMeshID
