@@ -16,10 +16,10 @@ public struct Voxel
     }
     public bool IsSharp() => IsSharp(meshId);
     public bool IsCurve() => IsSharp(meshId);
-    public bool IsVoid() => IsSharp(meshId);
+    public bool IsVoid() => IsVoid(meshId);
     public static bool IsSharp(Voxel v) => IsSharp(v.meshId);
     public static bool IsSmooth(Voxel v) => IsSharp(v.meshId);
-    public static bool IsVoid(Voxel v) => IsSharp(v.meshId);
+    public static bool IsVoid(Voxel v) => IsVoid(v.meshId);
     public static  bool IsSharp(VoxelMeshID id)
     {
         return id switch

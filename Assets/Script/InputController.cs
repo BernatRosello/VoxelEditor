@@ -9,14 +9,16 @@ public class InputController : MonoBehaviour
 {
     public Camera cam;
     public GridRenderer gridRenderer;
-    Vector3Int? startVoxel = null;
-    Vector3Int? depthVoxel = null;
-    Vector3Int? lastVoxel = null;
+    // Vector3Int? startVoxel = null;
+    // Vector3Int? depthVoxel = null;
+    // Vector3Int? lastVoxel = null;
 
-    enum DragAxis { None, X, Y, Z }
-    DragAxis activeAxis = DragAxis.None;
+    // enum DragAxis { None, X, Y, Z }
+    // DragAxis activeAxis = DragAxis.None;
     float holdTimer = 0f;
-    public float holdThreshold = 0.2f; // tweak (0.1–0.2 feels good)
+    public float holdThreshold = 0.5f; // tweak (0.1–0.2 feels good)
+    public float heldRate = 0.2f;
+    public float moveThreshold = 1f;
 
     void Update()
     {
@@ -25,145 +27,166 @@ public class InputController : MonoBehaviour
 
         if (mouse.leftButton.wasPressedThisFrame)
         {
-            BeginDrag(mouse.position.ReadValue());
+            //BeginDrag(mouse.position.ReadValue());
+            if (!TryGetVoxel(mouse.position.ReadValue(), out var voxel)) return;
+            ApplyTool(voxel);
         }
         else if (mouse.leftButton.isPressed)
         {
-            ContinueDrag(mouse.position.ReadValue());
+            bool shouldModify = false;
+            //ContinueDrag(mouse.position.ReadValue());
+            if (mouse.delta.magnitude > moveThreshold) // si te mueves que se haga inmediatamente la modificación
+                shouldModify = true;
+
+            holdTimer += Time.deltaTime;
+            if (holdTimer >= holdThreshold)
+                if (holdTimer > (heldRate + holdThreshold))
+                {
+                    shouldModify = true;
+                    holdTimer = holdThreshold;
+                }
+                
+            if (shouldModify)
+            {
+                if (!TryGetVoxel(mouse.position.ReadValue(), out var voxel)) return;
+                ApplyTool(voxel);
+            }
+                
         }
         else if (mouse.leftButton.wasReleasedThisFrame)
         {
-            EndDrag();
-        }
-    }
-
-    void BeginDrag(Vector2 screenPos)
-    {
-        if (TryGetVoxel(screenPos, out var voxel))
-        {
-            startVoxel = voxel;
-            lastVoxel = voxel;
-            activeAxis = DragAxis.None;
-
-            ApplyTool(voxel.x, voxel.y, voxel.z);
-        }
-    }
-
-    void ContinueDrag(Vector2 screenPos)
-    {
-        if (startVoxel == null) return;
-        if (!TryGetVoxel(screenPos, out var voxel)) return;
-        if (depthVoxel == null)
-        {
+            //EndDrag();
             holdTimer = 0;
-            depthVoxel = voxel;
-            // Debug.Log($"start Voxel = {startVoxel.Value}\t depthVoxel = {depthVoxel.Value}\t lastVoxel = {lastVoxel.Value}");
         }
-        // Debug.Log($"Current Voxel = {voxel} Current Axis = {GetAxis(voxel, startVoxel.Value)}");
+    }
 
-        // Step 1: Determine axis if not set
-        if (activeAxis == DragAxis.None)
-        {
-            if (voxel == depthVoxel.Value)
-            {
-                holdTimer += Time.deltaTime;
-            }
+    // void BeginDrag(Vector2 screenPos)
+    // {
+    //     if (TryGetVoxel(screenPos, out var voxel))
+    //     {
+    //         startVoxel = voxel;
+    //         lastVoxel = voxel;
+    //         activeAxis = DragAxis.None;
+
+    //         ApplyTool(voxel.x, voxel.y, voxel.z);
+    //     }
+    // }
+
+    // void ContinueDrag(Vector2 screenPos)
+    // {
+    //     if (startVoxel == null) return;
+    //     if (!TryGetVoxel(screenPos, out var voxel)) return;
+    //     if (depthVoxel == null)
+    //     {
+    //         holdTimer = 0;
+    //         depthVoxel = voxel;
+    //         // Debug.Log($"start Voxel = {startVoxel.Value}\t depthVoxel = {depthVoxel.Value}\t lastVoxel = {lastVoxel.Value}");
+    //     }
+    //     // Debug.Log($"Current Voxel = {voxel} Current Axis = {GetAxis(voxel, startVoxel.Value)}");
+
+    //     // Step 1: Determine axis if not set
+    //     if (activeAxis == DragAxis.None)
+    //     {
+    //         if (voxel == depthVoxel.Value)
+    //         {
+    //             holdTimer += Time.deltaTime;
+    //         }
             
-            if (holdTimer > holdThreshold || voxel != depthVoxel.Value)
-            {
-                if (voxel != depthVoxel.Value && GetAxis(voxel, startVoxel.Value) == GetAxis(depthVoxel.Value, startVoxel.Value))
-                {
-                    var dragVector = voxel - startVoxel.Value;
-                    int startDepthCoord, depthVoxelCoord, dragDepthCoord;
-                    switch (GetAxis(depthVoxel.Value, startVoxel.Value))
-                    {
-                        case DragAxis.X:
-                            startDepthCoord = startVoxel.Value.x;
-                            depthVoxelCoord = depthVoxel.Value.x;
-                            dragDepthCoord = dragVector.x;
-                            break;
-                        case DragAxis.Y:
-                            startDepthCoord = startVoxel.Value.y;
-                            depthVoxelCoord = depthVoxel.Value.y;
-                            dragDepthCoord = dragVector.y;
-                            break;
-                        case DragAxis.Z:
-                            startDepthCoord = startVoxel.Value.z;
-                            depthVoxelCoord = depthVoxel.Value.z;
-                            dragDepthCoord = dragVector.z;
-                            break;
-                        default:
-                            startDepthCoord = 0;
-                            depthVoxelCoord = 0;
-                            dragDepthCoord = 0;
-                            break;
-                    }
-                    if (startDepthCoord < dragDepthCoord)
-                    {
-                        if (startDepthCoord < depthVoxelCoord && depthVoxelCoord < dragDepthCoord)
-                            ApplyTool(depthVoxel.Value);
-                    } else
-                    {
-                        if (dragDepthCoord < depthVoxelCoord && depthVoxelCoord < startDepthCoord)
-                            ApplyTool(depthVoxel.Value);
-                    }
+    //         if (holdTimer > holdThreshold || voxel != depthVoxel.Value)
+    //         {
+    //             if (voxel != depthVoxel.Value && GetAxis(voxel, startVoxel.Value) == GetAxis(depthVoxel.Value, startVoxel.Value))
+    //             {
+    //                 var dragVector = voxel - startVoxel.Value;
+    //                 int startDepthCoord, depthVoxelCoord, dragDepthCoord;
+    //                 switch (GetAxis(depthVoxel.Value, startVoxel.Value))
+    //                 {
+    //                     case DragAxis.X:
+    //                         startDepthCoord = startVoxel.Value.x;
+    //                         depthVoxelCoord = depthVoxel.Value.x;
+    //                         dragDepthCoord = dragVector.x;
+    //                         break;
+    //                     case DragAxis.Y:
+    //                         startDepthCoord = startVoxel.Value.y;
+    //                         depthVoxelCoord = depthVoxel.Value.y;
+    //                         dragDepthCoord = dragVector.y;
+    //                         break;
+    //                     case DragAxis.Z:
+    //                         startDepthCoord = startVoxel.Value.z;
+    //                         depthVoxelCoord = depthVoxel.Value.z;
+    //                         dragDepthCoord = dragVector.z;
+    //                         break;
+    //                     default:
+    //                         startDepthCoord = 0;
+    //                         depthVoxelCoord = 0;
+    //                         dragDepthCoord = 0;
+    //                         break;
+    //                 }
+    //                 if (startDepthCoord < dragDepthCoord)
+    //                 {
+    //                     if (startDepthCoord < depthVoxelCoord && depthVoxelCoord < dragDepthCoord)
+    //                         ApplyTool(depthVoxel.Value);
+    //                 } else
+    //                 {
+    //                     if (dragDepthCoord < depthVoxelCoord && depthVoxelCoord < startDepthCoord)
+    //                         ApplyTool(depthVoxel.Value);
+    //                 }
 
-                }
+    //             }
                 
-                var axis = GetAxis(voxel, startVoxel.Value);
-                if (axis == DragAxis.None)
-                    return; // ignore until valid axis chosen
-                activeAxis = axis;
-            }
-        }
+    //             var axis = GetAxis(voxel, startVoxel.Value);
+    //             if (axis == DragAxis.None)
+    //                 return; // ignore until valid axis chosen
+    //             activeAxis = axis;
+    //         }
+    //     }
 
-        // Step 2: Only allow voxels ON the axis
-        if (!IsOnAxis(startVoxel.Value, voxel, activeAxis))
-            return;
+    //     // Step 2: Only allow voxels ON the axis
+    //     if (!IsOnAxis(startVoxel.Value, voxel, activeAxis))
+    //         return;
 
-        ApplyTool(voxel);
+    //     ApplyTool(voxel);
 
-        lastVoxel = voxel;
-    }
+    //     lastVoxel = voxel;
+    // }
 
-    DragAxis GetAxis(Vector3Int voxelA, Vector3Int voxelB)
-    {
-        Vector3Int delta = voxelA - voxelB;
-        int nonZeroAxes =
-        (delta.x != 0 ? 1 : 0) +
-        (delta.y != 0 ? 1 : 0) +
-        (delta.z != 0 ? 1 : 0);
+    // DragAxis GetAxis(Vector3Int voxelA, Vector3Int voxelB)
+    // {
+    //     Vector3Int delta = voxelA - voxelB;
+    //     int nonZeroAxes =
+    //     (delta.x != 0 ? 1 : 0) +
+    //     (delta.y != 0 ? 1 : 0) +
+    //     (delta.z != 0 ? 1 : 0);
 
-        // Only accept perfectly aligned second voxel
-        if (nonZeroAxes == 1)
-        {
-            if (delta.x != 0) return DragAxis.X;
-            else if (delta.y != 0) return DragAxis.Y;
-            else if (delta.z != 0) return DragAxis.Z;
-        }
+    //     // Only accept perfectly aligned second voxel
+    //     if (nonZeroAxes == 1)
+    //     {
+    //         if (delta.x != 0) return DragAxis.X;
+    //         else if (delta.y != 0) return DragAxis.Y;
+    //         else if (delta.z != 0) return DragAxis.Z;
+    //     }
 
-        return DragAxis.None;
+    //     return DragAxis.None;
 
-    }
+    // }
 
-    bool IsOnAxis(Vector3Int start, Vector3Int v, DragAxis axis)
-    {
-        return axis switch
-        {
-            DragAxis.X => v.y == start.y && v.z == start.z,
-            DragAxis.Y => v.x == start.x && v.z == start.z,
-            DragAxis.Z => v.x == start.x && v.y == start.y,
-            _ => false
-        };
-    }
+    // bool IsOnAxis(Vector3Int start, Vector3Int v, DragAxis axis)
+    // {
+    //     return axis switch
+    //     {
+    //         DragAxis.X => v.y == start.y && v.z == start.z,
+    //         DragAxis.Y => v.x == start.x && v.z == start.z,
+    //         DragAxis.Z => v.x == start.x && v.y == start.y,
+    //         _ => false
+    //     };
+    // }
 
-    void EndDrag()
-    {
-        startVoxel = null;
-        depthVoxel = null;
-        lastVoxel = null;
-        activeAxis = DragAxis.None;
-    }
+    // void EndDrag()
+    // {
+    //     startVoxel = null;
+    //     depthVoxel = null;
+    //     lastVoxel = null;
+    //     activeAxis = DragAxis.None;
+    // }
 
 
 
@@ -291,6 +314,8 @@ public class InputController : MonoBehaviour
 
         Voxel newVoxel = new();
         newVoxel.meshId = EditorState.Instance.activeMesh;
+        newVoxel.orientationId = EditorState.Instance.activeOrientation;
+        newVoxel.reflection = EditorState.Instance.activeReflection;
         grid.Set(x, y, z, newVoxel);
     }
     void OnDrawGizmos()
