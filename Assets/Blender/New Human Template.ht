@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1105 &110500000
+HumanTemplate:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: New Human Template
+  m_BoneTemplate:
+    Chest: 
+    Head: head
+    Hips: torso.hips
+    Jaw: 
+    Left Index Distal: 
+    Left Index Intermediate: 
+    Left Index Proximal: 
+    Left Little Distal: 
+    Left Little Intermediate: 
+    Left Little Proximal: 
+    Left Middle Distal: 
+    Left Middle Intermediate: 
+    Left Middle Proximal: 
+    Left Ring Distal: 
+    Left Ring Intermediate: 
+    Left Ring Proximal: 
+    Left Thumb Distal: 
+    Left Thumb Intermediate: 
+    Left Thumb Proximal: 
+    LeftEye: eye.L
+    LeftFoot: leg.foot.L.001
+    LeftHand: arm.hand.L_end
+    LeftLowerArm: arm.hand.L
+    LeftLowerLeg: leg.calf.L
+    LeftShoulder: arm.shoulder.L
+    LeftToes: leg.foot.L.001_end
+    LeftUpperArm: arm.wrist.L
+    LeftUpperLeg: leg.hip.L
+    Neck: neck
+    Right Index Distal: 
+    Right Index Intermediate: 
+    Right Index Proximal: 
+    Right Little Distal: 
+    Right Little Intermediate: 
+    Right Little Proximal: 
+    Right Middle Distal: 
+    Right Middle Intermediate: 
+    Right Middle Proximal: 
+    Right Ring Distal: 
+    Right Ring Intermediate: 
+    Right Ring Proximal: 
+    Right Thumb Distal: 
+    Right Thumb Intermediate: 
+    Right Thumb Proximal: 
+    RightEye: eye.R
+    RightFoot: leg.foot.R.001
+    RightHand: arm.hand.R_end
+    RightLowerArm: arm.hand.R
+    RightLowerLeg: leg.calf.R
+    RightShoulder: arm.shoulder.R
+    RightToes: leg.foot.R.001_end
+    RightUpperArm: arm.wrist.R
+    RightUpperLeg: leg.hip.R
+    Spine: torso.chest
+    UpperChest: 
