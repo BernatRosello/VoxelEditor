@@ -17,8 +17,8 @@ public class NavigationAnimator : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
-        agent = GetComponent<NavMeshAgent>();
-        animator = agent.GetComponentInChildren<Animator>();
+        agent = GetComponentInParent<NavMeshAgent>();
+        animator = GetComponent<Animator>();
         animatedTransform = animator.transform;
 
         animator.applyRootMotion = true;
