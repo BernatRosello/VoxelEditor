@@ -1,4 +1,5 @@
 using System;
+using NUnit.Framework;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
@@ -11,8 +12,11 @@ public class NavigationAnimator : MonoBehaviour
     private Transform animatedTransform;
     private Vector2 velocity;
     private Vector2 smoothDeltaPosition;
+    private bool isTurning;
     [SerializeField] private float rotationSmoothTime = 10f;
     [SerializeField] private float movementThreshold = 0.3f;
+    [SerializeField] private float turningThreshold = 35f;
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
@@ -39,43 +43,97 @@ public class NavigationAnimator : MonoBehaviour
 
         float dx = Vector3.Dot(animatedTransform.right, worldDeltaPosition);
         float dy = Vector3.Dot(animatedTransform.forward, worldDeltaPosition);
+
         Vector2 deltaPosition = new Vector2(dx, dy);
 
         float smooth = Mathf.Min(1, Time.deltaTime / 0.1f);
-        smoothDeltaPosition = Vector2.Lerp(smoothDeltaPosition, deltaPosition, smooth);
+
+        smoothDeltaPosition = Vector2.Lerp(
+            smoothDeltaPosition,
+            deltaPosition,
+            smooth
+        );
 
         velocity = smoothDeltaPosition / Time.deltaTime;
 
         if (agent.remainingDistance <= agent.stoppingDistance)
         {
             velocity = Vector2.Lerp(
-                Vector2.zero,
                 velocity,
+                Vector2.zero,
                 agent.remainingDistance / agent.stoppingDistance
             );
         }
 
+        // ------------------------------------------------------------------
+        // Desired movement direction
+        // ------------------------------------------------------------------
+
+        Vector3 desiredDirection = agent.desiredVelocity;
+        desiredDirection.y = 0;
+
+        bool hasDesiredDirection =
+            desiredDirection.sqrMagnitude > 0.001f;
+
+        float signedAngle = 0f;
+
+        if (hasDesiredDirection)
+        {
+            signedAngle = Vector3.SignedAngle(
+                animatedTransform.forward,
+                desiredDirection.normalized,
+                Vector3.up
+            );
+        }
+
+        // ------------------------------------------------------------------
+        // Turning logic
+        // ------------------------------------------------------------------
+
+        bool shouldTurn =
+            Mathf.Abs(signedAngle) > turningThreshold;
+    
         bool shouldMove =
+            !shouldTurn &&
             velocity.magnitude >= movementThreshold &&
             agent.remainingDistance > agent.stoppingDistance;
 
+        // ------------------------------------------------------------------
+        // Animator parameters
+        // ------------------------------------------------------------------
+
         animator.SetBool("IsMoving", shouldMove);
-        animator.SetFloat("locomotion", velocity.magnitude);
+        animator.SetBool("IsTurning", shouldTurn);
+
+        animator.SetFloat("vel_x", velocity.x);
+        animator.SetFloat("vel_y", velocity.y);
+
+        // Normalized turn amount (-1 to 1)
+        animator.SetFloat(
+            "vel_ang",
+            Mathf.Clamp(signedAngle / 90f, -1f, 1f)
+        );
+
+        // ------------------------------------------------------------------
+        // Position syncing
+        // ------------------------------------------------------------------
 
         float deltaMagnitude = worldDeltaPosition.magnitude;
 
         if (deltaMagnitude > agent.radius / 2f)
         {
-            animatedTransform.position =
-                Vector3.Lerp(animator.rootPosition, agent.nextPosition, smooth);
+            animatedTransform.position = Vector3.Lerp(
+                animator.rootPosition,
+                agent.nextPosition,
+                smooth
+            );
         }
 
-        // Smooth rotation
-        Vector3 desiredDirection = agent.desiredVelocity;
+            // ------------------------------------------------------------------
+        // Rotation handling
+        // ------------------------------------------------------------------
 
-        desiredDirection.y = 0;
-
-        if (desiredDirection.sqrMagnitude > 0.001f)
+        if (shouldMove)
         {
             Quaternion targetRotation =
                 Quaternion.LookRotation(desiredDirection);
@@ -94,12 +152,19 @@ public class NavigationAnimator : MonoBehaviour
         rootPosition.y = agent.nextPosition.y;
 
         animatedTransform.position = rootPosition;
+
+        // Root-motion rotation ONLY during turn state
+        if (isTurning)
+        {
+            animatedTransform.rotation = animator.rootRotation;
+        }
+
         agent.nextPosition = rootPosition;
     }
 
     private void OnDrawGizmos()
     {
         if (animator)
-            Gizmos.DrawLine(animator.rootPosition, animator.rootPosition + new Vector3(velocity.x, velocity.y, 0));
+            Gizmos.DrawLine(animator.rootPosition, animator.rootPosition + new Vector3(agent.desiredVelocity.x, 0, agent.desiredVelocity.z));
     }
 }

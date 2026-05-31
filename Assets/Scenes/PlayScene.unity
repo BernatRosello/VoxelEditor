@@ -1193,6 +1193,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NavigationAnimator
   rotationSmoothTime: 10
   movementThreshold: 0.3
+  turningThreshold: 35
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
