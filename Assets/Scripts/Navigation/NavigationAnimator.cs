@@ -27,7 +27,7 @@ public class NavigationAnimator : MonoBehaviour
     private NavMeshAgent agent;
     private Animator animator;
     private Transform animatedTransform;
-    [SerializeField] private float rotationSmoothTime = 10f;
+    [SerializeField] private float rotationSmoothDegrees = 90f;
     [SerializeField] private FloatThresholds movementThreshold = new(0.5f, 0.3f);
     [SerializeField] private FloatThresholds turningThreshold = new(30f, 5f);
     [SerializeField] private float turnWhileMovingThreshold = 91f;
@@ -42,6 +42,7 @@ public class NavigationAnimator : MonoBehaviour
     [SerializeField] private AnimationCurve longPathSpeedCurve;
     private float cachedPathLength;
     private bool pathCachedFlag = true;
+    private Vector3 smoothedSteeringTarget;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
@@ -183,8 +184,8 @@ public class NavigationAnimator : MonoBehaviour
         }
 
         float remainingDistance = GetRemainingDistance(agent);
-
-        Vector3 toTarget = agent.steeringTarget - animatedTransform.position;
+        smoothedSteeringTarget = agent.steeringTarget;
+        Vector3 toTarget = smoothedSteeringTarget - animatedTransform.position;
         toTarget.y = 0f;
 
         if (toTarget.sqrMagnitude < 0.001f)
@@ -308,7 +309,10 @@ public class NavigationAnimator : MonoBehaviour
         }
         else if (animator.GetBool("IsMoving"))
         {
-            animatedTransform.rotation = Quaternion.RotateTowards(animatedTransform.rotation, Quaternion.LookRotation((agent.steeringTarget - animatedTransform.position).normalized), 180 * Time.deltaTime);
+            animatedTransform.rotation = Quaternion.RotateTowards(
+                animatedTransform.rotation,
+                Quaternion.LookRotation((smoothedSteeringTarget - animatedTransform.position).normalized),
+                rotationSmoothDegrees * Time.deltaTime);
         }
 
 
@@ -319,11 +323,8 @@ public class NavigationAnimator : MonoBehaviour
         if (animator)
         {
             Gizmos.color = Color.blue;
-            Vector3 toTarget = agent.steeringTarget - animator.rootPosition;
-            Gizmos.DrawLine(
-                animator.rootPosition,
-                animator.rootPosition + toTarget
-            );
+            Vector3 toTarget = smoothedSteeringTarget - animator.rootPosition;
+            Gizmos.DrawLine(animator.rootPosition, animator.rootPosition + toTarget);
         }
     }
 }
