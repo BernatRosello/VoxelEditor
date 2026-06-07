@@ -154,14 +154,14 @@ public class NavigationAnimator : MonoBehaviour
                 maximumSpeed,
                 normalizedSpeed);
 
-        Debug.Log(
-            $"[PathSpeed] " +
-            $"remaining={remainingDistance:F2}m " +
-            $"total={totalPathDistance:F2}m " +
-            $"progress={progress:P0} " +
-            $"{profileInfo} " +
-            $"normalized={normalizedSpeed:F2} " +
-            $"speed={finalSpeed:F2}");
+        // Debug.Log(
+        //     $"[PathSpeed] " +
+        //     $"remaining={remainingDistance:F2}m " +
+        //     $"total={totalPathDistance:F2}m " +
+        //     $"progress={progress:P0} " +
+        //     $"{profileInfo} " +
+        //     $"normalized={normalizedSpeed:F2} " +
+        //     $"speed={finalSpeed:F2}");
 
         return finalSpeed;
     }
@@ -261,12 +261,12 @@ public class NavigationAnimator : MonoBehaviour
                 cachedPathLength = remainingDistance;
             }
 
-            Debug.Log(
-                $"hasPath={agent.hasPath} " +
-                $"pending={agent.pathPending} " +
-                $"NavMeshAgent remaining={agent.remainingDistance} " +
-                $"Patched remaining={remainingDistance} " +
-                $"status={agent.pathStatus}");
+            // Debug.Log(
+            //     $"hasPath={agent.hasPath} " +
+            //     $"pending={agent.pathPending} " +
+            //     $"NavMeshAgent remaining={agent.remainingDistance} " +
+            //     $"Patched remaining={remainingDistance} " +
+            //     $"status={agent.pathStatus}");
 
             Vector3 localTarget = animatedTransform.InverseTransformDirection(desiredForward).normalized;
             float desiredSpeed = GetSpeedAlongPath(remainingDistance, cachedPathLength);
