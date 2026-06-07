@@ -15,13 +15,16 @@ float4 _WindMove;
 float3 _AmbientColor;
 float _FaceViewProdThresh;
 int _RimCutoffLayer;
+float _TranslucencyStrength;
+float _TranslucencyPower;
+float4 _TranslucencyTint;
+int _TransCutoffLayer;
 
 TEXTURE2D(_FurMap); 
 SAMPLER(sampler_FurMap);
 float4 _FurMap_ST;
 
 TEXTURE2D(_NormalMap); 
-SAMPLER(sampler_NormalMap);
 float4 _NormalMap_ST;
 float _NormalScale;
 

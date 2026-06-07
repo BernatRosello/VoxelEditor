@@ -33,19 +33,29 @@ void AppendShellVertex(inout TriangleStream<Varyings> stream, Attributes input, 
     VertexNormalInputs normalInput = GetVertexNormalInputs(input.normalOS, input.tangentOS);
 
     float moveFactor = pow(abs((float)index / _ShellAmount), _BaseMove.w);
-    float3 posOS = input.positionOS.xyz;
-    float3 windAngle = _Time.w * _WindFreq.xyz;
-    float3 windMove = moveFactor * _WindMove.xyz * sin(windAngle + posOS * _WindMove.w);
-    float3 move = moveFactor * _BaseMove.xyz;
-
-    float3 shellDir = normalize(normalInput.normalWS + move + windMove);
+    half3 windAngle = _Time.w * _WindFreq.xyz;
+    half3 windMove = moveFactor * _WindMove.xyz * sin(windAngle + vertexInput.positionWS * _WindMove.w);
+    half3 move = moveFactor * _BaseMove.xyz;
+    half3 touchMove = vertexInput.positionWS - _TouchPosition;
+    touchMove = SafeNormalize(saturate((_TouchThreshold - length(touchMove))) * touchMove);
+    touchMove = touchMove * saturate(_TouchThreshold2 - dot(touchMove, normalInput.normalWS)) * _TouchMove;
+    half3 shellDir = move + windMove + touchMove;
+    shellDir = shellDir * saturate(dot(shellDir+normalInput.normalWS, normalInput.normalWS));
+    shellDir = SafeNormalize(normalInput.normalWS * max(1,length(shellDir)) + shellDir);
     float3 posWS = vertexInput.positionWS + shellDir * (_ShellStep * index);
     float4 posCS = TransformWorldToHClip(posWS);
+   
+    half3 objectScale = float3(
+        length(unity_ObjectToWorld._m00_m10_m20),
+        length(unity_ObjectToWorld._m01_m11_m21),
+        length(unity_ObjectToWorld._m02_m12_m22));
+
+    half scale = max(objectScale.x, max(objectScale.y, objectScale.z));
+
     
     output.vertex = posCS;
-    output.uv = TRANSFORM_TEX(input.uv, _BaseMap);
+    output.uv = TRANSFORM_TEX(input.uv * scale.xx, _BaseMap);
     output.fogCoord = ComputeFogFactor(posCS.z);
-    
     output.layer = (float)index / (_ShellAmount);
 
     stream.Append(output);

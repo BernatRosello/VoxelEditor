@@ -17,7 +17,7 @@ Properties
     [IntRange] _ShellAmount("Shell Amount", Range(1, 14)) = 14
     _ShellStep("Shell Step", Range(0.0, 0.1)) = 0.001
     _AlphaCutout("Alpha Cutout", Range(0.0, 1.0)) = 0.2
-    _FurScale("Fur Scale", Range(0.0, 10.0)) = 1.0
+    _FurScale("Fur Scale", Range(0.0, 100.0)) = 1.0
     _Occlusion("Occlusion", Range(-1.0, 1.0)) = 0.5
     _BaseMove("Base Move", Vector) = (0.0, -0.0, 0.0, 3.0)
     _WindFreq("Wind Freq", Vector) = (0.5, 0.7, 0.9, 1.0)
@@ -27,6 +27,10 @@ Properties
     _TouchThreshold2("Touch Threshold2", Range(-5,5)) = 0
 
     [Header(Lighting)][Space]
+    _TranslucencyStrength("Translucency Strength", Range(0,5)) = 1
+    _TranslucencyPower("Translucency Power", Range(1,16)) = 4
+    _TranslucencyTint("Translucency Tint", Color) = (1,1,1,1)
+    [IntRange] _TransCutoffLayer("Translucency Cutoff Layer", Range(0, 14)) = 0
     _RimLightPower("Rim Light Power", Range(1.0, 20.0)) = 6.0
     _RimLightIntensity("Rim Light Intensity", Range(0.0, 1.0)) = 0.5
     [IntRange] _RimCutoffLayer("Rim Cutoff Layer", Range(0, 14)) = 0

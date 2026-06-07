@@ -54,15 +54,33 @@ void ApplyRimLight(inout float3 color, float3 posWS, float3 viewDirWS, float3 no
     float fresnel = pow(saturate(1.0 - NdotV), _RimLightPower / 2.0);
 
     float shadow = 1.0;
-#if (defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE) || defined(_MAIN_LIGHT_SHADOWS_SCREEN)) && !defined(_RECEIVE_SHADOWS_OFF)
+    #if (defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE) || defined(_MAIN_LIGHT_SHADOWS_SCREEN)) && !defined(_RECEIVE_SHADOWS_OFF)
     float4 shadowCoord = TransformWorldToShadowCoord(posWS);
     shadow = MainLightRealtimeShadow(shadowCoord);
-#endif
+    #endif
 
     float intensity = _RimLightIntensity * (backscatter + fresnel * 0.25) * shadow;
 
     color += mainLight.color * intensity * rimFac;
 }
+
+float3 CalculateTranslucency(Light light, float3 normalWS, float3 viewDirWS, half3 baseColor, float layer, float shellMask)
+{
+    float3 L = light.direction;
+    float3 V = viewDirWS;
+
+    float backScatter = pow(saturate(dot(-normalWS, L)), 0.5);
+    float forwardScatter = pow(saturate(dot(-L, V)), _TranslucencyPower);
+
+    float strength = (backScatter * 0.6 + forwardScatter * 1.4)
+                   * shellMask
+                   * _TranslucencyStrength
+                   * light.shadowAttenuation
+                   * light.distanceAttenuation ;
+
+    return strength * sqrt(saturate(baseColor)) * light.color * _TranslucencyTint.rgb;
+}
+
 inline float rand(float2 seed)
 {
     return frac(sin(dot(seed.xy, float2(12.9898, 78.233))) * 43758.5453);

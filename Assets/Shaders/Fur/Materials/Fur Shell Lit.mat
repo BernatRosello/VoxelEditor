@@ -33,33 +33,37 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _NormalMap:
         m_Texture: {fileID: 2800000, guid: 6b22d957f2ae51c41aeda896a97ec8c5, type: 3}
-        m_Scale: {x: 1, y: 1}
+        m_Scale: {x: 0.1, y: 0.1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AlphaCutout: 0.084
-    - _FurScale: 8.77
+    - _AlphaCutout: 0.06
+    - _FurScale: 21.2
     - _Metallic: 0
-    - _NormalScale: 0.104
-    - _Occlusion: 0.506
+    - _NormalScale: 0.121
+    - _Occlusion: 0.045
     - _RimCutoffLayer: 0
-    - _RimLightIntensity: 0.163
+    - _RimLightIntensity: 0.088
     - _RimLightPower: 10.61
-    - _ShadowExtraBias: -0.248
-    - _ShellAmount: 5
-    - _ShellStep: 0.0306
+    - _ShadowExtraBias: -0.111
+    - _ShellAmount: 10
+    - _ShellStep: 0.025
     - _Smoothness: 0.036
     - _TouchMult: 15
     - _TouchPow: 0
     - _TouchThreshold: 0
     - _TouchThreshold2: -5
+    - _TransCutoffLayer: 3
+    - _TranslucencyPower: 2.31
+    - _TranslucencyStrength: 1.8
     - _TuochMult: 0
     m_Colors:
-    - _AmbientColor: {r: 0.5849056, g: 0.53154874, b: 0.11311853, a: 1}
-    - _BaseColor: {r: 0.6279815, g: 0.9056604, b: 0.7963612, a: 1}
+    - _AmbientColor: {r: 0.4811321, g: 0.44253182, b: 0.12482201, a: 1}
+    - _BaseColor: {r: 0.7092827, g: 0.9339623, b: 0.8453562, a: 1}
     - _BaseMove: {r: 0.1, g: 0.1, b: 0, a: 0.5}
     - _TouchMove: {r: 2, g: 2, b: 2, a: 1}
-    - _WindFreq: {r: 0.16, g: 0.56, b: 0.19, a: 0.35}
-    - _WindMove: {r: 0.07, g: 0.19, b: 0.43, a: 0.31}
+    - _TranslucencyTint: {r: 0.15332927, g: 0.809, b: 0.13753001, a: 1}
+    - _WindFreq: {r: 0.31, g: 0.56, b: 0.44, a: 0.38}
+    - _WindMove: {r: 0.37, g: 0.31, b: 0.17, a: 0.5}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
