@@ -45,7 +45,8 @@ void AppendShellVertex(inout TriangleStream<Varyings> stream, Attributes input, 
     output.vertex = posCS;
     output.uv = TRANSFORM_TEX(input.uv, _BaseMap);
     output.fogCoord = ComputeFogFactor(posCS.z);
-    output.layer = (float)index / _ShellAmount;
+    
+    output.layer = (float)index / (_ShellAmount);
 
     stream.Append(output);
 }

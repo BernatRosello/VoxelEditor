@@ -24,41 +24,42 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: 89b0aeefba046724197067b9fd69d2b2, type: 3}
-        m_Scale: {x: 0.5, y: 1}
-        m_Offset: {x: 0.66, y: 0}
+        m_Texture: {fileID: 2800000, guid: 72aad4c9b4e9891458dd1229d86583bb, type: 3}
+        m_Scale: {x: 0.1, y: 0.1}
+        m_Offset: {x: 0, y: 0}
     - _FurMap:
         m_Texture: {fileID: 2800000, guid: 3eb5ef796a53ffd4a8a2c606ef6e6c16, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalMap:
-        m_Texture: {fileID: 2800000, guid: d5892f6979190d547babda09cc9accc8, type: 3}
+        m_Texture: {fileID: 2800000, guid: 6b22d957f2ae51c41aeda896a97ec8c5, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AlphaCutout: 0.124
+    - _AlphaCutout: 0.084
     - _FurScale: 8.77
     - _Metallic: 0
-    - _NormalScale: 1.355
-    - _Occlusion: 0.251
-    - _RimLightIntensity: 0.75
-    - _RimLightPower: 7.43
-    - _ShadowExtraBias: 0.148
-    - _ShellAmount: 8
+    - _NormalScale: 0.104
+    - _Occlusion: 0.506
+    - _RimCutoffLayer: 0
+    - _RimLightIntensity: 0.163
+    - _RimLightPower: 10.61
+    - _ShadowExtraBias: -0.248
+    - _ShellAmount: 5
     - _ShellStep: 0.0306
-    - _Smoothness: 0.048
+    - _Smoothness: 0.036
     - _TouchMult: 15
     - _TouchPow: 0
     - _TouchThreshold: 0
-    - _TouchThreshold2: 1.12
+    - _TouchThreshold2: -5
     - _TuochMult: 0
     m_Colors:
-    - _AmbientColor: {r: 0.735849, g: 0.735849, b: 0.735849, a: 1}
-    - _BaseColor: {r: 0, g: 1, b: 0.13080314, a: 1}
+    - _AmbientColor: {r: 0.5849056, g: 0.53154874, b: 0.11311853, a: 1}
+    - _BaseColor: {r: 0.6279815, g: 0.9056604, b: 0.7963612, a: 1}
     - _BaseMove: {r: 0.1, g: 0.1, b: 0, a: 0.5}
     - _TouchMove: {r: 2, g: 2, b: 2, a: 1}
-    - _WindFreq: {r: 0.16, g: 0.32, b: 0.43, a: 0.23}
-    - _WindMove: {r: 0.31, g: 0.19, b: 0.43, a: 0.31}
+    - _WindFreq: {r: 0.16, g: 0.56, b: 0.19, a: 0.35}
+    - _WindMove: {r: 0.07, g: 0.19, b: 0.43, a: 0.31}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

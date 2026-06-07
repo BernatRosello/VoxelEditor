@@ -50,7 +50,6 @@ void AppendShellVertex(inout TriangleStream<Varyings> stream, Attributes input, 
     float3 touchMove = vertexInput.positionWS - _TouchPosition;
     touchMove = SafeNormalize(saturate((_TouchThreshold - length(touchMove))) * touchMove);
     touchMove = touchMove * saturate(_TouchThreshold2 - dot(touchMove, normalInput.normalWS)) * _TouchMove;
-    //touchMove = touchMove * _TouchMove;
     float3 shellDir = move + windMove + touchMove;
     shellDir = shellDir * saturate(dot(shellDir+normalInput.normalWS, normalInput.normalWS));
     shellDir = SafeNormalize(normalInput.normalWS * max(1,length(shellDir)) + shellDir);
@@ -59,9 +58,10 @@ void AppendShellVertex(inout TriangleStream<Varyings> stream, Attributes input, 
     output.positionWS = vertexInput.positionWS + shellDir * (_ShellStep * index);
     output.positionCS = TransformWorldToHClip(output.positionWS);
     output.uv = TRANSFORM_TEX(input.texcoord, _BaseMap);
-    output.normalWS = normalInput.normalWS;
+    output.normalWS = normalize(shellDir);
+
     output.tangentWS = normalInput.tangentWS;
-    output.layer = (float)index / _ShellAmount;
+    output.layer = (float)index / (_ShellAmount);
     // output.color *= 1/(_ShellAmount - index);
     // output.color = input.color;
 
@@ -128,13 +128,23 @@ float4 frag(Varyings input) : SV_Target
     inputData.bakedGI = SAMPLE_GI(input.lightmapUV, input.vertexSH, normalWS);
     inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(input.positionCS);
     
-    float4 bleh = float4(0.5, 0.5, 0.5, 1);
-    ApplyRimLight(bleh.rgb, input.positionWS, viewDirWS, normalWS);
-    return bleh;
-    float4 color = UniversalFragmentPBR(inputData, surfaceData);
+    // To avoid the underlying shells to sheen through which looks wierd and "plasticky"
+    float maxLayer = (_ShellAmount - 1.0) / _ShellAmount;
+    float cutoffLayer = _RimCutoffLayer / (float)_ShellAmount;
+    float rimFac;
+    if (cutoffLayer >= maxLayer)
+        rimFac = 0;
+    else
+        rimFac = saturate(
+            (input.layer - cutoffLayer) /
+            (maxLayer - cutoffLayer)
+        );
+    float4 test = float4 (0,0,0,1);
+    ApplyRimLight(test.rgb, input.positionWS, viewDirWS, normalWS, rimFac);
+    // return test;
 
-    // This isn't doing anything
-    // ApplyRimLight(color.rgb, input.positionWS, viewDirWS, normalWS);
+    float4 color = UniversalFragmentPBR(inputData, surfaceData);
+    ApplyRimLight(color.rgb, input.positionWS, viewDirWS, normalWS, rimFac);
     color.rgb += _AmbientColor * color.rgb;
     color.rgb = MixFog(color.rgb, inputData.fogCoord);
 

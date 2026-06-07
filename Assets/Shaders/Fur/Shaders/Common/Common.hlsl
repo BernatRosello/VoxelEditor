@@ -29,61 +29,40 @@ inline float4 GetShadowPositionHClip(float3 positionWS, float3 normalWS)
 {
     positionWS = CustomApplyShadowBias(positionWS, normalWS);
     float4 positionCS = TransformWorldToHClip(positionWS);
-#if UNITY_REVERSED_Z
+    #if UNITY_REVERSED_Z
     positionCS.z = min(positionCS.z, positionCS.w * UNITY_NEAR_CLIP_VALUE);
-#else
+    #else
     positionCS.z = max(positionCS.z, positionCS.w * UNITY_NEAR_CLIP_VALUE);
-#endif
+    #endif
     return positionCS;
 }
 
 float _RimLightPower;
 float _RimLightIntensity;
 
-void ApplyRimLight(inout float3 color, float3 posWS, float3 viewDirWS, float3 normalWS)
+void ApplyRimLight(inout float3 color, float3 posWS, float3 viewDirWS, float3 normalWS, float rimFac)
 {
-    float viewDotNormal = abs(dot(viewDirWS, normalWS));
-    float normalFactor = pow(abs(1.0 - viewDotNormal), _RimLightPower);
+    if (rimFac <= 0.0)
+        return;
 
-    Light light = GetMainLight();
-    float lightDirDotView = dot(light.direction, viewDirWS);
-    float intensity = pow(max(-lightDirDotView, 0.0), _RimLightPower);
-    intensity *= _RimLightIntensity * normalFactor;
-#ifdef _MAIN_LIGHT_SHADOWS
+    Light mainLight = GetMainLight();
+
+    float lightDirDotView = dot(mainLight.direction, viewDirWS);
+    float backscatter = pow(saturate( -lightDirDotView), _RimLightPower);
+
+    float NdotV = abs(dot(normalize(viewDirWS), normalize(normalWS)));
+    float fresnel = pow(saturate(1.0 - NdotV), _RimLightPower / 2.0);
+
+    float shadow = 1.0;
+#if (defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE) || defined(_MAIN_LIGHT_SHADOWS_SCREEN)) && !defined(_RECEIVE_SHADOWS_OFF)
     float4 shadowCoord = TransformWorldToShadowCoord(posWS);
-    intensity *= MainLightRealtimeShadow(shadowCoord);
-#endif 
-    color += intensity * light.color;
-
-#ifdef _ADDITIONAL_LIGHTS
-    int additionalLightsCount = GetAdditionalLightsCount();
-    for (int i = 0; i < additionalLightsCount; ++i)
-    {
-        int index = GetPerObjectLightIndex(i);
-        Light light = GetAdditionalPerObjectLight(index, posWS);
-        float lightDirDotView = dot(light.direction, viewDirWS);
-        float intensity = max(-lightDirDotView, 0.0);
-        intensity *= _RimLightIntensity * normalFactor;
-        intensity *= light.distanceAttenuation;
-#ifdef _MAIN_LIGHT_SHADOWS
-        intensity *= AdditionalLightRealtimeShadow(index, posWS);
-#endif 
-        color += intensity * light.color;
-    }
+    shadow = MainLightRealtimeShadow(shadowCoord);
 #endif
-    color = float4(max(-lightDirDotView, 0.0).xxx, 1);
-    color = float4(normalFactor.xxx, 1);
-    color = float4(normalWS * 0.5 + 0.5, 1);
-    // float rim = 1.0 - abs(dot(viewDirWS, normalWS));
-    // rim = pow(saturate(rim), _RimLightPower);
-    float NdotV = abs(dot(normalize(normalWS), normalize(viewDirWS)));
-    // float rim = pow(saturate(1.0 - NdotV),_RimLightPower);
-    // color = normalWS * rim;
-    float rim = 1.0 - abs(dot(viewDirWS, NdotV));
-    color = float4(rim.xxx, 1);
-    return; 
-}
 
+    float intensity = _RimLightIntensity * (backscatter + fresnel * 0.25) * shadow;
+
+    color += mainLight.color * intensity * rimFac;
+}
 inline float rand(float2 seed)
 {
     return frac(sin(dot(seed.xy, float2(12.9898, 78.233))) * 43758.5453);

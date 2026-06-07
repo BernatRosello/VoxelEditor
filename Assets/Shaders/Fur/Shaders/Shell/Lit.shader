@@ -29,6 +29,7 @@ Properties
     [Header(Lighting)][Space]
     _RimLightPower("Rim Light Power", Range(1.0, 20.0)) = 6.0
     _RimLightIntensity("Rim Light Intensity", Range(0.0, 1.0)) = 0.5
+    [IntRange] _RimCutoffLayer("Rim Cutoff Layer", Range(0, 14)) = 0
     _ShadowExtraBias("Shadow Extra Bias", Range(-1.0, 1.0)) = 0.0
 }
 

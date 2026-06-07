@@ -14,6 +14,7 @@ float4 _WindFreq;
 float4 _WindMove;
 float3 _AmbientColor;
 float _FaceViewProdThresh;
+int _RimCutoffLayer;
 
 TEXTURE2D(_FurMap); 
 SAMPLER(sampler_FurMap);

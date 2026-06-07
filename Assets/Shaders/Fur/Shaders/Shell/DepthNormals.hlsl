@@ -48,9 +48,10 @@ void AppendShellVertex(inout TriangleStream<Varyings> stream, Attributes input, 
     output.vertex = posCS;
     output.posWS = posWS;
     output.uv = TRANSFORM_TEX(input.uv, _BaseMap);
-    output.layer = (float)index / _ShellAmount;
+    
+    output.layer = (float)index / (_ShellAmount);
 
-    output.normalWS = normalInput.normalWS;
+    output.normalWS = normalize(shellDir);
     output.tangentWS = normalInput.tangentWS;
 
 
