@@ -25,7 +25,7 @@ Material:
     m_TexEnvs:
     - _BaseMap:
         m_Texture: {fileID: 2800000, guid: 72aad4c9b4e9891458dd1229d86583bb, type: 3}
-        m_Scale: {x: 0.1, y: 0.1}
+        m_Scale: {x: 0.02, y: 0.02}
         m_Offset: {x: 0, y: 0}
     - _FurMap:
         m_Texture: {fileID: 2800000, guid: 3eb5ef796a53ffd4a8a2c606ef6e6c16, type: 3}
@@ -37,14 +37,14 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AlphaCutout: 0.06
-    - _FurScale: 21.2
+    - _AlphaCutout: 0.096
+    - _FurScale: 85.7
     - _Metallic: 0
     - _NormalScale: 0.121
     - _Occlusion: 0.045
     - _RimCutoffLayer: 0
     - _RimLightIntensity: 0.088
-    - _RimLightPower: 10.61
+    - _RimLightPower: 3.49
     - _ShadowExtraBias: -0.111
     - _ShellAmount: 10
     - _ShellStep: 0.025
@@ -52,9 +52,9 @@ Material:
     - _TouchMult: 15
     - _TouchPow: 0
     - _TouchThreshold: 0
-    - _TouchThreshold2: -5
+    - _TouchThreshold2: 1.1
     - _TransCutoffLayer: 3
-    - _TranslucencyPower: 2.31
+    - _TranslucencyPower: 2.49
     - _TranslucencyStrength: 1.8
     - _TuochMult: 0
     m_Colors:
@@ -63,7 +63,7 @@ Material:
     - _BaseMove: {r: 0.1, g: 0.1, b: 0, a: 0.5}
     - _TouchMove: {r: 2, g: 2, b: 2, a: 1}
     - _TranslucencyTint: {r: 0.15332927, g: 0.809, b: 0.13753001, a: 1}
-    - _WindFreq: {r: 0.31, g: 0.56, b: 0.44, a: 0.38}
+    - _WindFreq: {r: 0.31, g: 0.56, b: 0.44, a: -0.19}
     - _WindMove: {r: 0.37, g: 0.31, b: 0.17, a: 0.5}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
