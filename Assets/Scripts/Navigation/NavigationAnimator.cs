@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 using System.Runtime.Serialization;
 using NUnit.Framework;
 using Unity.VisualScripting;
@@ -6,6 +7,14 @@ using UnityEditor;
 using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.AI;
+
+
+public enum NavSurfaceMode
+{
+    FlatTransform,      // Uses a transform's up vector
+    SphereTransform,    // Uses a transform as the sphere center
+    RaycastSurface      // Uses physics geometry
+}
 
 public class NavigationAnimator : MonoBehaviour
 {
@@ -27,10 +36,12 @@ public class NavigationAnimator : MonoBehaviour
     private NavMeshAgent agent;
     private Animator animator;
     private Transform animatedTransform;
-    [SerializeField] private float rotationSmoothDegrees = 90f;
     [SerializeField] private FloatThresholds movementThreshold = new(0.5f, 0.3f);
     [SerializeField] private FloatThresholds turningThreshold = new(30f, 5f);
+    [Space(10)]
     [SerializeField] private float turnWhileMovingThreshold = 91f;
+    [SerializeField] private float rotationSmoothDegrees = 90f;
+    [Space(10)]
     [SerializeField] private float minimumSpeed = 0.25f;
     [SerializeField] private float maximumSpeed = 5.0f;
     [InspectorWide]
@@ -40,6 +51,14 @@ public class NavigationAnimator : MonoBehaviour
     [SerializeField] private AnimationCurve mediumPathSpeedCurve;
     [SerializeField] private float longPathLength = 20f;
     [SerializeField] private AnimationCurve longPathSpeedCurve;
+    [Space(10)]
+    [SerializeField] private NavSurfaceMode navSurfMode; // Common 
+    [SerializeField] private Transform navSurfTransform; // For Flat & for Sphere modes
+    [SerializeField] private LayerMask surfaceMask = ~0; // For Raycast Mode
+    [SerializeField] private float surfaceRayDistance = 5f; // For Raycast Mode
+
+    private Vector3 surfaceUp = Vector3.up;
+
     private float cachedPathLength;
     private bool pathCachedFlag = true;
     private Vector3 smoothedSteeringTarget;
@@ -66,7 +85,31 @@ public class NavigationAnimator : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        SetCurrentUp();
         ProcessMovement();
+    }
+
+    public void SetCurrentUp()
+    {
+        switch(navSurfMode)
+        {
+            case RaycastSurface:
+            // NOTE: NavMesh API sucks and there is currently NO WAY to get the normal of the NavMeshSurface at any given position.
+            //      To work around this we can use a raycast, but it should be filtered only to include the collection of meshes that
+            //      were used to bake the NavMesh in the first place (but even this is not a perfect solution since baking can severely
+            //      change the Surface when comparing it to the base mesh).
+                if (Physics.Raycast(animatedTransform.position, -animatedTransform.up, out RaycastHit hit, surfaceRayDistance, surfaceMask))
+                {
+                    surfaceUp = hit.normal;
+                }
+                break;
+            case SphereTransform:
+                surfaceUp = (animatedTransform.position - navSurfTransform.position).normalized;
+                break;
+            case FlatTransform:
+                surfaceUp =  navSurfTransform.up;
+                break;
+        }
     }
 
     // To handle unexpected infinite values given out by the NavMesh plugin. As referenced by https://stackoverflow.com/a/67561314
@@ -185,15 +228,14 @@ public class NavigationAnimator : MonoBehaviour
 
         float remainingDistance = GetRemainingDistance(agent);
         smoothedSteeringTarget = agent.steeringTarget;
-        Vector3 toTarget = smoothedSteeringTarget - animatedTransform.position;
-        toTarget.y = 0f;
+        Vector3 toTarget = Vector3.ProjectOnPlane(steeringTarget - transform.position, surfaceUp);
 
         if (toTarget.sqrMagnitude < 0.001f)
             return;
 
         Vector3 desiredForward = toTarget.normalized;
 
-        float angleToTarget = Vector3.SignedAngle(animatedTransform.forward, desiredForward, Vector3.up);
+        float angleToTarget = Vector3.SignedAngle(animatedTransform.forward, desiredForward, surfaceUp);
 
         float absAngle = Mathf.Abs(angleToTarget);
 
@@ -280,7 +322,7 @@ public class NavigationAnimator : MonoBehaviour
             }
             else if (desiredSpeed > 5)
             {
-                animator.SetFloat("LocomotionSpeedParam", desiredSpeed/5);
+                animator.SetFloat("LocomotionSpeedParam", desiredSpeed / 5);
             }
 
             if (remainingDistance > 0.15f && absAngle > turnWhileMovingThreshold)
@@ -301,18 +343,19 @@ public class NavigationAnimator : MonoBehaviour
     {
         animatedTransform.position = animator.rootPosition;
         agent.nextPosition = animator.rootPosition;
-        // agent.Warp(transform.position);
 
         if (animator.GetBool("IsTurning"))
-        {
-            animatedTransform.rotation = animator.rootRotation;
+        {   // Root Motion Rotation
+            animatedTransform.rotation = Quaternion.FromToRotation(animatedTransform.up, surfaceUp) * animatedTransform.rotation * animator.deltaRotation;
         }
         else if (animator.GetBool("IsMoving"))
-        {
+        {   // Procedurally controlled Rotation
+            var steeringDelta = smoothedSteeringTarget - animatedTransform.position;
+            // NOTE: we might have to project the steering target down to the tangent surfaceUp plane ( Vector3.ProjectOnPlane(..., surfaceUp); )
             animatedTransform.rotation = Quaternion.RotateTowards(
                 animatedTransform.rotation,
-                Quaternion.LookRotation((smoothedSteeringTarget - animatedTransform.position).normalized),
-                rotationSmoothDegrees * Time.deltaTime);
+                Quaternion.LookRotation(steeringDelta.normalized, surfaceUp),
+                steeringDelta.sqrMagnitude * rotationSmoothDegrees * Time.deltaTime);
         }
 
 
