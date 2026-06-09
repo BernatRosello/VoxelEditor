@@ -33,6 +33,22 @@ public class NavigationAnimator : MonoBehaviour
         public float Start => startThreshold;
         public float Stop => stopThreshold;
     }
+
+    public static class NavAreas
+    {
+        public static readonly int Walkable =
+            NavMesh.GetAreaFromName("Walkable");
+
+        public static readonly int PlanetSeam =
+            NavMesh.GetAreaFromName("PlanetSeam");
+
+        public static readonly int ClimbLink =
+            NavMesh.GetAreaFromName("ClimbLink");
+
+        public static readonly int LadderLink =
+            NavMesh.GetAreaFromName("LadderLink");
+    }
+
     private NavMeshAgent agent;
     private Animator animator;
     private Transform animatedTransform;
@@ -52,10 +68,15 @@ public class NavigationAnimator : MonoBehaviour
     [SerializeField] private float longPathLength = 20f;
     [SerializeField] private AnimationCurve longPathSpeedCurve;
     [Space(10)]
-    [SerializeField] private NavSurfaceMode navSurfMode; // Common 
-    [SerializeField] private Transform navSurfTransform; // For Flat & for Sphere modes
-    [SerializeField] private LayerMask surfaceMask = ~0; // For Raycast Mode
-    [SerializeField] private float surfaceRayDistance = 5f; // For Raycast Mode
+
+    [Header("Navigation Surface Configuration")]
+    [SerializeField] private static NavSurfaceMode navSurfMode; // Common 
+    [SerializeField] private static Transform navSurfTransform; // For Flat & for Sphere modes
+    [SerializeField] private static LayerMask surfaceMask = ~0; // For Raycast Mode
+    [SerializeField] private static float surfaceRayDistance = 5f; // For Raycast Mode
+    [Header("Off Mesh Links")]
+    [SerializeField, NavMeshArea] private string seamArea = "SurfaceSeams";
+    [SerializeField, NavMeshArea] private string climbArea = "Climb";
 
     private Vector3 surfaceUp = Vector3.up;
 
@@ -73,6 +94,7 @@ public class NavigationAnimator : MonoBehaviour
         animator.applyRootMotion = true;
         agent.updatePosition = false;
         agent.updateRotation = false;
+        agent.autoTraverseOffMeshLink = false;
 
         animator.SetBool("IsMoving", false);
         animator.SetBool("IsTurning", false);
@@ -86,18 +108,22 @@ public class NavigationAnimator : MonoBehaviour
     void Update()
     {
         SetCurrentUp();
+
+        if (HandleOffMeshLink())
+            return;
+
         ProcessMovement();
     }
 
     public void SetCurrentUp()
     {
-        switch(navSurfMode)
+        switch (navSurfMode)
         {
             case RaycastSurface:
-            // NOTE: NavMesh API sucks and there is currently NO WAY to get the normal of the NavMeshSurface at any given position.
-            //      To work around this we can use a raycast, but it should be filtered only to include the collection of meshes that
-            //      were used to bake the NavMesh in the first place (but even this is not a perfect solution since baking can severely
-            //      change the Surface when comparing it to the base mesh).
+                // NOTE: NavMesh API sucks and there is currently NO WAY to get the normal of the NavMeshSurface at any given position.
+                //      To work around this we can use a raycast, but it should be filtered only to include the collection of meshes that
+                //      were used to bake the NavMesh in the first place (but even this is not a perfect solution since baking can severely
+                //      change the Surface when comparing it to the base mesh).
                 if (Physics.Raycast(animatedTransform.position, -animatedTransform.up, out RaycastHit hit, surfaceRayDistance, surfaceMask))
                 {
                     surfaceUp = hit.normal;
@@ -107,7 +133,7 @@ public class NavigationAnimator : MonoBehaviour
                 surfaceUp = (animatedTransform.position - navSurfTransform.position).normalized;
                 break;
             case FlatTransform:
-                surfaceUp =  navSurfTransform.up;
+                surfaceUp = navSurfTransform.up;
                 break;
         }
     }
@@ -337,6 +363,44 @@ public class NavigationAnimator : MonoBehaviour
                 cachedPathLength = remainingDistance;
             }
         }
+    }
+
+    private bool HandleOffMeshLink()
+    {
+        if (!agent.isOnOffMeshLink)
+            return false;
+
+        OffMeshLinkData linkData = agent.currentOffMeshLinkData;
+
+        int seamAreaId = NavMesh.GetAreaFromName(seamArea);
+        int climbAreaId = NavMesh.GetAreaFromName(climbArea);
+
+        switch (linkData.offMeshLink.area)
+        {
+            case var area when area == seamAreaId:
+
+                Debug.Log($"Reached seam OffMeshLink '{linkData.offMeshLink.name}'.");
+                break;
+
+            case var area when area == climbAreaId:
+
+                Debug.Log($"Reached climb OffMeshLink '{linkData.offMeshLink.name}'.");
+                // TODO:
+                // Play climb traversal animation.
+                animator.SetBool("IsMoving", false);
+                animator.SetTrigger("ClimbTrigger");
+                break;
+
+            default:
+
+                Debug.LogWarning($"Reached OffMeshLink '{linkData.offMeshLink.name}' " + $"with unhandled area {linkData.offMeshLink.area}.");
+                break;
+        }
+
+        // Perhaps consider checking finalization condition for off mesh link traversal and then calling 
+        //          agent.CompleteOffMeshLink();
+
+        return true;
     }
 
     private void OnAnimatorMove()
