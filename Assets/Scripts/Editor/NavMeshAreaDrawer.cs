@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 
+using System;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
@@ -11,11 +12,13 @@ public class NavMeshAreaDrawer : PropertyDrawer
         SerializedProperty property,
         GUIContent label)
     {
-        bool valid = IsValidArea(property.stringValue);
+        bool invalid =
+            !string.IsNullOrEmpty(property.stringValue) &&
+            !IsValidArea(property.stringValue);
 
-        return valid
-            ? EditorGUIUtility.singleLineHeight
-            : EditorGUIUtility.singleLineHeight * 2.5f;
+        return invalid
+            ? EditorGUIUtility.singleLineHeight * 2.5f
+            : EditorGUIUtility.singleLineHeight;
     }
 
     public override void OnGUI(
@@ -35,29 +38,70 @@ public class NavMeshAreaDrawer : PropertyDrawer
 
         string[] areaNames = NavMesh.GetAreaNames();
 
+        if (areaNames.Length == 0)
+        {
+            EditorGUI.LabelField(
+                position,
+                label.text,
+                "No NavMesh Areas defined");
+
+            return;
+        }
+
+        bool invalid =
+            !string.IsNullOrEmpty(property.stringValue) &&
+            !IsValidArea(property.stringValue);
+
+        string[] popupOptions;
+
+        int selectedIndex;
+
+        if (invalid)
+        {
+            popupOptions = new string[areaNames.Length + 1];
+            popupOptions[0] = $"<Missing> {property.stringValue}";
+
+            Array.Copy(
+                areaNames,
+                0,
+                popupOptions,
+                1,
+                areaNames.Length);
+
+            selectedIndex = 0;
+        }
+        else
+        {
+            popupOptions = areaNames;
+
+            selectedIndex = Array.IndexOf(
+                areaNames,
+                property.stringValue);
+
+            if (selectedIndex < 0)
+                selectedIndex = 0;
+        }
+
         Rect popupRect = position;
         popupRect.height = EditorGUIUtility.singleLineHeight;
 
-        int selectedIndex = System.Array.IndexOf(
-            areaNames,
-            property.stringValue);
+        int newIndex = EditorGUI.Popup(
+            popupRect,
+            label.text,
+            selectedIndex,
+            popupOptions);
 
-        bool valid = selectedIndex >= 0;
-
-        if (areaNames.Length > 0)
+        if (invalid)
         {
-            selectedIndex = Mathf.Max(0, selectedIndex);
-
-            selectedIndex = EditorGUI.Popup(
-                popupRect,
-                label.text,
-                selectedIndex,
-                areaNames);
-
-            property.stringValue = areaNames[selectedIndex];
+            if (newIndex > 0)
+                property.stringValue = popupOptions[newIndex];
+        }
+        else
+        {
+            property.stringValue = popupOptions[newIndex];
         }
 
-        if (!valid && !string.IsNullOrEmpty(property.stringValue))
+        if (invalid)
         {
             Rect helpRect = position;
             helpRect.y += EditorGUIUtility.singleLineHeight + 2f;
@@ -72,8 +116,8 @@ public class NavMeshAreaDrawer : PropertyDrawer
 
     private static bool IsValidArea(string areaName)
     {
-        return !string.IsNullOrEmpty(areaName)
-            && NavMesh.GetAreaFromName(areaName) != -1;
+        return !string.IsNullOrEmpty(areaName) &&
+               NavMesh.GetAreaFromName(areaName) != -1;
     }
 }
 
