@@ -1,10 +1,5 @@
 using System;
-using System.Numerics;
-using System.Runtime.Serialization;
-using NUnit.Framework;
 using Unity.VisualScripting;
-using UnityEditor;
-using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -34,21 +29,6 @@ public class NavigationAnimator : MonoBehaviour
         public float Stop => stopThreshold;
     }
 
-    public static class NavAreas
-    {
-        public static readonly int Walkable =
-            NavMesh.GetAreaFromName("Walkable");
-
-        public static readonly int PlanetSeam =
-            NavMesh.GetAreaFromName("PlanetSeam");
-
-        public static readonly int ClimbLink =
-            NavMesh.GetAreaFromName("ClimbLink");
-
-        public static readonly int LadderLink =
-            NavMesh.GetAreaFromName("LadderLink");
-    }
-
     private NavMeshAgent agent;
     private Animator animator;
     private Transform animatedTransform;
@@ -67,16 +47,8 @@ public class NavigationAnimator : MonoBehaviour
     [SerializeField] private AnimationCurve mediumPathSpeedCurve;
     [SerializeField] private float longPathLength = 20f;
     [SerializeField] private AnimationCurve longPathSpeedCurve;
-    [Space(10)]
+    public NavigationAnimatorSettings navSettings;
 
-    [Header("Navigation Surface Configuration")]
-    [SerializeField] private static NavSurfaceMode navSurfMode; // Common 
-    [SerializeField] private static Transform navSurfTransform; // For Flat & for Sphere modes
-    [SerializeField] private static LayerMask surfaceMask = ~0; // For Raycast Mode
-    [SerializeField] private static float surfaceRayDistance = 5f; // For Raycast Mode
-    [Header("Off Mesh Links")]
-    [SerializeField, NavMeshArea] private string seamArea = "SurfaceSeams";
-    [SerializeField, NavMeshArea] private string climbArea = "Climb";
 
     private Vector3 surfaceUp = Vector3.up;
 
@@ -117,23 +89,25 @@ public class NavigationAnimator : MonoBehaviour
 
     public void SetCurrentUp()
     {
-        switch (navSurfMode)
+        switch (navSettings.NavSurfMode)
         {
-            case RaycastSurface:
+            case NavSurfaceMode.RaycastSurface:
                 // NOTE: NavMesh API sucks and there is currently NO WAY to get the normal of the NavMeshSurface at any given position.
                 //      To work around this we can use a raycast, but it should be filtered only to include the collection of meshes that
                 //      were used to bake the NavMesh in the first place (but even this is not a perfect solution since baking can severely
                 //      change the Surface when comparing it to the base mesh).
-                if (Physics.Raycast(animatedTransform.position, -animatedTransform.up, out RaycastHit hit, surfaceRayDistance, surfaceMask))
+                if (Physics.Raycast(animatedTransform.position, -animatedTransform.up, out RaycastHit hit,
+                    navSettings.SurfaceRayDistance,
+                    navSettings.SurfaceMask))
                 {
                     surfaceUp = hit.normal;
                 }
                 break;
-            case SphereTransform:
-                surfaceUp = (animatedTransform.position - navSurfTransform.position).normalized;
+            case NavSurfaceMode.SphereTransform:
+                surfaceUp = (animatedTransform.position - navSettings.NavSurf.transform.position).normalized;
                 break;
-            case FlatTransform:
-                surfaceUp = navSurfTransform.up;
+            case NavSurfaceMode.FlatTransform:
+                surfaceUp = navSettings.NavSurf.transform.up;
                 break;
         }
     }
@@ -254,7 +228,7 @@ public class NavigationAnimator : MonoBehaviour
 
         float remainingDistance = GetRemainingDistance(agent);
         smoothedSteeringTarget = agent.steeringTarget;
-        Vector3 toTarget = Vector3.ProjectOnPlane(steeringTarget - transform.position, surfaceUp);
+        Vector3 toTarget = Vector3.ProjectOnPlane(smoothedSteeringTarget - transform.position, surfaceUp);
 
         if (toTarget.sqrMagnitude < 0.001f)
             return;
@@ -372,8 +346,8 @@ public class NavigationAnimator : MonoBehaviour
 
         OffMeshLinkData linkData = agent.currentOffMeshLinkData;
 
-        int seamAreaId = NavMesh.GetAreaFromName(seamArea);
-        int climbAreaId = NavMesh.GetAreaFromName(climbArea);
+        int seamAreaId = NavMesh.GetAreaFromName(navSettings.PlanetSeamArea);
+        int climbAreaId = NavMesh.GetAreaFromName(navSettings.ClimbArea);
 
         switch (linkData.offMeshLink.area)
         {

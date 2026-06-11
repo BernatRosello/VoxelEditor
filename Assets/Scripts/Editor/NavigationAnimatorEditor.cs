@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+
 using UnityEditor;
 using UnityEngine;
 
@@ -9,39 +10,72 @@ public class NavigationAnimatorEditor : Editor
     {
         serializedObject.Update();
 
-        DrawPropertiesExcluding(serializedObject,
-            "m_Script",
-            "navSurfTransform",
-            "surfaceMask",
-            "surfaceRayDistance");
+        DrawPropertiesExcluding(serializedObject, "m_Script", "navSettings");
 
-        var mode = serializedObject.FindProperty("navSurfMode");
-        EditorGUILayout.PropertyField(mode);
+        NavigationAnimator animator =
+            (NavigationAnimator)target;
 
-        switch ((NavSurfaceMode)mode.enumValueIndex)
+        NavigationAnimatorSettings settings =
+            animator.navSettings;
+
+        EditorGUILayout.Space();
+
+        if (settings == null)
         {
-            case NavSurfaceMode.FlatTransform:
-                EditorGUILayout.PropertyField(
-                    serializedObject.FindProperty("navSurfTransform"),
-                    new GUIContent("Surface Transform"));
-                break;
+            EditorGUILayout.HelpBox(
+                "No Navigation Animator Settings asset assigned.",
+                MessageType.Error);
 
-            case NavSurfaceMode.SphereTransform:
-                EditorGUILayout.PropertyField(
-                    serializedObject.FindProperty("navSurfTransform"),
-                    new GUIContent("Sphere Center"));
-                break;
-
-            case NavSurfaceMode.RaycastSurface:
-                EditorGUILayout.PropertyField(
-                    serializedObject.FindProperty("surfaceMask"));
-
-                EditorGUILayout.PropertyField(
-                    serializedObject.FindProperty("surfaceRayDistance"));
-                break;
+            serializedObject.ApplyModifiedProperties();
+            return;
         }
+
+        EditorGUILayout.ObjectField(
+            "Settings Asset",
+            settings,
+            typeof(NavigationAnimatorSettings),
+            false);
+
+        if (GUILayout.Button("Open Settings"))
+        {
+            Selection.activeObject = settings;
+            EditorGUIUtility.PingObject(settings);
+        }
+
+        DrawSettingsWarnings(settings);
 
         serializedObject.ApplyModifiedProperties();
     }
+
+    private static void DrawSettingsWarnings(
+        NavigationAnimatorSettings settings)
+    {
+        switch (settings.NavSurfMode)
+        {
+            case NavSurfaceMode.FlatTransform:
+            case NavSurfaceMode.SphereTransform:
+
+                if (settings.NavSurfTransform == null)
+                {
+                    EditorGUILayout.HelpBox(
+                        "The selected navigation mode requires a transform reference.",
+                        MessageType.Warning);
+                }
+
+                break;
+
+            case NavSurfaceMode.RaycastSurface:
+
+                if (settings.SurfaceRayDistance <= 0f)
+                {
+                    EditorGUILayout.HelpBox(
+                        "Surface Ray Distance should be greater than zero.",
+                        MessageType.Warning);
+                }
+
+                break;
+        }
+    }
 }
+
 #endif
