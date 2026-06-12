@@ -881,7 +881,7 @@ GameObject:
   - component: {fileID: 1511049762}
   - component: {fileID: 1511049761}
   - component: {fileID: 1511049760}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Plane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1878,8 +1878,8 @@ MonoBehaviour:
   turningThreshold:
     startThreshold: 45
     stopThreshold: 5
-  turnWhileMovingThreshold: 91
-  rotationSmoothDegrees: 180
+  turnWhileMovingThreshold: 60
+  rotationSmoothDegrees: 10
   minimumSpeed: 0.05
   maximumSpeed: 6
   shortPathLength: 2
@@ -2030,6 +2030,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   navSettings: {fileID: 11400000, guid: 997a256f6c9776549ac3708eaa570e2d, type: 2}
+  navSurfaceTransform: {fileID: 1511049764}
 --- !u!1 &2107283292
 GameObject:
   m_ObjectHideFlags: 0

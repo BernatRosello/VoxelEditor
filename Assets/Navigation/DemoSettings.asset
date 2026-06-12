@@ -13,10 +13,9 @@ MonoBehaviour:
   m_Name: DemoSettings
   m_EditorClassIdentifier: Assembly-CSharp::NavigationAnimatorSettings
   NavSurfMode: 0
-  NavSurfTransform: {fileID: 0}
   SurfaceMask:
     serializedVersion: 2
-    m_Bits: 0
-  SurfaceRayDistance: 10
+    m_Bits: 128
+  SurfaceRayDistance: 15
   ClimbArea: Walkable
   PlanetSeamArea: Walkable

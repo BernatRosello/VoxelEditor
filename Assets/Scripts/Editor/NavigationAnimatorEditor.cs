@@ -54,14 +54,6 @@ public class NavigationAnimatorEditor : Editor
         {
             case NavSurfaceMode.FlatTransform:
             case NavSurfaceMode.SphereTransform:
-
-                if (settings.NavSurfTransform == null)
-                {
-                    EditorGUILayout.HelpBox(
-                        "The selected navigation mode requires a transform reference.",
-                        MessageType.Warning);
-                }
-
                 break;
 
             case NavSurfaceMode.RaycastSurface:

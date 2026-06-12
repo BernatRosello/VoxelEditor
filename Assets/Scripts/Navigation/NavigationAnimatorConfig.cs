@@ -8,8 +8,6 @@ public class NavigationAnimatorSettings : ScriptableObject
 {
     public NavSurfaceMode NavSurfMode;
 
-    public GameObject NavSurf;
-
     public LayerMask SurfaceMask;
 
     public float SurfaceRayDistance = 100f;
