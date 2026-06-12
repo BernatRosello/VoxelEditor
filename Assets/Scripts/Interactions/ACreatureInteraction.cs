@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Runtime;
+using Microsoft.VisualBasic;
 
 public enum InteractionPriority
 {
@@ -11,27 +12,14 @@ public enum InteractionPriority
     Critical
 }
 
-public abstract class AInteractionParams
-{
-
-}
-
+public abstract class AInteractionParams { }
 public abstract class ACreatureInteraction<TParams> : ACreatureInteraction where TParams : AInteractionParams
 {
     protected readonly TParams Params;
-
     protected ACreatureInteraction(TParams parameters, List<ParticipantData> participants) : base(participants)
     {
         Params = parameters;
     }
-}
-
-public enum InteractionState
-{
-    Starting,
-    Running,
-    Ending,
-    Finished
 }
 
 public abstract class ACreatureInteraction
@@ -48,10 +36,7 @@ public abstract class ACreatureInteraction
 
     #endregion
     #region RUN TIME
-    private InteractionState state;
     private readonly List<ParticipantData> participants = new();
-
-
     public IReadOnlyList<ParticipantData> Participants => participants;
 
     #endregion
@@ -59,71 +44,151 @@ public abstract class ACreatureInteraction
     public ACreatureInteraction(List<ParticipantData> participantList)
     {
         participants.AddRange(participantList);
+        foreach (var p in participants)
+        {
+            p.Phase = InteractionState.Starting;
+        }
     }
 
+    #region INTERACTION CONTROL FLOW CHECKS
+
+    // action beginning preconditions
+    protected virtual bool CheckStartAllParticipants() { return true; }
+    protected virtual bool CheckStart(ParticipantData participant) { return true; }
+    protected virtual bool StartFinished(ParticipantData participant) { return true; }
+    protected virtual bool UpdateFinished(ParticipantData participant) { return true; }
+    protected virtual bool EndFinished(ParticipantData participant) { return true; }
+
+    protected virtual bool CheckJoin(ParticipantData participant) { return true; }
+    protected virtual bool JoinFinished(ParticipantData participant) { return true; }
+    protected virtual bool CheckLeave(ParticipantData participantData) { return true; }
+    protected virtual bool LeaveFinished(ParticipantData participant) { return true; }
+
+
+
+    #endregion
 
     #region INTERACTION FUNCTIONS
-    // action beginning preconditions
-    public virtual bool CheckStart()
+    
+    protected virtual void StartInteraction(ParticipantData participant)
     {
-        return true;
+        PerformAction(ActionDriver.MoveToPoint(posA),..)
+        PerformAction(ActionDriver.TurnTowards(posB),..., (syncPoint =) true)
+        PerformAction(ActionDriver.WaveEmote(),.., )
     }
+    protected void JoinInteraction(ParticipantData participant) { }
+    protected virtual void OnParticipantJoined(ParticipantData joined) { }
+    protected abstract void UpdateInteraction(ParticipantData participant);
 
-    // action beginning preconditions
-    public virtual void StartInteraction()
-    {
-    }
-
-    // update phase
-    public abstract void UpdateInteraction();
-
-    // check if update phase is done
-    public abstract bool CheckEnd();
+    protected virtual void LeaveInteraction(ParticipantData participant) { }
 
     // regular finish interaction path orderly liberate participants etc.
-    public virtual void EndInteraction()
+    protected virtual void EndInteraction(ParticipantData participant) { }
+
+
+
+    protected virtual void OnParticipantLeft(ParticipantData left) { }
+
+    protected virtual void AbortParticipant(ParticipantData participant)
     {
+        OnParticipantLeft(participant);
+        participants.Remove(participant);
     }
 
-    public bool IsFinished => state == InteractionState.Finished;
+    #endregion
+
+    #region PUBLIC METHOD INTERFACE
 
     public virtual bool TryJoin(ParticipantData participant)
     {
-        return AllowJoining;
-    }
-    protected virtual void OnParticipantJoined(ParticipantData joined)
-    {
-    }
-
-    public void JoinInteraction(ParticipantData participant)
-    {
-        participants.Add(participant);
-        OnParticipantJoined(participant);
+        if (AllowJoining && !participants.Contains(participant))
+        {
+            participant.State = InteractionState.Joining;
+            participants.Add(participant);
+            OnParticipantJoined(participant);
+            return true;
+        }
+        return false;
     }
 
     public virtual bool TryLeave(ParticipantData participant)
     {
-        return AllowLeaving;
+        if (AllowLeaving && participants.Contains(participant))
+        {
+            participant.State = InteractionState.Leaving;
+            // participants.Remove(participant);
+            // OnParticipantLeft(participant);
+            return true;
+        }
+        return false;
     }
 
-    public virtual void LeaveInteraction(ParticipantData participant)
+    public virtual bool ForceStop(ParticipantData participant)
     {
-        participants.Remove(participant);
-        OnParticipantLeft(participant);
+        if (participants.Contains(participant))
+        {
+            participant.State = InteractionState.Abort;
+        }
     }
-
-    protected virtual void OnParticipantLeft(ParticipantData left)
-    {
-    }
-
-    public virtual void AbortParticipant(ParticipantData participant)
-    {
-    }
-
 
     public void Tick()
     {
+        // perhaps we should implement the initial start point in here for the interaction.
 
+
+        foreach (var p in participants)
+        {
+            if (p.State == InteractionState.Abort)
+            {
+                AbortParticipant(p);
+                break;
+            }
+
+            if (!p.ActionComplete)
+                continue;
+
+            switch (p.State)
+            {
+                case InteractionState.Starting:
+                    StartInteraction(p);
+                    if (StartFinished(p))
+                    {
+                        p.State = InteractionState.Update;
+                    }
+                        break;
+
+                case InteractionState.Joining:
+                    JoinInteraction(p);
+                    if (JoinFinished(p))
+                    {
+                        p.State = InteractionState.Update;
+                    }
+                    break;
+
+                case InteractionState.Update:
+                    UpdateInteraction(participant);
+                    if (UpdateFinished(p))
+                    {
+                        p.State = InteractionState.Ending;
+                    }
+                    break;
+
+                case InteractionState.Leaving:
+                    LeaveInteraction(participant);
+                    if (LeaveFinished(p))
+                    {
+                        p.State = InteractionState.Abort;
+                    }
+                    break;
+
+                case InteractionState.Ending:
+                    if (EndFinished(p))
+                    {
+                        p.State = InteractionState.Abort;
+                    }
+                    break;
+            }
+        }
     }
 
     #endregion
