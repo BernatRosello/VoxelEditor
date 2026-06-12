@@ -33,7 +33,7 @@ public sealed class InteractionManager : MonoBehaviour
 
             interaction.Tick();
 
-            if (interaction.IsFinished)
+            if (interaction.IsInteractionCompleted())
             {
                 DestroyInteraction(interaction);
                 interactions.RemoveAt(i);
@@ -57,9 +57,10 @@ public sealed class InteractionManager : MonoBehaviour
 
     public void UnregisterParticipant(CreatureIdentity identity)
     {
-        if (participants.ContainsKey(identity) && participants[identity].CurrentInteraction != null)
+        var p = participants[identity];
+        if (participants.ContainsKey(identity) && p.CurrentInteraction != null)
         {
-            participants[identity].CurrentInteraction.LeaveInteraction(participants[identity]);
+            p.CurrentInteraction.ForceStop(p);
         }
 
         participants.Remove(identity);
@@ -115,23 +116,26 @@ public sealed class InteractionManager : MonoBehaviour
 
         var newInteraction = request.CreateInteraction(availableParticipants);
 
-        // Perhaps should allow and wait on a transitory state where we wait for characters to finish  doing their previous interactions' last action
-        if (!newInteraction.CheckStart())
-        {
-            return;
-        }
+        // // Perhaps should allow and wait on a transitory state where we wait for characters to finish  doing their previous interactions' last action
+        // if (!newInteraction.CheckStart())
+        // {
+        //     return;
+        // }
 
-        foreach (ParticipantData p in availableParticipants)
-        {
-            p.CurrentInteraction = newInteraction;
-            // participant.Phase = ParticipantPhase.Start;
-            p.ActionIndex = 0;
-            p.ActionComplete = false;
-        }
+        // foreach (ParticipantData p in availableParticipants)
+        // {
+        //     newInteraction.TryJoin(p);
+        // }
 
-        newInteraction.StartInteraction();
+        // if (newInteraction.Validate())
+        // {
+        //     interactions.Add(newInteraction);
+        // }
+        // else
+        // {
+        //     ...
+        // }
 
-        interactions.Add(newInteraction);
     }
 
     #endregion
@@ -140,31 +144,32 @@ public sealed class InteractionManager : MonoBehaviour
 
     public bool TryJoinInteraction(ACreatureInteraction interaction, ParticipantData participant)
     {
-        if (!interaction.AllowJoining)
-        {
-            return false;
-        }
+        return false;
+        // if (!interaction.AllowJoining)
+        // {
+        //     return false;
+        // }
 
-        if (participant.CurrentInteraction != null &&
-            interaction.InterruptLowerPriorityInteractions &&
-            participant.CurrentInteraction.Priority > interaction.Priority)
-        {
-            return false;
-        }
+        // if (participant.CurrentInteraction != null &&
+        //     interaction.InterruptLowerPriorityInteractions &&
+        //     participant.CurrentInteraction.Priority > interaction.Priority)
+        // {
+        //     return false;
+        // }
 
-        if (!interaction.TryJoin(participant))
-        {
-            return false;
-        }
+        // if (!interaction.TryJoin(participant))
+        // {
+        //     return false;
+        // }
 
-        participant.CurrentInteraction = interaction;
-        // participant.Phase = ParticipantPhase.Start;
-        participant.ActionIndex = 0;
-        participant.ActionComplete = false;
+        // participant.CurrentInteraction = interaction;
+        // // participant.Phase = ParticipantPhase.Start;
+        // participant.ActionIndex = 0;
+        // participant.ActionComplete = false;
 
-        interaction.JoinInteraction(participant);
+        // interaction.JoinInteraction(participant);
 
-        return true;
+        // return true;
     }
 
     #endregion
@@ -173,27 +178,28 @@ public sealed class InteractionManager : MonoBehaviour
 
     public bool TryLeaveInteraction(ParticipantData participant)
     {
-        ACreatureInteraction interaction = participant.CurrentInteraction;
+        return false;
+        // ACreatureInteraction interaction = participant.CurrentInteraction;
 
-        if (interaction == null)
-        {
-            return false;
-        }
+        // if (interaction == null)
+        // {
+        //     return false;
+        // }
 
-        if (!interaction.AllowLeaving)
-        {
-            return false;
-        }
+        // if (!interaction.AllowLeaving)
+        // {
+        //     return false;
+        // }
 
-        if (!interaction.TryLeave(participant))
-        {
-            return false;
-        }
+        // if (!interaction.TryLeave(participant))
+        // {
+        //     return false;
+        // }
 
-        interaction.LeaveInteraction(participant);
-        participant.CurrentInteraction = null;
+        // interaction.LeaveInteraction(participant);
+        // participant.CurrentInteraction = null;
 
-        return true;
+        // return true;
     }
 
     #endregion
@@ -205,7 +211,7 @@ public sealed class InteractionManager : MonoBehaviour
         for (int i = interaction.Participants.Count - 1; i >= 0; i--)
         {
             ParticipantData participant = interaction.Participants[i];
-            interaction.AbortParticipant(participant);
+            interaction.ForceStop(participant);
             participant.CurrentInteraction = null;
         }
 

@@ -35,21 +35,8 @@ public class ConversationInteraction : ACreatureInteraction<ConversationParams>
 
     public override bool InterruptLowerPriorityInteractions => false;
 
-    public override bool CheckEnd()
+    protected override void UpdateInteraction(ParticipantData participant)
     {
-        // Something for done talking?? idk
         throw new System.NotImplementedException();
-    }
-
-    public override void UpdateInteraction()
-    {
-        // Beginning Phase
-        // walk to gathering position
-
-        // Talk Phase
-        // talking animation for random amount of time
-
-        // Leave Phase
-        // 
     }
 }
