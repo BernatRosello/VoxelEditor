@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
+using UnityEngine;
 
 public class ConversationParams : AInteractionParams
 {
@@ -8,14 +8,31 @@ public class ConversationParams : AInteractionParams
     public CreatureIdentity initiator;
 }
 
+public class ConversationRequest : AInteractionRequest<ConversationInteraction, ConversationParams>
+{
+    public ConversationRequest(ConversationParams parameters, IEnumerable<CreatureIdentity> targets)
+        : base(parameters, targets, 
+            // Request Factory
+            (p, participants) => new ConversationInteraction(p, participants) ) {}
+}
+
 public class ConversationInteraction : ACreatureInteraction<ConversationParams>
 {
     Vector3 gatherPosition;
-    public ConversationInteraction(ConversationParams parameters, List<ParticipantData> participants) : base(parameters, participants)
+    public ConversationInteraction(ConversationParams parameters, List<CreatureData> participants) : base(parameters, participants)
     {
         if (participants.Count == 2)
         {
-            gatherPosition = participants.First(p => p.Identity == parameters.initiator).Driver.GetPosition();
+            gatherPosition = participants.First(p => p.Identity != parameters.initiator).Driver.GetPosition();
+        }
+        else
+        {
+            gatherPosition = Vector3.zero;
+            float avgFac = 1.0f/participants.Count();
+            foreach (var p in participants)
+            {
+                gatherPosition += p.Driver.GetPosition() * avgFac;
+            }
         }
     }
 
@@ -27,16 +44,29 @@ public class ConversationInteraction : ACreatureInteraction<ConversationParams>
 
     public override int MaxParticipants => 5;
 
-    public override bool AllowJoining => true;
+    public override bool AllowLateJoining => true;
 
-    public override bool AllowLeaving => true;
+    public override bool AllowEarlyLeaving => true;
 
     public override InteractionPriority Priority => 0;
 
     public override bool InterruptLowerPriorityInteractions => false;
 
-    protected override void UpdateInteraction(ParticipantData participant)
+    protected override void UpdateInteraction(CreatureData participant)
     {
-        throw new System.NotImplementedException();
+        switch (StateOf(participant).ActionIndex)
+        {
+            case 0:
+                DispatchAction(participant, DriverActions.MoveTo(gatherPosition));
+                break;
+
+            case 1:
+                DispatchAction(participant, DriverActions.SetTrigger("Trip"));
+                break;
+
+            case 2:
+                DispatchAction(participant, DriverActions.MoveTo(gatherPosition - new Vector3(-10, 0, 0)));
+                break;
+        }
     }
 }

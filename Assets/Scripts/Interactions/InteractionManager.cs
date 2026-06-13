@@ -6,11 +6,13 @@ public sealed class InteractionManager : MonoBehaviour
 {
     public static InteractionManager Instance { get; private set; }
 
-    private readonly Dictionary<CreatureIdentity, ParticipantData> participants = new();
+    private readonly Dictionary<CreatureIdentity, CreatureData> creatureData = new();
+    private readonly Dictionary<CreatureData, ACreatureInteraction> participants = new();
 
     private readonly List<ACreatureInteraction> interactions = new();
 
     private readonly Queue<AInteractionRequest> requestQueue = new();
+
 
     private void Awake()
     {
@@ -21,6 +23,23 @@ public sealed class InteractionManager : MonoBehaviour
         }
 
         Instance = this;
+
+        Creature[] identities = FindObjectsByType<Creature>();
+
+        foreach (var c in identities)
+        {
+            ActionDriver driver =
+                c.GetComponent<ActionDriver>();
+
+            if (driver == null)
+            {
+                Debug.LogWarning(
+                    $"Creature '{c.Identity.Guid}' has no ActionDriver.");
+                continue;
+            }
+
+            RegisterParticipant(c.Identity, driver);
+        }
     }
 
     private void Update()
@@ -33,9 +52,8 @@ public sealed class InteractionManager : MonoBehaviour
 
             interaction.Tick();
 
-            if (interaction.IsInteractionCompleted())
+            if (interaction.IsInteractionEmpty())
             {
-                DestroyInteraction(interaction);
                 interactions.RemoveAt(i);
             }
         }
@@ -43,32 +61,31 @@ public sealed class InteractionManager : MonoBehaviour
 
     #region Participants
 
-    public ParticipantData RegisterParticipant(CreatureIdentity identity, ActionDriver driver)
+    public CreatureData RegisterParticipant(CreatureIdentity identity, ActionDriver driver)
     {
-        ParticipantData participant = new(driver, identity);
-        participants[identity] = participant;
+        CreatureData participant = new(driver, identity);
+        creatureData[identity] = participant;
         return participant;
     }
 
-    public void UnregisterParticipant(ParticipantData participant)
+    public void UnregisterParticipant(CreatureData participant)
     {
         UnregisterParticipant(participant.Identity);
     }
 
     public void UnregisterParticipant(CreatureIdentity identity)
     {
-        var p = participants[identity];
-        if (participants.ContainsKey(identity) && p.CurrentInteraction != null)
+        if (creatureData.TryGetValue(identity, out var p) && participants.ContainsKey(p))
         {
-            p.CurrentInteraction.ForceStop(p);
+            participants[p].ForceLeave(p);
         }
 
-        participants.Remove(identity);
+        creatureData.Remove(identity);
     }
 
-    private IEnumerable<ParticipantData> ResolveParticipants(IEnumerable<CreatureIdentity> identities)
+    private IEnumerable<CreatureData> ResolveParticipants(IEnumerable<CreatureIdentity> identities)
     {
-        return identities.Select(x => participants[x]);
+        return identities.Select(x => creatureData[x]);
     }
 
     #endregion
@@ -77,10 +94,23 @@ public sealed class InteractionManager : MonoBehaviour
 
     private void ProcessRequests()
     {
-        while (requestQueue.Count > 0)
+        int requestsToProcess = requestQueue.Count;
+
+        for (int i = 0; i < requestsToProcess; i++)
         {
             AInteractionRequest request = requestQueue.Dequeue();
-            TryCreateInteraction(request);
+
+            if (TryCreateInteraction(request))
+            {
+                continue;
+            }
+
+            request.RequestAttemptsLeft--;
+
+            if (request.RequestAttemptsLeft > 0)
+            {
+                requestQueue.Enqueue(request);
+            }
         }
     }
 
@@ -88,118 +118,92 @@ public sealed class InteractionManager : MonoBehaviour
 
     #region Creation
 
-    private void TryCreateInteraction(AInteractionRequest request)
+    private bool TryCreateInteraction(AInteractionRequest request)
     {
         var potentialParticipants = ResolveParticipants(request.Targets);
-        List<ParticipantData> availableParticipants = new();
+        List<CreatureData> availableParticipants = new();
 
-        var preInter = request.GetInteraction();
-
-        int availableCount = 0;
-        foreach (ParticipantData p in potentialParticipants)
+        ACreatureInteraction tempInter = request.CreateInteraction(potentialParticipants);
+        if (!tempInter.ValidateInteraction())
         {
-            if (p.CurrentInteraction != null &&
-            preInter.InterruptLowerPriorityInteractions &&
-            p.CurrentInteraction.Priority < preInter.Priority)
+            return false;
+        }
+
+        foreach (CreatureData p in potentialParticipants)
+        {
+            ACreatureInteraction currentInteraction;
+            if (participants.TryGetValue(p, out currentInteraction) &&
+                tempInter.InterruptLowerPriorityInteractions &&
+                currentInteraction.Priority < tempInter.Priority)
             {
                 if (!TryLeaveInteraction(p))
                 {
                     continue;
                 }
             }
-            else
-            {
-                availableCount++;
-                availableParticipants.Add(p);
-            }
+            availableParticipants.Add(p);
         }
 
+        // Parameters are passed into the creation internally by the request holding them
         var newInteraction = request.CreateInteraction(availableParticipants);
-
-        // // Perhaps should allow and wait on a transitory state where we wait for characters to finish  doing their previous interactions' last action
-        // if (!newInteraction.CheckStart())
-        // {
-        //     return;
-        // }
-
-        // foreach (ParticipantData p in availableParticipants)
-        // {
-        //     newInteraction.TryJoin(p);
-        // }
-
-        // if (newInteraction.Validate())
-        // {
-        //     interactions.Add(newInteraction);
-        // }
-        // else
-        // {
-        //     ...
-        // }
-
+        if (newInteraction.ValidateInteraction())
+        {
+            interactions.Add(newInteraction);
+            foreach (var p in availableParticipants)
+            {
+                participants[p] = newInteraction;
+            }
+            return true;
+        }
+        return false;
     }
 
     #endregion
 
     #region Join
 
-    public bool TryJoinInteraction(ACreatureInteraction interaction, ParticipantData participant)
+    public bool TryJoinInteraction(ACreatureInteraction inter, CreatureData p)
     {
-        return false;
-        // if (!interaction.AllowJoining)
-        // {
-        //     return false;
-        // }
-
-        // if (participant.CurrentInteraction != null &&
-        //     interaction.InterruptLowerPriorityInteractions &&
-        //     participant.CurrentInteraction.Priority > interaction.Priority)
-        // {
-        //     return false;
-        // }
-
-        // if (!interaction.TryJoin(participant))
-        // {
-        //     return false;
-        // }
-
-        // participant.CurrentInteraction = interaction;
-        // // participant.Phase = ParticipantPhase.Start;
-        // participant.ActionIndex = 0;
-        // participant.ActionComplete = false;
-
-        // interaction.JoinInteraction(participant);
-
-        // return true;
+        if (!interactions.Contains(inter) || !creatureData.ContainsKey(p.Identity))
+        {
+            return false;
+        }
+        if (!participants.TryGetValue(p, out var curr))
+        {
+            return inter.TryJoin(p);
+        }
+        else
+        {
+            return inter.InterruptLowerPriorityInteractions &&
+                    curr.Priority < inter.Priority &&
+                    curr.TryLeave(p) &&
+                    inter.TryJoin(p);
+        }
     }
 
     #endregion
 
     #region Leave
 
-    public bool TryLeaveInteraction(ParticipantData participant)
+    public bool TryLeaveInteraction(CreatureData p)
     {
-        return false;
-        // ACreatureInteraction interaction = participant.CurrentInteraction;
+        if (!creatureData.ContainsKey(p.Identity) || !participants.TryGetValue(p, out ACreatureInteraction interaction))
+        {
+            return true;
+        }
 
-        // if (interaction == null)
-        // {
-        //     return false;
-        // }
+        return interaction.TryLeave(p);
+    }
 
-        // if (!interaction.AllowLeaving)
-        // {
-        //     return false;
-        // }
+    public static void NotifyParticipantLeft(ACreatureInteraction i, CreatureData p)
+    {
+        if (!Instance)
+            return;
 
-        // if (!interaction.TryLeave(participant))
-        // {
-        //     return false;
-        // }
-
-        // interaction.LeaveInteraction(participant);
-        // participant.CurrentInteraction = null;
-
-        // return true;
+        if (Instance.participants.TryGetValue(p, out var localInter) && localInter == i)
+        {
+            Instance.participants.Remove(p);
+        }
     }
 
     #endregion
@@ -210,26 +214,15 @@ public sealed class InteractionManager : MonoBehaviour
     {
         for (int i = interaction.Participants.Count - 1; i >= 0; i--)
         {
-            ParticipantData participant = interaction.Participants[i];
-            interaction.ForceStop(participant);
-            participant.CurrentInteraction = null;
+            CreatureData p = interaction.Participants[i];
+            interaction.ForceLeave(p);
         }
-
-        interactions.Remove(interaction);
     }
 
     #endregion
 
     #region Destruction
 
-    private void DestroyInteraction(ACreatureInteraction interaction)
-    {
-        // Interaction must've already orderly ended and not have any participants...
-        foreach (ParticipantData participant in interaction.Participants)
-        {
-            participant.CurrentInteraction = null;
-        }
-    }
 
     #endregion
 }

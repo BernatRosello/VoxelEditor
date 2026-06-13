@@ -2,20 +2,49 @@ using System;
 using UnityEngine;
 using UnityEngine.AI;
 
-[RequireComponent(typeof(NavMeshAgent))]
+public delegate void DriverAction(ActionDriver driver, Action completionCallback);
+
+public sealed class DriverActionDefinition
+{
+    public DriverAction Action;
+    public Func<ActionDriver, bool> CompletionCondition;
+}
+
+public static class DriverActions
+{
+    public static DriverActionDefinition MoveTo(Vector3 destination)
+    {
+        return new()
+        {
+            Action = (driver, completed) => { driver.MoveTo(destination); },
+            CompletionCondition = driver => driver.HasReachedDestination()
+        };
+    }
+
+    public static DriverActionDefinition StopMoving()
+    {
+        return new()
+        {
+            Action = (driver, completed) => { driver.StopMoving(); completed(); }
+        };
+    }
+
+    public static DriverActionDefinition SetTrigger(
+        string trigger)
+    {
+        return new()
+        {
+            Action = (driver, completed) => { driver.SetTrigger(trigger); completed(); }
+        };
+    }
+}
+
+[RequireComponent(typeof(NavigationAnimator))]
 [RequireComponent(typeof(Animator))]
 public class ActionDriver : MonoBehaviour
 {
-    [Header("Optional References")]
-
-    [SerializeField]
-    private MonoBehaviour emotionProvider;
-
-    private NavMeshAgent agent;
     private Animator animator;
-
-    public NavMeshAgent Agent => agent;
-
+    private NavigationAnimator nav;
     public Animator Animator => animator;
 
     public Transform CachedTransform
@@ -24,35 +53,85 @@ public class ActionDriver : MonoBehaviour
         private set;
     }
 
+    private Func<bool> completionCondition;
+    private Action completionCallback;
+
+    public bool IsBusy => completionCondition != null;
+
     private void Awake()
     {
         CachedTransform = transform;
 
-        agent = GetComponent<NavMeshAgent>();
+        nav = GetComponent<NavigationAnimator>();
 
         animator = GetComponent<Animator>();
     }
 
+    private void Update()
+    {
+        if (completionCondition == null)
+        {
+            return;
+        }
+
+        if (!completionCondition())
+        {
+            return;
+        }
+
+        Action callback = completionCallback;
+
+        completionCondition = null;
+        completionCallback = null;
+
+        callback?.Invoke();
+    }
+
+    #region Internals
+    internal void Execute(DriverAction driverAction, Action completionCallback, Func<bool> completionCondition = null)
+    {
+        if (IsBusy)
+        {
+            throw new InvalidOperationException($"{name} is already executing an action.");
+        }
+
+        driverAction(this, completionCallback);
+
+        if (completionCondition == null)
+        {
+            return;
+        }
+
+        this.completionCondition = completionCondition;
+        this.completionCallback = completionCallback;
+    }
+    #endregion
+
     #region Navigation
 
-    public void MoveTo(
+    internal void MoveTo(
         Vector3 destination)
     {
-        agent.SetDestination(destination);
+        nav.SetDestination(destination);
     }
 
-    public bool HasReachedDestination(
+    internal bool HasReachedDestination(
         float tolerance = 0.25f)
     {
-        if (agent.pathPending)
+        if (nav.HasDestination())
             return false;
 
-        return agent.remainingDistance <= tolerance;
+        return nav.DistanceToDestination() > tolerance;
     }
 
-    public void StopMoving()
+    internal Vector3 GetPosition()
     {
-        agent.SetDestination(
+        return animator.transform.position;
+    }
+
+    internal void StopMoving()
+    {
+        nav.SetDestination(
             CachedTransform.position);
     }
 
@@ -60,28 +139,10 @@ public class ActionDriver : MonoBehaviour
 
     #region Rotation
 
-    public void FacePosition(
-        Vector3 position,
-        float rotationSpeed = 360f)
+    internal void FacePosition(
+        Vector3 position)
     {
-        Vector3 direction =
-            position - CachedTransform.position;
 
-        direction.y = 0f;
-
-        if (direction.sqrMagnitude < 0.0001f)
-            return;
-
-        Quaternion targetRotation =
-            Quaternion.LookRotation(
-                direction.normalized);
-
-        CachedTransform.rotation =
-            Quaternion.RotateTowards(
-                CachedTransform.rotation,
-                targetRotation,
-                rotationSpeed *
-                Time.deltaTime);
     }
 
     public bool IsFacingPosition(
@@ -108,7 +169,7 @@ public class ActionDriver : MonoBehaviour
 
     #region Animation
 
-    public void SetBool(
+    internal void SetBool(
         string parameter,
         bool value)
     {
@@ -117,7 +178,7 @@ public class ActionDriver : MonoBehaviour
             value);
     }
 
-    public void SetFloat(
+    internal void SetFloat(
         string parameter,
         float value)
     {
@@ -126,14 +187,14 @@ public class ActionDriver : MonoBehaviour
             value);
     }
 
-    public void SetTrigger(
+    internal void SetTrigger(
         string parameter)
     {
         animator.SetTrigger(
             parameter);
     }
 
-    public AnimatorStateInfo
+    internal AnimatorStateInfo
         GetCurrentAnimatorState()
     {
         return animator
@@ -144,51 +205,21 @@ public class ActionDriver : MonoBehaviour
 
     #region Emotions
 
-    public bool TrySetEmotion(
+    internal bool TrySetEmotion(
         string emotionName,
         float value)
     {
-        if (emotionProvider == null)
-            return false;
-
-        if (emotionProvider
-            is IEmotionProvider provider)
-        {
-            provider.SetEmotion(
-                emotionName,
-                value);
-
-            return true;
-        }
-
+        // TODO
         return false;
     }
 
-    public bool TryGetEmotion(
+    internal bool TryGetEmotion(
         string emotionName,
         out float value)
     {
-        value = 0f;
-
-        if (emotionProvider == null)
-            return false;
-
-        if (emotionProvider
-            is IEmotionProvider provider)
-        {
-            value =
-                provider.GetEmotion(
-                    emotionName);
-
-            return true;
-        }
-
+        // TODO
+        value = 0;
         return false;
-    }
-
-    internal System.Numerics.Vector3 GetPosition()
-    {
-        throw new NotImplementedException();
     }
 
     #endregion

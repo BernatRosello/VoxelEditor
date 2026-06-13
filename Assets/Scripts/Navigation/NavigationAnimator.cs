@@ -414,4 +414,19 @@ public class NavigationAnimator : MonoBehaviour
             Gizmos.DrawLine(animator.rootPosition, animator.rootPosition + toTarget);
         }
     }
+
+    internal void SetDestination(Vector3 destination)
+    {
+        agent.SetDestination(destination);
+    }
+
+    internal bool HasDestination()
+    {
+        return agent.hasPath;
+    }
+
+    internal float DistanceToDestination()
+    {
+        return cachedPathLength;
+    }
 }

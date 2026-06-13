@@ -13,13 +13,29 @@ public enum InteractionPriority
     Critical
 }
 
+public enum InteractionPhase
+{
+    UnInitialized = default,
+    Join,
+    Update,
+    Leave
+}
+
+public sealed class CreatureInteractionState
+{
+    public InteractionPhase Phase;
+    public int ActionIndex;
+    public bool ActionComplete;
+}
+
+
 public abstract class AInteractionParams { }
 public abstract class ACreatureInteraction<TParams> : ACreatureInteraction where TParams : AInteractionParams
 {
-    protected readonly TParams Params;
-    protected ACreatureInteraction(TParams parameters, List<ParticipantData> participants) : base(participants)
+    protected readonly TParams InteractionParameters;
+    protected ACreatureInteraction(TParams parameters, List<CreatureData> participants) : base(participants)
     {
-        Params = parameters;
+        InteractionParameters = parameters;
     }
 }
 
@@ -30,165 +46,267 @@ public abstract class ACreatureInteraction
     public abstract string Description { get; }
     public abstract int MinParticipants { get; }
     public abstract int MaxParticipants { get; }
-    public abstract bool AllowJoining { get; }
-    public abstract bool AllowLeaving { get; }
+    public abstract bool AllowLateJoining { get; }
+    public abstract bool AllowEarlyLeaving { get; }
     public abstract InteractionPriority Priority { get; }
     public abstract bool InterruptLowerPriorityInteractions { get; }
-    public virtual bool IsInteractionCompleted() { return participants.Count < MinParticipants; }
+    public IReadOnlyList<CreatureData> Participants => participants;
 
     #endregion
     #region RUN TIME
-    private readonly List<ParticipantData> participants = new();
-    public IReadOnlyList<ParticipantData> Participants => participants;
+    private Dictionary<CreatureData, CreatureInteractionState> participantStates = new();
+    private readonly List<CreatureData> participants = new();
 
     #endregion
 
-    public ACreatureInteraction(List<ParticipantData> participantList)
+    public ACreatureInteraction(List<CreatureData> participantList)
     {
-        participants.AddRange(participantList);
-        foreach (var p in participants)
+        foreach (var p in participantList)
         {
-            p.State = InteractionState.Starting;
+            participants.Add(p);
+            CreatureInteractionState s = new()
+            {
+                Phase = InteractionPhase.UnInitialized,
+                ActionComplete = true,
+                ActionIndex = 0
+            };
+            participantStates[p] = s;
+            OnParticipantJoined(p);
         }
     }
 
     #region INTERACTION CONTROL FLOW CHECKS
-
-    // action beginning preconditions
-    protected virtual bool CheckStartAllParticipants() { return true; }
-    protected virtual bool CheckStart(ParticipantData participant) { return true; }
-    protected virtual bool StartFinished(ParticipantData participant) { return true; }
-    protected virtual bool UpdateFinished(ParticipantData participant) { return true; }
-    protected virtual bool EndFinished(ParticipantData participant) { return true; }
-
-    protected virtual bool CheckJoin(ParticipantData participant) { return true; }
-    protected virtual bool JoinFinished(ParticipantData participant) { return true; }
-    protected virtual bool CheckLeave(ParticipantData participantData) { return true; }
-    protected virtual bool LeaveFinished(ParticipantData participant) { return true; }
+    /// <summary>
+    /// Determines conditions for when a creature is allowed to join (be it during initialization or late join)
+    /// 
+    /// Base implementation:
+    ///     participants.Count < MaxParticipants
+    /// </summary>
+    /// <param name="participant"></param>
+    /// <returns></returns>
+    protected virtual bool CheckJoin(CreatureData participant) { return participants.Count < MaxParticipants; }
+    protected virtual bool JoinFinished(CreatureData participant) { return true; }
+    /// <summary>
+    /// Determines conditions for when a creature is allowed to join (be it during initialization or late join)
+    /// 
+    /// Base implementation:
+    ///     participants.Count < MinParticipants
+    /// </summary>
+    /// <param name="participantData"></param>
+    /// <returns></returns>
+    protected virtual bool CheckLeave(CreatureData participantData) { return participants.Count < MinParticipants; }
+    protected virtual bool LeaveFinished(CreatureData participant) { return true; }
+    protected virtual bool IsSynchronizedAction(int actionIndex) { return false; }
 
     #endregion
 
     #region INTERACTION FUNCTIONS
-    
-    protected virtual void StartInteraction(ParticipantData participant)
+
+    protected virtual void JoinInteraction(CreatureData participant) { }
+    protected virtual void OnParticipantJoined(CreatureData joined) { }
+    protected virtual void UpdateInteraction(CreatureData participant)
     {
-        // PerformAction(ActionDriver.MoveToPoint(posA),..)
-        // PerformAction(ActionDriver.TurnTowards(posB),..., (syncPoint =) true)
-        // PerformAction(ActionDriver.WaveEmote(),.., )
+        var pState = participantStates[participant];
+        while (pState.ActionComplete)
+        {
+            if (IsBlockedBySynchronization(participant))
+            {
+                break;
+            }
+
+            if (!pState.ActionComplete)
+            {
+                pState.ActionComplete = false;
+                break;
+            }
+
+            pState.ActionIndex++;
+        }
     }
-    protected void JoinInteraction(ParticipantData participant) { }
-    protected virtual void OnParticipantJoined(ParticipantData joined) { }
-    protected abstract void UpdateInteraction(ParticipantData participant);
+    protected virtual void LeaveInteraction(CreatureData participant) { }
 
-    protected virtual void LeaveInteraction(ParticipantData participant) { }
+    // Base must be called if overriden to ensure that interaction manager is correctly notified of internal participant abandoment of interaction
+    protected virtual void OnParticipantLeft(CreatureData left) { InteractionManager.NotifyParticipantLeft(this, left); }
 
-    // regular finish interaction path orderly liberate participants etc.
-    protected virtual void EndInteraction(ParticipantData participant) { }
-
-
-
-    protected virtual void OnParticipantLeft(ParticipantData left) { }
-
-    protected virtual void AbortParticipant(ParticipantData participant)
+    protected virtual void RemoveParticipantData(CreatureData participant)
     {
-        OnParticipantLeft(participant);
         participants.Remove(participant);
+        participantStates.Remove(participant);
     }
 
     #endregion
 
     #region PUBLIC METHOD INTERFACE
-
-    public virtual bool TryJoin(ParticipantData participant)
+    public virtual bool ValidateInteraction()
     {
-        if (AllowJoining && !participants.Contains(participant))
-        {
-            participant.State = InteractionState.Joining;
-            participants.Add(participant);
-            OnParticipantJoined(participant);
-            return true;
-        }
-        return false;
+        return participants.Count >= MinParticipants;
     }
 
-    public virtual bool TryLeave(ParticipantData participant)
+    public virtual bool IsInteractionEmpty()
     {
-        if (AllowLeaving && participants.Contains(participant))
+        return participants.Count == 0;
+    }
+    public virtual bool TryJoin(CreatureData participant)
+    {
+        if (!AllowLateJoining ||
+            participants.Contains(participant) ||
+            participants.Count >= MaxParticipants)
         {
-            participant.State = InteractionState.Leaving;
-            // participants.Remove(participant);
-            // OnParticipantLeft(participant);
-            return true;
+            return false;
         }
-        return false;
+
+        participantStates[participant] = new CreatureInteractionState
+        {
+            Phase = InteractionPhase.Join,
+            ActionIndex = 0,
+            ActionComplete = true
+        };
+
+        participants.Add(participant);
+
+        OnParticipantJoined(participant);
+
+        return true;
     }
 
-    public virtual void ForceStop(ParticipantData participant)
+    public virtual bool TryLeave(CreatureData participant)
     {
-        if (participants != null && participants.Contains(participant))
+        if (!AllowEarlyLeaving ||
+            !participants.Contains(participant))
         {
-            participant.State = InteractionState.Abort;
+            return false;
+        }
+
+        participantStates[participant].Phase = InteractionPhase.Leave;
+
+        return true;
+    }
+
+    public virtual void ForceLeave(CreatureData participant)
+    {
+        if (participants.Contains(participant))
+        {
+            participantStates[participant].Phase = InteractionPhase.Leave;
         }
     }
 
     public void Tick()
     {
-        // perhaps we should implement the initial start point in here for the interaction.
-        for (int i = participants.Count - 1; i > 0; i--)
+        for (int i = participants.Count - 1; i >= 0; i--)
         {
-            var p = participants[i];
+            CreatureData p = participants[i];
+            CreatureInteractionState pState = participantStates[p];
 
-            if (p.State == InteractionState.Abort)
+            switch (pState.Phase)
             {
-                AbortParticipant(p);
-                continue;
-            }
+                case InteractionPhase.UnInitialized:
+                case InteractionPhase.Join:
 
-            if (!p.ActionComplete)
-                continue;
-
-            switch (p.State)
-            {
-                case InteractionState.Starting:
-                    StartInteraction(p);
-                    if (StartFinished(p))
+                    if (!pState.ActionComplete)
                     {
-                        p.State = InteractionState.Update;
-                    }
                         break;
+                    }
 
-                case InteractionState.Joining:
                     JoinInteraction(p);
+
                     if (JoinFinished(p))
                     {
-                        p.State = InteractionState.Update;
+                        pState.Phase = InteractionPhase.Update;
                     }
+
                     break;
 
-                case InteractionState.Update:
-                    UpdateInteraction(p);
-                    if (UpdateFinished(p))
+                case InteractionPhase.Update:
+                    if (pState.ActionComplete)
                     {
-                        p.State = InteractionState.Ending;
+                        UpdateInteraction(p);
+                        break;
+                    }
+                    if (CheckLeave(p))
+                    {
+                        pState.Phase = InteractionPhase.Leave;
                     }
                     break;
 
-                case InteractionState.Leaving:
+                case InteractionPhase.Leave:
+
+                    if (!pState.ActionComplete)
+                    {
+                        break;
+                    }
+
                     LeaveInteraction(p);
+
                     if (LeaveFinished(p))
                     {
-                        p.State = InteractionState.Abort;
+                        OnParticipantLeft(p);
+                        RemoveParticipantData(p);
                     }
-                    break;
 
-                case InteractionState.Ending:
-                    if (EndFinished(p))
-                    {
-                        p.State = InteractionState.Abort;
-                    }
                     break;
             }
         }
+    }
+
+    #endregion
+
+    #region HELPER METHODS
+    protected CreatureInteractionState StateOf(CreatureData creature)
+    {
+        return participantStates[creature];
+    }
+
+    protected bool AllParticipantsPastAction(int actionIndex)
+    {
+        foreach (var participant in participants)
+        {
+            CreatureInteractionState state = participantStates[participant];
+
+            if (state.ActionIndex <= actionIndex)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private bool IsBlockedBySynchronization(CreatureData participant)
+    {
+        CreatureInteractionState state = participantStates[participant];
+
+        int currentAction = state.ActionIndex;
+
+        if (!IsSynchronizedAction(currentAction))
+        {
+            return false;
+        }
+
+        foreach (var other in participants)
+        {
+            if (other == participant)
+            {
+                continue;
+            }
+
+            CreatureInteractionState otherState = participantStates[other];
+
+            if (otherState.ActionIndex < currentAction)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected void DispatchAction(CreatureData participant, DriverActionDefinition action)
+    {
+        CreatureInteractionState state = participantStates[participant];
+        state.ActionComplete = false;
+        participant.Driver.Execute(
+            action.Action, () => state.ActionComplete = true,
+            action.CompletionCondition == null ? null : () => action.CompletionCondition(participant.Driver));
     }
 
     #endregion

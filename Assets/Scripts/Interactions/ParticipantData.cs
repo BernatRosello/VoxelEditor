@@ -1,26 +1,9 @@
 using System.Runtime.ConstrainedExecution;
-
-public enum InteractionState
-{
-    Joining,
-    Starting,
-    Update,
-    Leaving,
-    Ending,
-    Abort
-}
-
-public sealed class ParticipantData
+public sealed class CreatureData
 {
     public CreatureIdentity Identity;
     public ActionDriver Driver;
-    public ACreatureInteraction CurrentInteraction { get; set; }
-    public InteractionState State;
-
-    public int ActionIndex;
-    public bool ActionComplete;
-
-    public ParticipantData(
+    public CreatureData(
         ActionDriver driver, CreatureIdentity identity)
     {
         Driver = driver;

@@ -18,6 +18,7 @@ public struct CreatureIdentity : IEquatable<CreatureIdentity>
     public string Guid => guid;
 
     public bool IsValid => !string.IsNullOrWhiteSpace(guid);
+    
 
     public CreatureIdentity(string guid) : this()
     {
