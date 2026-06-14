@@ -272,10 +272,10 @@ public class NavigationAnimator : MonoBehaviour
         //
         if (isTurning)
         {
-            Debug.Log(
-                $"Angle={angleToTarget:F1}  " +
-                $"Desired={desiredForward}  " +
-                $"Forward={animatedTransform.forward}");
+            // Debug.Log(
+            //     $"Angle={angleToTarget:F1}  " +
+            //     $"Desired={desiredForward}  " +
+            //     $"Forward={animatedTransform.forward}");
 
             float velAng = Mathf.Clamp(angleToTarget / 180f, -1f, 1f);
             animator.SetFloat("vel_ang", velAng, 0.1f, Time.deltaTime);

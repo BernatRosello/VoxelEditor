@@ -11,9 +11,10 @@ public class ConversationParams : AInteractionParams
 public class ConversationRequest : AInteractionRequest<ConversationInteraction, ConversationParams>
 {
     public ConversationRequest(ConversationParams parameters, IEnumerable<CreatureIdentity> targets)
-        : base(parameters, targets, 
+        : base(parameters, targets,
             // Request Factory
-            (p, participants) => new ConversationInteraction(p, participants) ) {}
+            (p, participants) => new ConversationInteraction(p, participants))
+    { }
 }
 
 public class ConversationInteraction : ACreatureInteraction<ConversationParams>
@@ -28,7 +29,7 @@ public class ConversationInteraction : ACreatureInteraction<ConversationParams>
         else
         {
             gatherPosition = Vector3.zero;
-            float avgFac = 1.0f/participants.Count();
+            float avgFac = 1.0f / participants.Count();
             foreach (var p in participants)
             {
                 gatherPosition += p.Driver.GetPosition() * avgFac;
@@ -54,7 +55,14 @@ public class ConversationInteraction : ACreatureInteraction<ConversationParams>
 
     protected override bool CheckLeave(CreatureData participantData)
     {
-        return StateOf(participantData).ActionIndex >= 2;
+        bool result = AllParticipantsPastAction(2);
+
+        Debug.Log(
+            $"{participantData.Identity} leave check = {result} " +
+            $"index={StateOf(participantData).ActionIndex} " +
+            $"complete={StateOf(participantData).ActionComplete}");
+
+        return result;
     }
 
     protected override void UpdateInteraction(CreatureData participant)
@@ -70,11 +78,12 @@ public class ConversationInteraction : ACreatureInteraction<ConversationParams>
                 break;
 
             case 2:
-                DispatchAction(participant, DriverActions.MoveTo(gatherPosition - new Vector3(-10, 0, 0)));
+                DispatchAction(participant, DriverActions.MoveTo(gatherPosition - new Vector3(-2, 0, 0)));
                 break;
 
             default:
                 Debug.Log($"ActionIndex is: {StateOf(participant).ActionIndex}");
+                StateOf(participant).ActionIndex = 3;
                 break;
         }
     }

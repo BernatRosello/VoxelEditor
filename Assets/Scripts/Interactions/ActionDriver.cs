@@ -116,10 +116,10 @@ public class ActionDriver : MonoBehaviour
     }
 
     internal bool HasReachedDestination(
-        float tolerance = 2.0f)
+        float tolerance = .1f)
     {
         if (nav.HasDestination())
-            return false;
+            return true;
 
         return nav.DistanceToDestination() < tolerance;
     }

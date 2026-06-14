@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime;
 using Microsoft.VisualBasic;
 using UnityEngine.UIElements;
+using UnityEngine;
 
 public enum InteractionPriority
 {
@@ -71,7 +72,6 @@ public abstract class ACreatureInteraction
                 ActionIndex = 0
             };
             participantStates[p] = s;
-            OnParticipantJoined(p);
         }
     }
 
@@ -103,7 +103,11 @@ public abstract class ACreatureInteraction
     #region INTERACTION FUNCTIONS
 
     protected virtual void JoinInteraction(CreatureData participant) { }
-    protected virtual void OnParticipantJoined(CreatureData joined) { }
+    protected virtual void OnParticipantJoined(CreatureData joined)
+    {
+        Debug.Log($"Creature[{joined.Identity}] JOINED the interaction[{this.InteractionName}]");
+    }
+
     protected virtual void UpdateInteraction(CreatureData participant)
     {
         var pState = participantStates[participant];
@@ -126,7 +130,11 @@ public abstract class ACreatureInteraction
     protected virtual void LeaveInteraction(CreatureData participant) { }
 
     // Base must be called if overriden to ensure that interaction manager is correctly notified of internal participant abandoment of interaction
-    protected virtual void OnParticipantLeft(CreatureData left) { InteractionManager.NotifyParticipantLeft(this, left); }
+    protected virtual void OnParticipantLeft(CreatureData left)
+    {
+        Debug.Log($"Creature[{left.Identity}] LEFT the interaction[{this.InteractionName}]");
+        InteractionManager.NotifyParticipantLeft(this, left);
+    }
 
     protected virtual void RemoveParticipantData(CreatureData participant)
     {
@@ -154,19 +162,39 @@ public abstract class ACreatureInteraction
         {
             return false;
         }
-
-        participantStates[participant] = new CreatureInteractionState
-        {
-            Phase = InteractionPhase.Join,
-            ActionIndex = 0,
-            ActionComplete = true
-        };
-
-        participants.Add(participant);
-
-        OnParticipantJoined(participant);
-
+        Join(participant);
         return true;
+    }
+
+    protected void Join(CreatureData p)
+    {
+        if (!participantStates.ContainsKey(p))
+        {
+            participantStates[p] = new CreatureInteractionState
+            {
+                Phase = InteractionPhase.Join,
+                ActionIndex = 0,
+                ActionComplete = true
+            };
+
+#if UNITY_EDITOR
+            if (participants.Contains(p))
+                Debug.LogError("The participant list should not already contain (Late) joining participant");
+#endif
+            participants.Add(p);
+        }
+        else
+        {
+            participantStates[p].Phase = InteractionPhase.Join;
+            participantStates[p].ActionIndex = 0;
+            participantStates[p].ActionComplete = true;
+#if UNITY_EDITOR
+            if (!participants.Contains(p))
+                Debug.LogError("The participan list should already contain UnInitialized joining participant!");
+#endif
+        }
+
+        OnParticipantJoined(p);
     }
 
     public virtual bool TryLeave(CreatureData participant)
@@ -200,6 +228,8 @@ public abstract class ACreatureInteraction
             switch (pState.Phase)
             {
                 case InteractionPhase.UnInitialized:
+                    Join(p);
+                    break;
                 case InteractionPhase.Join:
 
                     if (!pState.ActionComplete)
@@ -217,15 +247,18 @@ public abstract class ACreatureInteraction
                     break;
 
                 case InteractionPhase.Update:
-                    if (pState.ActionComplete)
-                    {
-                        UpdateInteraction(p);
-                        break;
-                    }
+
                     if (CheckLeave(p))
                     {
                         pState.Phase = InteractionPhase.Leave;
+                        break;
                     }
+
+                    if (pState.ActionComplete)
+                    {
+                        UpdateInteraction(p);
+                    }
+
                     break;
 
                 case InteractionPhase.Leave:
@@ -302,10 +335,16 @@ public abstract class ACreatureInteraction
 
     protected void DispatchAction(CreatureData participant, DriverActionDefinition action)
     {
+        Debug.Log($"Dispatching action for participant[{participant.Identity}]");
         CreatureInteractionState state = participantStates[participant];
         state.ActionComplete = false;
         participant.Driver.Execute(
-            action.Action, () => state.ActionComplete = true,
+            action.Action, () =>
+            {
+                Debug.Log($"COMPLETED ACTION [{state.ActionIndex}]");
+                state.ActionComplete = true;
+                state.ActionIndex++;
+            },
             action.CompletionCondition == null ? null : () => action.CompletionCondition(participant.Driver));
     }
 

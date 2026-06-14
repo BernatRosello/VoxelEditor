@@ -79,9 +79,9 @@ NavMeshAgent:
   m_Acceleration: 1
   avoidancePriority: 50
   m_AngularSpeed: 179
-  m_StoppingDistance: 0
+  m_StoppingDistance: 0.1
   m_AutoTraverseOffMeshLink: 1
-  m_AutoBraking: 0
+  m_AutoBraking: 1
   m_AutoRepath: 1
   m_Height: 2
   m_BaseOffset: 0
@@ -175,13 +175,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NavigationAnimator
   movementThreshold:
-    startThreshold: 0.5
+    startThreshold: 0.2
     stopThreshold: 0.1
   turningThreshold:
     startThreshold: 45
     stopThreshold: 5
   turnWhileMovingThreshold: 60
-  rotationSmoothDegrees: 10
+  rotationSmoothDegrees: 15
   minimumSpeed: 0.05
   maximumSpeed: 6
   shortPathLength: 2
