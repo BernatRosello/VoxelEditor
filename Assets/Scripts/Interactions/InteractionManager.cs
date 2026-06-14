@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
+using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 
 public sealed class InteractionManager : MonoBehaviour
@@ -40,6 +42,13 @@ public sealed class InteractionManager : MonoBehaviour
 
             RegisterParticipant(c.Identity, driver);
         }
+    }
+
+    [ContextMenu("Create Conversation")]
+    private void CreateConversation()
+    {
+        var newReq = new ConversationRequest(new ConversationParams(), creatureData.Keys.AsEnumerable());
+        CreateRequest(newReq);
     }
 
     private void Update()
@@ -91,6 +100,14 @@ public sealed class InteractionManager : MonoBehaviour
     #endregion
 
     #region Requests
+
+    public static void  CreateRequest(AInteractionRequest req)
+    {
+        if (!Instance)
+            return;
+
+        Instance.requestQueue.Enqueue(req);
+    }
 
     private void ProcessRequests()
     {

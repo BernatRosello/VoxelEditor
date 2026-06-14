@@ -52,6 +52,11 @@ public class ConversationInteraction : ACreatureInteraction<ConversationParams>
 
     public override bool InterruptLowerPriorityInteractions => false;
 
+    protected override bool CheckLeave(CreatureData participantData)
+    {
+        return StateOf(participantData).ActionIndex >= 2;
+    }
+
     protected override void UpdateInteraction(CreatureData participant)
     {
         switch (StateOf(participant).ActionIndex)
@@ -66,6 +71,10 @@ public class ConversationInteraction : ACreatureInteraction<ConversationParams>
 
             case 2:
                 DispatchAction(participant, DriverActions.MoveTo(gatherPosition - new Vector3(-10, 0, 0)));
+                break;
+
+            default:
+                Debug.Log($"ActionIndex is: {StateOf(participant).ActionIndex}");
                 break;
         }
     }

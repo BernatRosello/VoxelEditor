@@ -346,7 +346,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Creature
   identity:
-    guid: d390d045a3134816933289e21cc721d8
+    guid: 0
     originGame: 
     originVersion: 
     creationTimestamp: 0

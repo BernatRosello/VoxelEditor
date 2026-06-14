@@ -8,6 +8,12 @@ public class Creature : MonoBehaviour
     public CreatureIdentity Identity =>
         identity;
 
+    [ContextMenu("Reassign GUID")]
+    private void ResetGUID()
+    {
+        identity = CreatureIdentity.Create();
+    }
+
 #if UNITY_EDITOR
 
     private void OnValidate()
