@@ -37,6 +37,14 @@ public static class DriverActions
             Action = (driver, completed) => { driver.SetTrigger(trigger); completed(); }
         };
     }
+
+    public static DriverActionDefinition SetBool(string trigger, bool value)
+    {
+        return new()
+        {
+            Action = (driver, completed) => { driver.SetBool(trigger, value); completed(); }
+        };
+    }
 }
 
 [RequireComponent(typeof(NavigationAnimator))]
@@ -116,12 +124,12 @@ public class ActionDriver : MonoBehaviour
     }
 
     internal bool HasReachedDestination(
-        float tolerance = .1f)
+        float tolerance = 0.1f)
     {
         if (nav.HasDestination())
             return true;
 
-        return nav.DistanceToDestination() < tolerance;
+        return nav.GetRemainingDistance() < tolerance;
     }
 
     internal Vector3 GetPosition()

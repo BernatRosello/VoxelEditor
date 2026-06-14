@@ -284,6 +284,10 @@ public abstract class ACreatureInteraction
     #endregion
 
     #region HELPER METHODS
+    protected int IndexOf(CreatureData participant)
+    {
+        return participants.IndexOf(participant);
+    }
     protected CreatureInteractionState StateOf(CreatureData creature)
     {
         return participantStates[creature];

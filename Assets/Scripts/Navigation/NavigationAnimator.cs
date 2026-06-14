@@ -113,6 +113,10 @@ public class NavigationAnimator : MonoBehaviour
         }
     }
 
+    public float GetRemainingDistance()
+    {
+        return GetRemainingDistance(agent);
+    }
     // To handle unexpected infinite values given out by the NavMesh plugin. As referenced by https://stackoverflow.com/a/67561314
     public static float GetRemainingDistance(NavMeshAgent agent)
     {
@@ -482,10 +486,5 @@ public class NavigationAnimator : MonoBehaviour
     internal bool HasDestination()
     {
         return agent.hasPath;
-    }
-
-    internal float DistanceToDestination()
-    {
-        return cachedPathLength;
     }
 }

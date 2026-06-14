@@ -55,7 +55,7 @@ public class ConversationInteraction : ACreatureInteraction<ConversationParams>
 
     protected override bool CheckLeave(CreatureData participantData)
     {
-        bool result = AllParticipantsPastAction(2);
+        bool result = AllParticipantsPastAction(3);
 
         Debug.Log(
             $"{participantData.Identity} leave check = {result} " +
@@ -67,10 +67,15 @@ public class ConversationInteraction : ACreatureInteraction<ConversationParams>
 
     protected override void UpdateInteraction(CreatureData participant)
     {
+        float rad;
+        Vector3 participantSlot;
         switch (StateOf(participant).ActionIndex)
         {
             case 0:
-                DispatchAction(participant, DriverActions.MoveTo(gatherPosition));
+                rad = Mathf.Lerp(0,2*Mathf.PI, (float)IndexOf(participant)/Participants.Count);
+                participantSlot = gatherPosition + new Vector3((float)Mathf.Cos(rad),0, (float)Mathf.Sin(rad)) * 3;
+                Debug.Log($"Moving to participantSlot {participantSlot}");
+                DispatchAction(participant, DriverActions.MoveTo(participantSlot));
                 break;
 
             case 1:
@@ -78,12 +83,14 @@ public class ConversationInteraction : ACreatureInteraction<ConversationParams>
                 break;
 
             case 2:
-                DispatchAction(participant, DriverActions.MoveTo(gatherPosition - new Vector3(-2, 0, 0)));
+                rad = Mathf.Lerp(0,2*Mathf.PI, (float)IndexOf(participant)/Participants.Count);
+                participantSlot = gatherPosition - new Vector3((float)Mathf.Cos(rad),0, (float)Mathf.Sin(rad)) * 2;
+                Debug.Log($"Moving to participantSlot {participantSlot}");
+                DispatchAction(participant, DriverActions.MoveTo(participantSlot));
                 break;
 
-            default:
-                Debug.Log($"ActionIndex is: {StateOf(participant).ActionIndex}");
-                StateOf(participant).ActionIndex = 3;
+            case 3:
+                DispatchAction(participant, DriverActions.SetBool("IsDancing", true));
                 break;
         }
     }

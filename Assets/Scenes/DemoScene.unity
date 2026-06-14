@@ -996,6 +996,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d555579dbaa492748a41a2fd1437f194, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InteractionManager
+  AvoidancePredictionTime: 2
+  PathfindingIterationsPerFrame: 100
 --- !u!4 &1185857090
 Transform:
   m_ObjectHideFlags: 0
@@ -1858,7 +1860,7 @@ PrefabInstance:
       objectReference: {fileID: 1511049764}
     - target: {fileID: 1503339185107194975, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.65
+      value: 1.65
       objectReference: {fileID: 0}
     - target: {fileID: 1503339185107194975, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1866,7 +1868,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1503339185107194975, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 2.54
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 1503339185107194975, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
       propertyPath: m_LocalRotation.w
