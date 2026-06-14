@@ -296,7 +296,6 @@ public class NavigationAnimator : MonoBehaviour
         {
             if (remainingDistance < (movementThreshold.Stop * animator.GetFloat("LocomotionSpeedParam")))
             {
-                //animator.SetBool("IsMoving", false);
                 animator.SetFloat("vel_x", 0f, 0.1f, Time.deltaTime);
                 animator.SetFloat("vel_y", 0f, 0.1f, Time.deltaTime);
                 agent.ResetPath();
@@ -309,37 +308,97 @@ public class NavigationAnimator : MonoBehaviour
                 cachedPathLength = remainingDistance;
             }
 
-            // Debug.Log(
-            //     $"hasPath={agent.hasPath} " +
-            //     $"pending={agent.pathPending} " +
-            //     $"NavMeshAgent remaining={agent.remainingDistance} " +
-            //     $"Patched remaining={remainingDistance} " +
-            //     $"status={agent.pathStatus}");
+            //
+            // ORIENTATION
+            //
+            // Keep orientation driven exclusively by steering target.
+            //
+            Vector3 steeringLocal =
+                animatedTransform.InverseTransformDirection(
+                    desiredForward).normalized;
 
-            Vector3 localTarget = animatedTransform.InverseTransformDirection(desiredForward).normalized;
-            float desiredSpeed = GetSpeedAlongPath(remainingDistance, cachedPathLength);
-            // float movementSpeed = desiredSpeed * animator.GetFloat("CalmEnergetic");
+            //
+            // MOVEMENT
+            //
+            // Use desiredVelocity so avoidance influences locomotion.
+            //
+            Vector3 desiredVelocity =
+                Vector3.ProjectOnPlane(
+                    agent.desiredVelocity,
+                    surfaceUp);
 
-            animator.SetFloat("vel_x", localTarget.x * desiredSpeed, 0.1f, Time.deltaTime);
-            animator.SetFloat("vel_y", localTarget.z * desiredSpeed, 0.1f, Time.deltaTime);
-            if (desiredSpeed < 1)
+            Vector3 localVelocity;
+
+            if (desiredVelocity.sqrMagnitude > 0.001f)
             {
-                animator.SetFloat("LocomotionSpeedParam", Mathf.Lerp(0.65f, 1.0f, desiredSpeed));
+                localVelocity =
+                    animatedTransform.InverseTransformDirection(
+                        desiredVelocity.normalized);
             }
-            else if (desiredSpeed > 5)
+            else
             {
-                animator.SetFloat("LocomotionSpeedParam", desiredSpeed / 5);
+                // Fallback when the agent reports almost no velocity.
+                localVelocity = steeringLocal;
             }
 
-            if (remainingDistance > 0.15f && absAngle > turnWhileMovingThreshold)
+            float desiredSpeed =
+                GetSpeedAlongPath(
+                    remainingDistance,
+                    cachedPathLength);
+
+            animator.SetFloat(
+                "vel_x",
+                localVelocity.x * desiredSpeed,
+                0.1f,
+                Time.deltaTime);
+
+            animator.SetFloat(
+                "vel_y",
+                localVelocity.z * desiredSpeed,
+                0.1f,
+                Time.deltaTime);
+
+            if (desiredSpeed < 1f)
+            {
+                animator.SetFloat(
+                    "LocomotionSpeedParam",
+                    Mathf.Lerp(
+                        0.65f,
+                        1.0f,
+                        desiredSpeed));
+            }
+            else if (desiredSpeed > 5f)
+            {
+                animator.SetFloat(
+                    "LocomotionSpeedParam",
+                    desiredSpeed / 5f);
+            }
+
+            //
+            // TURN-IN-PLACE DECISION
+            //
+            // IMPORTANT:
+            // Still use steering target angle here,
+            // NOT desiredVelocity.
+            //
+            if (remainingDistance > 0.15f &&
+                absAngle > turnWhileMovingThreshold)
             {
                 animator.SetBool("IsMoving", false);
                 animator.SetBool("IsTurning", true);
 
-                animator.SetFloat("vel_x", 0f, 0.25f, Time.deltaTime);
-                animator.SetFloat("vel_y", 0f, 0.25f, Time.deltaTime);
+                animator.SetFloat(
+                    "vel_x",
+                    0f,
+                    0.25f,
+                    Time.deltaTime);
 
-                // refresh path length to ensure smooth velocity transitions
+                animator.SetFloat(
+                    "vel_y",
+                    0f,
+                    0.25f,
+                    Time.deltaTime);
+
                 cachedPathLength = remainingDistance;
             }
         }

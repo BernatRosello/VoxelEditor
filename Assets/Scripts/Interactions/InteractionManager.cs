@@ -15,6 +15,9 @@ public sealed class InteractionManager : MonoBehaviour
 
     private readonly Queue<AInteractionRequest> requestQueue = new();
 
+    [Header("NavMesh Configurations")]
+    public float AvoidancePredictionTime = 2;
+    public int PathfindingIterationsPerFrame = 100;
 
     private void Awake()
     {
@@ -53,6 +56,9 @@ public sealed class InteractionManager : MonoBehaviour
 
     private void Update()
     {
+        UnityEngine.AI.NavMesh.avoidancePredictionTime = AvoidancePredictionTime;
+        UnityEngine.AI.NavMesh.pathfindingIterationsPerFrame = PathfindingIterationsPerFrame;
+
         ProcessRequests();
 
         for (int i = interactions.Count - 1; i >= 0; i--)

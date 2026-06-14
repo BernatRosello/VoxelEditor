@@ -1900,10 +1900,6 @@ PrefabInstance:
       propertyPath: identity.guid
       value: b00942fca4444cfb957194ad0c640bbb
       objectReference: {fileID: 0}
-    - target: {fileID: 9089790579125584195, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
-      propertyPath: m_ObstacleAvoidanceType
-      value: 3
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
