@@ -44,17 +44,11 @@ public static class DriverActions
     /// </summary>
     /// <param name="action"></param>
     /// <returns></returns>
-    public static DriverActionDefinition Animator(
-    Action<ActionDriver> action)
+    public static DriverActionDefinition Animator(Action<ActionDriver> action)
     {
         return new()
         {
-            Action = (driver, completed) =>
-            {
-                action(driver);
-
-                completed();
-            }
+            Action = (driver, completed) => { action(driver); completed(); }
         };
     }
 
@@ -105,7 +99,7 @@ public class ActionDriver : MonoBehaviour
 
     private void Update()
     {
-        if (completionCondition == null)
+        if (!IsBusy)
         {
             return;
         }

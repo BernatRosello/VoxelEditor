@@ -16,6 +16,10 @@ public sealed class InteractionManager : MonoBehaviour
     private readonly List<ACreatureInteraction> interactions = new();
 
     private readonly Queue<AInteractionRequest> requestQueue = new();
+    
+    [SerializeField] private float TPS = 20;
+    private float TickTime => 1.0f/TPS;
+    private float tickTimer;
 
     [Header("NavMesh Configurations")]
     public float AvoidancePredictionTime = 2;
@@ -30,6 +34,7 @@ public sealed class InteractionManager : MonoBehaviour
         }
 
         Instance = this;
+        tickTimer = 0;
 
         Creature[] creaturesInScene = FindObjectsByType<Creature>();
 
@@ -60,6 +65,13 @@ public sealed class InteractionManager : MonoBehaviour
     {
         UnityEngine.AI.NavMesh.avoidancePredictionTime = AvoidancePredictionTime;
         UnityEngine.AI.NavMesh.pathfindingIterationsPerFrame = PathfindingIterationsPerFrame;
+        tickTimer += Time.deltaTime;
+
+        if (tickTimer < TickTime)
+        {
+            return;
+        }
+        tickTimer = 0;
 
         ProcessRequests();
 

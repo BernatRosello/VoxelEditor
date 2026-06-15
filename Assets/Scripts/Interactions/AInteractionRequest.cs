@@ -105,7 +105,7 @@ public abstract class AInteractionRequest<TInteractionType, TParams> : AInteract
     /// Maximum amount of creation attempts.
     /// </param>
     protected AInteractionRequest(TParams parameters, IEnumerable<CreatureIdentity> targets,
-        System.Func<TParams, List<CreatureData>, TInteractionType> factory, int requestAttempts = 1)
+        Func<TParams, List<CreatureData>, TInteractionType> factory, int requestAttempts = 1)
         : base(targets, requestAttempts)
     {
         this.parameters = parameters;
