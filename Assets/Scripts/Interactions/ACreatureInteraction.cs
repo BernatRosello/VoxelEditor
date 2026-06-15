@@ -16,7 +16,7 @@ public enum InteractionPriority
 
 public enum InteractionPhase
 {
-    UnInitialized = default,
+    CtorPendingJoin = default,
     Join,
     Update,
     Leave
@@ -67,7 +67,7 @@ public abstract class ACreatureInteraction
             participants.Add(p);
             CreatureInteractionState s = new()
             {
-                Phase = InteractionPhase.UnInitialized,
+                Phase = InteractionPhase.CtorPendingJoin,
                 ActionComplete = true,
                 ActionIndex = 0
             };
@@ -76,10 +76,11 @@ public abstract class ACreatureInteraction
     }
 
     #region INTERACTION CONTROL FLOW CHECKS
+
     /// <summary>
     /// Determines conditions for when a creature is allowed to join (be it during initialization or late join)
-    /// 
-    /// Base implementation:
+    ///  <br/>
+    /// Base implementation: <br/>
     ///     participants.Count < MaxParticipants
     /// </summary>
     /// <param name="participant"></param>
@@ -96,6 +97,24 @@ public abstract class ACreatureInteraction
     /// <returns></returns>
     protected virtual bool CheckLeave(CreatureData participantData) { return participants.Count < MinParticipants; }
     protected virtual bool LeaveFinished(CreatureData participant) { return true; }
+
+    /// <summary>
+    /// Defines synchronization barriers within the interaction flow. <br/>
+    /// <br/>
+    /// When <see langword="true"/> is returned for an action index,
+    /// participants reaching that action will wait until every other
+    /// participant has reached the same action before continuing. <br/>
+    /// <br/>
+    /// Override this to coordinate multi-creature interactions. <br/>
+    /// <br/>
+    /// Example: <br/>
+    ///     Action 0 -> Everyone moves <br/>
+    ///     Action 1 -> Synchronization barrier <br/>
+    ///     Action 2 -> Everyone starts dancing simultaneously <br/>
+    /// </summary>
+    /// <param name="actionIndex">
+    /// Action index being evaluated.
+    /// </param>
     protected virtual bool IsSynchronizedAction(int actionIndex) { return false; }
 
     #endregion
@@ -218,6 +237,22 @@ public abstract class ACreatureInteraction
         }
     }
 
+    /// <summary>
+    /// Advances the interaction by one frame.
+    ///
+    /// Each participant progresses independently through:
+    ///
+    /// <list type="number">
+    /// <item><see cref="InteractionPhase.UnInitialized"/></item>
+    /// <item><see cref="InteractionPhase.Join"/></item>
+    /// <item><see cref="InteractionPhase.Update"/></item>
+    /// <item><see cref="InteractionPhase.Leave"/></item>
+    /// </list>
+    ///
+    /// Action execution only occurs while
+    /// <see cref="CreatureInteractionState.ActionComplete"/>
+    /// is <see langword="true"/>.
+    /// </summary>
     public void Tick()
     {
         for (int i = participants.Count - 1; i >= 0; i--)
@@ -227,7 +262,7 @@ public abstract class ACreatureInteraction
 
             switch (pState.Phase)
             {
-                case InteractionPhase.UnInitialized:
+                case InteractionPhase.CtorPendingJoin:
                     Join(p);
                     break;
                 case InteractionPhase.Join:
@@ -325,10 +360,7 @@ public abstract class ACreatureInteraction
             {
                 continue;
             }
-
-            CreatureInteractionState otherState = participantStates[other];
-
-            if (otherState.ActionIndex < currentAction)
+            if (participantStates[other].ActionIndex < currentAction)
             {
                 return true;
             }
@@ -337,11 +369,78 @@ public abstract class ACreatureInteraction
         return false;
     }
 
-    protected void DispatchAction(CreatureData participant, DriverActionDefinition action)
+    /// <summary>
+    /// Creates a completion condition that succeeds after
+    /// <paramref name="seconds"/> seconds have elapsed. </br>
+    /// </br>
+    /// Useful for adding durations to actions. </br>
+    /// </br>
+    /// Example: </br>
+    ///     DispatchAction(participant, DriverActions.SetBool("IsDancing", true), After(5f));
+    /// </summary>
+    protected Func<bool> After(float seconds)
     {
-        Debug.Log($"Dispatching action for participant[{participant.Identity}]");
+        float endTime = Time.time + seconds;
+
+        return () => Time.time >= endTime;
+    }
+
+    /// <summary>
+    /// Creates a completion condition that succeeds when
+    /// any supplied condition succeeds. </br>
+    /// </br>
+    /// i.e logical OR combination of all conditions
+    /// </summary>
+    protected Func<bool> AnyOf(params Func<bool>[] conditions)
+    {
+        return () => conditions.Any(c => c());
+    }
+
+    /// <summary>
+    /// Creates a completion condition that succeeds when
+    /// any supplied condition succeeds. </br>
+    /// </br>
+    /// i.e logical AND combination of all conditions
+    /// </summary>
+    protected Func<bool> AllOf(params Func<bool>[] conditions)
+    {
+        return () => conditions.All(c => c());
+    }
+
+    /// <summary>
+    /// Dispatches a <see cref="DriverActionDefinition"/> to a participant. </br>
+    /// </br>
+    /// The participant is marked as busy until the completion condition
+    /// evaluates to <see langword="true"/>. Once completed: </br>
+    /// </br>
+    /// - <see cref="CreatureInteractionState.ActionComplete"/> is set. </br>
+    /// - <see cref="CreatureInteractionState.ActionIndex"/> is incremented. </br>
+    /// </br>
+    /// By default, the action's own completion condition is used, but
+    /// it may be overridden for this specific dispatch. </br>
+    /// </br>
+    /// This method is intended to be called from
+    /// <see cref="UpdateInteraction(CreatureData)"/> implementations.
+    /// </summary>
+    /// <param name="participant">
+    /// Participant that will execute the action.
+    /// </param>
+    /// <param name="action">
+    /// Action definition to execute.
+    /// </param>
+    /// <param name="completionConditionOverride">
+    /// Optional completion condition used instead of
+    /// <see cref="DriverActionDefinition.CompletionCondition"/>.
+    /// </param>
+    protected void DispatchAction(CreatureData participant, DriverActionDefinition action, Func<bool> completionConditionOverride = null)
+    {
+        Debug.Log($"Dispatching action[{action}] for participant[{participant.Identity}] with completionConditionOverride[{completionConditionOverride}]");
         CreatureInteractionState state = participantStates[participant];
         state.ActionComplete = false;
+        Func<bool> completeExpr = completionConditionOverride ??
+            (action.CompletionCondition == null
+                ? null
+                : () => action.CompletionCondition(participant.Driver));
         participant.Driver.Execute(
             action.Action, () =>
             {
@@ -349,7 +448,9 @@ public abstract class ACreatureInteraction
                 state.ActionComplete = true;
                 state.ActionIndex++;
             },
-            action.CompletionCondition == null ? null : () => action.CompletionCondition(participant.Driver));
+            completeExpr
+
+        );
     }
 
     #endregion

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -6,8 +7,8 @@ public delegate void DriverAction(ActionDriver driver, Action completionCallback
 
 public sealed class DriverActionDefinition
 {
-    public DriverAction Action;
-    public Func<ActionDriver, bool> CompletionCondition;
+    public DriverAction Action { get; init; }
+    public Func<ActionDriver, bool> CompletionCondition { get; init; }
 }
 
 public static class DriverActions
@@ -29,8 +30,35 @@ public static class DriverActions
         };
     }
 
-    public static DriverActionDefinition SetTrigger(
-        string trigger)
+    public static DriverActionDefinition FaceDirection(Vector3 dir)
+    {
+        return new()
+        {
+            Action = (driver, completed) => { driver.FaceDirection(dir); },
+            CompletionCondition = driver => driver.HasReachedDestination()
+        };
+    }
+
+    /// <summary>
+    /// Warning! Should only be used with lambdas with immediate animator setter functions AntionDriver actions!
+    /// </summary>
+    /// <param name="action"></param>
+    /// <returns></returns>
+    public static DriverActionDefinition Animator(
+    Action<ActionDriver> action)
+    {
+        return new()
+        {
+            Action = (driver, completed) =>
+            {
+                action(driver);
+
+                completed();
+            }
+        };
+    }
+
+    public static DriverActionDefinition SetTrigger(string trigger)
     {
         return new()
         {
@@ -96,6 +124,7 @@ public class ActionDriver : MonoBehaviour
     }
 
     #region Internals
+    private bool actionFinished;
     internal void Execute(DriverAction driverAction, Action completionCallback, Func<bool> completionCondition = null)
     {
         if (IsBusy)
@@ -103,10 +132,25 @@ public class ActionDriver : MonoBehaviour
             throw new InvalidOperationException($"{name} is already executing an action.");
         }
 
-        driverAction(this, completionCallback);
+        actionFinished = false;
 
+        void Complete()
+        {
+            if (actionFinished)
+                return;
+            actionFinished = true;
+            this.completionCondition = null;
+            this.completionCallback = null;
+            completionCallback?.Invoke();
+        }
+
+        driverAction(this, Complete);
+
+        if (actionFinished)
+            return;
         if (completionCondition == null)
         {
+            Complete();
             return;
         }
 
@@ -117,8 +161,7 @@ public class ActionDriver : MonoBehaviour
 
     #region Navigation
 
-    internal void MoveTo(
-        Vector3 destination)
+    internal void MoveTo(Vector3 destination)
     {
         nav.SetDestination(destination);
     }
@@ -126,7 +169,7 @@ public class ActionDriver : MonoBehaviour
     internal bool HasReachedDestination(
         float tolerance = 0.1f)
     {
-        if (nav.HasDestination())
+        if (!nav.HasDestination())
             return true;
 
         return nav.GetRemainingDistance() < tolerance;
@@ -134,96 +177,83 @@ public class ActionDriver : MonoBehaviour
 
     internal Vector3 GetPosition()
     {
-        return animator.transform.position;
+        return CachedTransform.position;
+        // return animator.transform.position;
     }
 
     internal void StopMoving()
     {
-        nav.SetDestination(
-            CachedTransform.position);
+        nav.SetDestination(CachedTransform.position);
     }
 
     #endregion
 
     #region Rotation
 
-    internal void FacePosition(
-        Vector3 position)
+    public void FaceDirection(Vector3 dir)
     {
-
+        nav.MoveTo(GetPosition() + dir * 0.1f);
     }
 
-    public bool IsFacingPosition(
-        Vector3 position,
-        float toleranceDegrees = 5f)
+    internal void FacePosition(Vector3 position)
     {
-        Vector3 direction =
-            position - CachedTransform.position;
+        return FaceDirection(position - GetPosition());
+    }
 
-        direction.y = 0f;
-
+    public bool IsFacingDirection(Vector3 dir, float toleranceDegrees = 5f, bool verticalCheck = false)
+    {
         if (direction.sqrMagnitude < 0.0001f)
             return true;
 
-        float angle =
-            Vector3.Angle(
-                CachedTransform.forward,
-                direction.normalized);
+        if (!verticalCheck)
+            dir.y = 0;
+
+        float angle = Vector3.Angle(CachedTransform.forward, direction.normalized);
 
         return angle <= toleranceDegrees;
+    }
+
+    public bool IsFacingPosition(Vector3 position, float toleranceDegrees = 5f)
+    {
+        return IsFacingDirection(position - GetPosition(), toleranceDegrees);
     }
 
     #endregion
 
     #region Animation
 
-    internal void SetBool(
-        string parameter,
-        bool value)
+    internal void SetBool(string parameter, bool value)
     {
-        animator.SetBool(
-            parameter,
-            value);
+        animator.SetBool(parameter, value);
     }
 
-    internal void SetFloat(
-        string parameter,
-        float value)
+    internal void SetFloat(string parameter, float value)
     {
-        animator.SetFloat(
-            parameter,
-            value);
+        animator.SetFloat(parameter, value);
     }
 
-    internal void SetTrigger(
-        string parameter)
+    internal void SetTrigger(string parameter)
     {
-        animator.SetTrigger(
-            parameter);
+        animator.SetTrigger(parameter);
     }
 
     internal AnimatorStateInfo
         GetCurrentAnimatorState()
     {
-        return animator
-            .GetCurrentAnimatorStateInfo(0);
+        return animator.GetCurrentAnimatorStateInfo(0);
     }
 
     #endregion
 
     #region Emotions
 
-    internal bool TrySetEmotion(
-        string emotionName,
-        float value)
+    internal bool TrySetEmotion(string emotionName, float value)
     {
         // TODO
         return false;
     }
 
-    internal bool TryGetEmotion(
-        string emotionName,
-        out float value)
+    internal bool TryGetEmotion(string emotionName, out float value)
     {
         // TODO
         value = 0;

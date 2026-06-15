@@ -317,27 +317,19 @@ public class NavigationAnimator : MonoBehaviour
             //
             // Keep orientation driven exclusively by steering target.
             //
-            Vector3 steeringLocal =
-                animatedTransform.InverseTransformDirection(
-                    desiredForward).normalized;
-
+            Vector3 steeringLocal = animatedTransform.InverseTransformDirection(desiredForward).normalized;
             //
             // MOVEMENT
             //
             // Use desiredVelocity so avoidance influences locomotion.
             //
-            Vector3 desiredVelocity =
-                Vector3.ProjectOnPlane(
-                    agent.desiredVelocity,
-                    surfaceUp);
+            Vector3 desiredVelocity = Vector3.ProjectOnPlane(agent.desiredVelocity, surfaceUp);
 
             Vector3 localVelocity;
 
             if (desiredVelocity.sqrMagnitude > 0.001f)
             {
-                localVelocity =
-                    animatedTransform.InverseTransformDirection(
-                        desiredVelocity.normalized);
+                localVelocity = animatedTransform.InverseTransformDirection(desiredVelocity.normalized);
             }
             else
             {
@@ -345,37 +337,19 @@ public class NavigationAnimator : MonoBehaviour
                 localVelocity = steeringLocal;
             }
 
-            float desiredSpeed =
-                GetSpeedAlongPath(
-                    remainingDistance,
-                    cachedPathLength);
+            float desiredSpeed = GetSpeedAlongPath(remainingDistance, cachedPathLength);
 
-            animator.SetFloat(
-                "vel_x",
-                localVelocity.x * desiredSpeed,
-                0.1f,
-                Time.deltaTime);
+            animator.SetFloat("vel_x", localVelocity.x * desiredSpeed, 0.1f, Time.deltaTime);
 
-            animator.SetFloat(
-                "vel_y",
-                localVelocity.z * desiredSpeed,
-                0.1f,
-                Time.deltaTime);
+            animator.SetFloat("vel_y", localVelocity.z * desiredSpeed, 0.1f, Time.deltaTime);
 
             if (desiredSpeed < 1f)
             {
-                animator.SetFloat(
-                    "LocomotionSpeedParam",
-                    Mathf.Lerp(
-                        0.65f,
-                        1.0f,
-                        desiredSpeed));
+                animator.SetFloat("LocomotionSpeedParam", Mathf.Lerp(0.65f, 1.0f, desiredSpeed));
             }
             else if (desiredSpeed > 5f)
             {
-                animator.SetFloat(
-                    "LocomotionSpeedParam",
-                    desiredSpeed / 5f);
+                animator.SetFloat("LocomotionSpeedParam", desiredSpeed / 5f);
             }
 
             //
@@ -391,18 +365,9 @@ public class NavigationAnimator : MonoBehaviour
                 animator.SetBool("IsMoving", false);
                 animator.SetBool("IsTurning", true);
 
-                animator.SetFloat(
-                    "vel_x",
-                    0f,
-                    0.25f,
-                    Time.deltaTime);
+                animator.SetFloat("vel_x", 0f, 0.25f, Time.deltaTime);
 
-                animator.SetFloat(
-                    "vel_y",
-                    0f,
-                    0.25f,
-                    Time.deltaTime);
-
+                animator.SetFloat("vel_y", 0f, 0.25f, Time.deltaTime);
                 cachedPathLength = remainingDistance;
             }
         }
