@@ -36,8 +36,7 @@ public class MoveToClickPoint : MonoBehaviour
         {
             if (Physics.Raycast(ray, out RaycastHit hit, 100f))
             {
-                var parameters = new ConversationParams();
-                parameters.position = hit.point;
+                var parameters = new ConversationParams { position = hit.point };
                 InteractionManager.CreateRequest(new ConversationInteraction(parameters, InteractionManager.Creatures));
             }
         }
@@ -48,7 +47,7 @@ public class MoveToClickPoint : MonoBehaviour
             {
                 selectedDriver = hit.transform.GetComponent<ActionDriver>();
             }
-        }   
+        }
         else
         {
             if (Physics.Raycast(ray, out RaycastHit hit, 100f))
@@ -59,7 +58,10 @@ public class MoveToClickPoint : MonoBehaviour
                 // Something like: UserMove that allows selecting a series (or one, in this case)
                 // of creatures to move to a given location with a very high priority, in a way that shows-off
                 // the functioning of the interaction manager scheduling
-                selectedDriver.SetDestination(hit.point);
+                // selectedDriver.SetDestination(hit.point);
+                // selectedDriver = null;
+                var parameters = new UserMoveParams { position = hit.point };
+                InteractionManager.CreateRequest(new ConversationInteraction(parameters, selectedDriver.GetComponent<Creature>().Identity));
                 selectedDriver = null;
             }
         }

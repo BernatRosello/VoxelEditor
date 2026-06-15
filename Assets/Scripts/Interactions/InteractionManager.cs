@@ -31,9 +31,9 @@ public sealed class InteractionManager : MonoBehaviour
 
         Instance = this;
 
-        Creature[] identities = FindObjectsByType<Creature>();
+        Creature[] creaturesInScene = FindObjectsByType<Creature>();
 
-        foreach (var c in identities)
+        foreach (var c in creaturesInScene)
         {
             ActionDriver driver =
                 c.GetComponent<ActionDriver>();

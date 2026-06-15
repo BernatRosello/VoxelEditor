@@ -68,10 +68,10 @@ public class ConversationInteraction : ACreatureInteraction<ConversationParams>
     {
         bool result = AllParticipantsPastAction(3);
 
-        Debug.Log(
-            $"{participantData.Identity} leave check = {result} " +
-            $"index={StateOf(participantData).ActionIndex} " +
-            $"complete={StateOf(participantData).ActionComplete}");
+        // Debug.Log(
+        //     $"{participantData.Identity} leave check = {result} " +
+        //     $"index={StateOf(participantData).ActionIndex} " +
+        //     $"complete={StateOf(participantData).ActionComplete}");
 
         return result;
     }
