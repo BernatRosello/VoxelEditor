@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
 using UnityEngine;
 
 public class ConversationParams : AInteractionParams
 {
+    public Vector3? position;
     public float duration;
     public CreatureIdentity initiator;
 }
@@ -23,18 +25,26 @@ public class ConversationInteraction : ACreatureInteraction<ConversationParams>
     Vector3 gatherPosition;
     public ConversationInteraction(ConversationParams parameters, List<CreatureData> participants) : base(parameters, participants)
     {
-        if (participants.Count == 2)
+        if (!parameters.position)
         {
-            gatherPosition = participants.First(p => p.Identity != parameters.initiator).Driver.GetPosition();
+            var init = participants.FirstOrDefault(p => p.Identity != parameters.initiator);
+            if (participants.Count == 2 && init != null)
+            {
+                gatherPosition = init.Driver.GetPosition();
+            }
+            else
+            {
+                gatherPosition = Vector3.zero;
+                float avgFac = 1.0f / participants.Count();
+                foreach (var p in participants)
+                {
+                    gatherPosition += p.Driver.GetPosition() * avgFac;
+                }
+            }
         }
         else
         {
-            gatherPosition = Vector3.zero;
-            float avgFac = 1.0f / participants.Count();
-            foreach (var p in participants)
-            {
-                gatherPosition += p.Driver.GetPosition() * avgFac;
-            }
+            gatherPosition = parameters.position;
         }
     }
 

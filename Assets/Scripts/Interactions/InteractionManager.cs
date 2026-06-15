@@ -11,6 +11,8 @@ public sealed class InteractionManager : MonoBehaviour
     private readonly Dictionary<CreatureIdentity, CreatureData> creatureData = new();
     private readonly Dictionary<CreatureData, ACreatureInteraction> participants = new();
 
+    public static IReadOnlySet<CreatureIdentity> Creatures => Instance.creatureData.Keys;
+
     private readonly List<ACreatureInteraction> interactions = new();
 
     private readonly Queue<AInteractionRequest> requestQueue = new();
@@ -50,7 +52,7 @@ public sealed class InteractionManager : MonoBehaviour
     [ContextMenu("Create Conversation")]
     private void CreateConversation()
     {
-        var newReq = new ConversationRequest(new ConversationParams(), creatureData.Keys.AsEnumerable());
+        var newReq = new ConversationRequest(null, creatureData.Keys.AsEnumerable());
         CreateRequest(newReq);
     }
 
