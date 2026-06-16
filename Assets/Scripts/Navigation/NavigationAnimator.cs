@@ -448,6 +448,11 @@ public class NavigationAnimator : MonoBehaviour
         agent.SetDestination(destination);
     }
 
+    internal Vector3 GetPosition()
+    {
+        return agent.nextPosition;
+    }
+
     internal bool HasDestination()
     {
         return agent.hasPath;

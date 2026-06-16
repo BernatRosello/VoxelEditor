@@ -30,7 +30,12 @@ public abstract class AInteractionRequest
     /// Failed requests may be requeued until this value reaches zero.
     /// </summary>
     public int RequestAttemptsLeft { get => requestAttemptsLeft; set => requestAttemptsLeft = value; }
+    public bool Promised { get => promised; set => promised = value; }
+    public List<CreatureData> PromisedParticipants { get => promisedParticipants; set => promisedParticipants = value; }
+
+    private List<CreatureData> promisedParticipants = new ();
     private int requestAttemptsLeft;
+    private bool promised;
 
     /// <summary>
     /// Creates a new interaction request.
@@ -105,8 +110,23 @@ public abstract class AInteractionRequest<TInteractionType, TParams> : AInteract
     /// Maximum amount of creation attempts.
     /// </param>
     protected AInteractionRequest(TParams parameters, IEnumerable<CreatureIdentity> targets,
-        Func<TParams, List<CreatureData>, TInteractionType> factory, int requestAttempts = 1)
+        System.Func<TParams, List<CreatureData>, TInteractionType> factory, int requestAttempts = 1)
         : base(targets, requestAttempts)
+    {
+        this.parameters = parameters;
+        this.factory = factory;
+    }
+
+    /// <summary>
+    /// Single target variant
+    /// </summary>
+    /// <param name="parameters"></param>
+    /// <param name="target"></param>
+    /// <param name="factory"></param>
+    /// <param name="requestAttempts"></param>
+    protected AInteractionRequest(TParams parameters, CreatureIdentity target,
+        System.Func<TParams, List<CreatureData>, TInteractionType> factory, int requestAttempts = 1)
+        : base(new List<CreatureIdentity> {target}, requestAttempts)
     {
         this.parameters = parameters;
         this.factory = factory;

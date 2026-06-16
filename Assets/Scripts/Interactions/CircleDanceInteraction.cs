@@ -1,33 +1,37 @@
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Numerics;
+using Unity.VisualScripting;
 using UnityEngine;
 
-public class ConversationParams : AInteractionParams
+public class CircleDanceParams : AInteractionParams
 {
     public Vector3? position;
     public float duration;
     public CreatureIdentity initiator;
 }
 
-public class ConversationRequest : AInteractionRequest<ConversationInteraction, ConversationParams>
+public class CircleDanceRequest : AInteractionRequest<CircleDanceInteraction, CircleDanceParams>
 {
-    public ConversationRequest(ConversationParams parameters, IEnumerable<CreatureIdentity> targets)
+    public CircleDanceRequest(CircleDanceParams parameters, IEnumerable<CreatureIdentity> targets)
         : base(parameters, targets,
             // Request Factory
-            (p, participants) => new ConversationInteraction(p, participants))
+            (p, participants) => new CircleDanceInteraction(p, participants))
     { }
 }
 
-public class ConversationInteraction : ACreatureInteraction<ConversationParams>
+public class CircleDanceInteraction : ACreatureInteraction<CircleDanceParams>
 {
     Vector3 gatherPosition;
-    public ConversationInteraction(ConversationParams parameters, List<CreatureData> participants) : base(parameters, participants)
+    public CircleDanceInteraction(CircleDanceParams parameters, List<CreatureData> participants) : base(parameters, participants)
     {
-        if (!parameters.position)
+        if (parameters == null || !parameters.position.HasValue)
         {
-            var init = participants.FirstOrDefault(p => p.Identity != parameters.initiator);
+            CreatureData init;
+            if (parameters == null || parameters.initiator == null)
+                init = participants[0];
+            else
+                init = participants.FirstOrDefault(p => p.Identity != parameters.initiator);
+
             if (participants.Count == 2 && init != null)
             {
                 gatherPosition = init.Driver.GetPosition();
@@ -44,29 +48,22 @@ public class ConversationInteraction : ACreatureInteraction<ConversationParams>
         }
         else
         {
-            gatherPosition = parameters.position;
+            gatherPosition = Parameters.position.Value;
         }
     }
 
-    public override string InteractionName => "Conversation";
-
+    public override string Name => "CircleDance";
     public override string Description => "Initiator will go talk to the other participant (if just 2, otherwise they will gather at the midpoint)";
-
     public override int MinParticipants => 2;
-
     public override int MaxParticipants => 20;
-
     public override bool AllowLateJoining => true;
-
     public override bool AllowEarlyLeaving => true;
-
-    public override InteractionPriority Priority => 0;
-
-    public override bool InterruptLowerPriorityInteractions => false;
+    public override InteractionPriority Priority => InteractionPriority.Normal;
+    public override bool InterruptLowerPriorityInteractions => true;
 
     protected override bool CheckLeave(CreatureData participantData)
     {
-        bool result = AllParticipantsPastAction(3);
+        bool result = AllParticipantsPastAction(5);//&& base.CheckLeave(participantData);
 
         // Debug.Log(
         //     $"{participantData.Identity} leave check = {result} " +
@@ -76,7 +73,7 @@ public class ConversationInteraction : ACreatureInteraction<ConversationParams>
         return result;
     }
 
-    protected virtual bool IsSynchronizedAction(int actionIndex) { return actionIndex == 1; }
+    protected override bool IsSynchronizedAction(int actionIndex) { return actionIndex == 1; }
 
     protected override void UpdateInteraction(CreatureData p)
     {
@@ -85,9 +82,9 @@ public class ConversationInteraction : ACreatureInteraction<ConversationParams>
         switch (StateOf(p).ActionIndex)
         {
             case 0:
-                rad = Mathf.Lerp(0, 2 * Mathf.PI, (float)IndexOf(p) / Participants.Count);
+                rad = Mathf.Lerp(0, 2 * Mathf.PI, (float)IndexOf(p) / ActiveParticipants.Count);
                 participantSlot = gatherPosition + new Vector3((float)Mathf.Cos(rad), 0, (float)Mathf.Sin(rad)) * 3;
-                Debug.Log($"Moving to participantSlot {participantSlot}");
+                // Debug.Log($"Moving to participantSlot {participantSlot}");
                 DispatchAction(p, DriverActions.MoveTo(participantSlot));
                 break;
 
@@ -95,11 +92,11 @@ public class ConversationInteraction : ACreatureInteraction<ConversationParams>
                 // sync point right here... 
                 // i.e actionIndex == 1 is dispatched synchronously/in the same interaction Tick
                 // see IsSynchronizedAction(..) override and usage
-                Debug.Log($"Creature[{p.Identity}] reached CHECKPOINT ActionIndex == 1.");
-                DispatchAction(p, DriverActions.FacePosition(gatherPosition),
-                    AllOf(
-                        After(2f),
-                        () => p.Driver.IsFacingPosition(gatherPosition)));
+                // Debug.Log($"Creature[{p.Identity}] reached CHECKPOINT ActionIndex == 1.");
+                DispatchAction(p, DriverActions.FacePosition(gatherPosition), 2);//, //After(2f));
+                    // AnyOf(
+                    //     AllOf(After(2f), () => p.Driver.IsFacingPosition(gatherPosition)),
+                    //     After(10f)));
                 break;
 
             case 2:
@@ -107,23 +104,35 @@ public class ConversationInteraction : ACreatureInteraction<ConversationParams>
                 StateOf(p).ActionIndex++;
                 break;
             case 3:
+                // Debug.Log($"Creature[{p.Identity}] reached CHECKPOINT ActionIndex == 3.");
                 DispatchAction(p, DriverActions.SetBool("IsDancing", true), After(10f));
                 break;
 
             case 4:
+                // Debug.Log($"Creature[{p.Identity}] reached CHECKPOINT ActionIndex == 4.");
                 DispatchAction(p, DriverActions.Animator(d =>
                 {
                     d.SetBool("IsDancing", false);
-                    d.SetTrigger("Trip");
+                    // d.SetTrigger("Trip");
                 }));
                 break;
 
             case 5:
-                rad = Mathf.Lerp(0, 2 * Mathf.PI, (float)IndexOf(p) / Participants.Count);
+                // Debug.Log($"Creature[{p.Identity}] reached CHECKPOINT ActionIndex == 5.");
+                rad = Mathf.Lerp(0, 2 * Mathf.PI, (float)IndexOf(p) / ActiveParticipants.Count);
                 participantSlot = gatherPosition - new Vector3((float)Mathf.Cos(rad), 0, (float)Mathf.Sin(rad)) * 2;
-                Debug.Log($"Moving to participantSlot {participantSlot}");
+                // Debug.Log($"Moving to participantSlot {participantSlot}");
                 DispatchAction(p, DriverActions.MoveTo(participantSlot));
                 break;
+
+            default:
+                Debug.Log($"C[{p.Identity}] ActionIndex out of scripted range: {StateOf(p).ActionIndex} ActionComplete({StateOf(p).ActionComplete})");
+                break;
         }
+    }
+
+    protected override void LeaveInteraction(CreatureData participant)
+    {
+        DispatchAction(participant, DriverActions.ResetAnimator());
     }
 }

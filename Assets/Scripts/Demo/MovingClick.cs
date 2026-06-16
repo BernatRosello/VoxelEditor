@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -36,8 +38,9 @@ public class MoveToClickPoint : MonoBehaviour
         {
             if (Physics.Raycast(ray, out RaycastHit hit, 100f))
             {
-                var parameters = new ConversationParams { position = hit.point };
-                InteractionManager.CreateRequest(new ConversationInteraction(parameters, InteractionManager.Creatures));
+                var parameters = new CircleDanceParams { position = hit.point };
+                var req = new CircleDanceRequest(parameters, InteractionManager.Creatures);
+                InteractionManager.CreateRequest(req);
             }
         }
         else if (selectedDriver == null)
@@ -61,7 +64,8 @@ public class MoveToClickPoint : MonoBehaviour
                 // selectedDriver.SetDestination(hit.point);
                 // selectedDriver = null;
                 var parameters = new UserMoveParams { position = hit.point };
-                InteractionManager.CreateRequest(new ConversationInteraction(parameters, selectedDriver.GetComponent<Creature>().Identity));
+                var req = new UserMoveRequest(parameters, selectedDriver.GetComponent<Creature>().Identity);
+                InteractionManager.CreateRequest(req);
                 selectedDriver = null;
             }
         }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
@@ -11,14 +12,14 @@ public sealed class InteractionManager : MonoBehaviour
     private readonly Dictionary<CreatureIdentity, CreatureData> creatureData = new();
     private readonly Dictionary<CreatureData, ACreatureInteraction> participants = new();
 
-    public static IReadOnlySet<CreatureIdentity> Creatures => Instance.creatureData.Keys;
+    public static IReadOnlyCollection<CreatureIdentity> Creatures => Instance.creatureData.Keys;
 
     private readonly List<ACreatureInteraction> interactions = new();
 
     private readonly Queue<AInteractionRequest> requestQueue = new();
-    
+
     [SerializeField] private float TPS = 20;
-    private float TickTime => 1.0f/TPS;
+    private float TickTime => 1.0f / TPS;
     private float tickTimer;
 
     [Header("NavMesh Configurations")]
@@ -54,10 +55,10 @@ public sealed class InteractionManager : MonoBehaviour
         }
     }
 
-    [ContextMenu("Create Conversation")]
-    private void CreateConversation()
+    [ContextMenu("Create CircleDance")]
+    private void CreateCircleDance()
     {
-        var newReq = new ConversationRequest(null, creatureData.Keys.AsEnumerable());
+        var newReq = new CircleDanceRequest(null, creatureData.Keys.AsEnumerable());
         CreateRequest(newReq);
     }
 
@@ -83,6 +84,7 @@ public sealed class InteractionManager : MonoBehaviour
 
             if (interaction.IsInteractionEmpty())
             {
+                Debug.Log($"Removed empty '{interaction.Name}' Interaction");
                 interactions.RemoveAt(i);
             }
         }
@@ -112,16 +114,17 @@ public sealed class InteractionManager : MonoBehaviour
         creatureData.Remove(identity);
     }
 
-    private IEnumerable<CreatureData> ResolveParticipants(IEnumerable<CreatureIdentity> identities)
+    public static IEnumerable<CreatureData> ResolveParticipants(IEnumerable<CreatureIdentity> identities)
     {
-        return identities.Select(x => creatureData[x]);
+        if (!Instance) return null;
+        return identities.Select(x => Instance.creatureData[x]);
     }
 
     #endregion
 
     #region Requests
 
-    public static void  CreateRequest(AInteractionRequest req)
+    public static void CreateRequest(AInteractionRequest req)
     {
         if (!Instance)
             return;
@@ -136,17 +139,24 @@ public sealed class InteractionManager : MonoBehaviour
         for (int i = 0; i < requestsToProcess; i++)
         {
             AInteractionRequest request = requestQueue.Dequeue();
-
-            if (TryCreateInteraction(request))
+            if (request.Promised || TryPrepareRequest(request))
             {
-                continue;
+                if (!TryFulfillRequest(request))
+                {
+                    // If it can't be fulfilled right now let it go around once more
+                    // * Promised participants will be leaving, which will block them
+                    //      from being promised to other requests.
+                    requestQueue.Enqueue(request);
+                }
             }
-
-            request.RequestAttemptsLeft--;
-
-            if (request.RequestAttemptsLeft > 0)
+            else
             {
-                requestQueue.Enqueue(request);
+                request.RequestAttemptsLeft--;
+
+                if (request.RequestAttemptsLeft > 0)
+                {
+                    requestQueue.Enqueue(request);
+                }
             }
         }
     }
@@ -154,8 +164,38 @@ public sealed class InteractionManager : MonoBehaviour
     #endregion
 
     #region Creation
+    private bool TryFulfillRequest(AInteractionRequest request)
+    {
+        List<CreatureData> available = new();
 
-    private bool TryCreateInteraction(AInteractionRequest request)
+        foreach (var pp in request.PromisedParticipants)
+        {
+            var p = creatureData[pp.Identity];
+
+            // return out if any participant is still busy in another interaction
+            if (participants.ContainsKey(p))
+            {
+                return false;
+            }
+
+            available.Add(p);
+        }
+
+        var interaction = request.CreateInteraction(available);
+
+        if (!interaction.ValidateInteraction())
+            return false;
+
+        interactions.Add(interaction);
+
+        foreach (var p in available)
+        {
+            participants[p] = interaction;
+        }
+
+        return true;
+    }
+    private bool TryPrepareRequest(AInteractionRequest request)
     {
         var potentialParticipants = ResolveParticipants(request.Targets);
         List<CreatureData> availableParticipants = new();
@@ -163,20 +203,26 @@ public sealed class InteractionManager : MonoBehaviour
         ACreatureInteraction tempInter = request.CreateInteraction(potentialParticipants);
         if (!tempInter.ValidateInteraction())
         {
+            Debug.Log($"Failed to Pre-Validate InteractionRequest for [{tempInter.Name}] ");
             return false;
         }
 
         foreach (CreatureData p in potentialParticipants)
         {
             ACreatureInteraction currentInteraction;
-            if (participants.TryGetValue(p, out currentInteraction) &&
-                tempInter.InterruptLowerPriorityInteractions &&
-                currentInteraction.Priority < tempInter.Priority)
+            if (!participants.TryGetValue(p, out currentInteraction))
             {
-                if (!TryLeaveInteraction(p))
-                {
-                    continue;
-                }
+                availableParticipants.Add(p);
+                continue;
+            }
+            if (!tempInter.InterruptLowerPriorityInteractions ||
+                currentInteraction.Priority > tempInter.Priority) // allows same priority to be overridden
+            {
+                continue;
+            }
+            if (!TryLeaveInteraction(p))
+            {
+                continue;
             }
             availableParticipants.Add(p);
         }
@@ -185,11 +231,9 @@ public sealed class InteractionManager : MonoBehaviour
         var newInteraction = request.CreateInteraction(availableParticipants);
         if (newInteraction.ValidateInteraction())
         {
-            interactions.Add(newInteraction);
-            foreach (var p in availableParticipants)
-            {
-                participants[p] = newInteraction;
-            }
+            request.Promised = true;
+            request.PromisedParticipants.Clear();
+            request.PromisedParticipants.AddRange(availableParticipants);
             return true;
         }
         return false;
@@ -240,19 +284,6 @@ public sealed class InteractionManager : MonoBehaviour
         if (Instance.participants.TryGetValue(p, out var localInter) && localInter == i)
         {
             Instance.participants.Remove(p);
-        }
-    }
-
-    #endregion
-
-    #region Abort
-
-    public void AbortInteraction(ACreatureInteraction interaction)
-    {
-        for (int i = interaction.Participants.Count - 1; i >= 0; i--)
-        {
-            CreatureData p = interaction.Participants[i];
-            interaction.ForceLeave(p);
         }
     }
 

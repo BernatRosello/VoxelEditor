@@ -3,12 +3,12 @@ using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.AI;
 
-public delegate void DriverAction(ActionDriver driver, Action completionCallback);
+public delegate void DriverAction(ActionDriver driver);
 
 public sealed class DriverActionDefinition
 {
-    public DriverAction Action { get; init; }
-    public Func<ActionDriver, bool> CompletionCondition { get; init; }
+    public DriverAction Action { get; internal set; }
+    public Func<ActionDriver, bool> CompletionCondition { get; internal set; }
 }
 
 public static class DriverActions
@@ -17,7 +17,7 @@ public static class DriverActions
     {
         return new()
         {
-            Action = (driver, completed) => { driver.MoveTo(destination); },
+            Action = (driver) => { driver.MoveTo(destination); },
             CompletionCondition = driver => driver.HasReachedDestination()
         };
     }
@@ -26,7 +26,7 @@ public static class DriverActions
     {
         return new()
         {
-            Action = (driver, completed) => { driver.StopMoving(); completed(); }
+            Action = (driver) => { driver.StopMoving(); }
         };
     }
 
@@ -34,8 +34,24 @@ public static class DriverActions
     {
         return new()
         {
-            Action = (driver, completed) => { driver.FaceDirection(dir); },
-            CompletionCondition = driver => driver.HasReachedDestination()
+            Action = (driver) => { driver.FaceDirection(dir); },
+            CompletionCondition = driver => driver.IsFacingDirection(dir)
+        };
+    }
+    public static DriverActionDefinition FacePosition(Vector3 position)
+    {
+        return new()
+        {
+            Action = (driver) => { driver.FacePosition(position); },
+            CompletionCondition = driver => driver.IsFacingPosition(position)
+        };
+    }
+
+    public static DriverActionDefinition ResetAnimator()
+    {
+        return new()
+        {
+            Action = (driver) => { driver.ResetToIdle(); }
         };
     }
 
@@ -48,7 +64,7 @@ public static class DriverActions
     {
         return new()
         {
-            Action = (driver, completed) => { action(driver); completed(); }
+            Action = (driver) => { action(driver); }
         };
     }
 
@@ -56,7 +72,7 @@ public static class DriverActions
     {
         return new()
         {
-            Action = (driver, completed) => { driver.SetTrigger(trigger); completed(); }
+            Action = (driver) => { driver.SetTrigger(trigger); }
         };
     }
 
@@ -64,7 +80,7 @@ public static class DriverActions
     {
         return new()
         {
-            Action = (driver, completed) => { driver.SetBool(trigger, value); completed(); }
+            Action = (driver) => { driver.SetBool(trigger, value); }
         };
     }
 }
@@ -118,7 +134,15 @@ public class ActionDriver : MonoBehaviour
     }
 
     #region Internals
-    private bool actionFinished;
+    /// <summary>
+    /// If no completion condition is provided or can be resolved by the DriverActionDefinition:
+    /// the action is performed in Immediate mode and the completion callback is fired
+    /// synchronously after driverAction dispatch.
+    /// </summary>
+    /// <param name="driverAction"></param>
+    /// <param name="completionCallback"></param>
+    /// <param name="completionCondition"></param>
+    /// <exception cref="InvalidOperationException"></exception>
     internal void Execute(DriverAction driverAction, Action completionCallback, Func<bool> completionCondition = null)
     {
         if (IsBusy)
@@ -126,30 +150,17 @@ public class ActionDriver : MonoBehaviour
             throw new InvalidOperationException($"{name} is already executing an action.");
         }
 
-        actionFinished = false;
-
-        void Complete()
-        {
-            if (actionFinished)
-                return;
-            actionFinished = true;
-            this.completionCondition = null;
-            this.completionCallback = null;
-            completionCallback?.Invoke();
-        }
-
-        driverAction(this, Complete);
-
-        if (actionFinished)
-            return;
-        if (completionCondition == null)
-        {
-            Complete();
-            return;
-        }
+        driverAction(this);
 
         this.completionCondition = completionCondition;
         this.completionCallback = completionCallback;
+
+        // No condition => immediate action
+        if (completionCondition == null)
+        {
+            completionCallback?.Invoke();
+            return;
+        }
     }
     #endregion
 
@@ -161,7 +172,7 @@ public class ActionDriver : MonoBehaviour
     }
 
     internal bool HasReachedDestination(
-        float tolerance = 0.1f)
+        float tolerance = 0.15f)
     {
         if (!nav.HasDestination())
             return true;
@@ -177,7 +188,7 @@ public class ActionDriver : MonoBehaviour
 
     internal void StopMoving()
     {
-        nav.SetDestination(CachedTransform.position);
+        nav.SetDestination(nav.GetPosition());
     }
 
     #endregion
@@ -186,23 +197,23 @@ public class ActionDriver : MonoBehaviour
 
     public void FaceDirection(Vector3 dir)
     {
-        nav.MoveTo(GetPosition() + dir * 0.1f);
+        nav.SetDestination(GetPosition() + dir * 0.1f);
     }
 
     internal void FacePosition(Vector3 position)
     {
-        return FaceDirection(position - GetPosition());
+        FaceDirection(position - GetPosition());
     }
 
     public bool IsFacingDirection(Vector3 dir, float toleranceDegrees = 5f, bool verticalCheck = false)
     {
-        if (direction.sqrMagnitude < 0.0001f)
+        if (dir.sqrMagnitude < 0.0001f)
             return true;
 
         if (!verticalCheck)
             dir.y = 0;
 
-        float angle = Vector3.Angle(CachedTransform.forward, direction.normalized);
+        float angle = Vector3.Angle(CachedTransform.forward, dir.normalized);
 
         return angle <= toleranceDegrees;
     }
@@ -215,6 +226,11 @@ public class ActionDriver : MonoBehaviour
     #endregion
 
     #region Animation
+    internal void ResetToIdle()
+    {
+        animator.SetBool("IsDancing", false);
+        StopMoving();
+    }
 
     internal void SetBool(string parameter, bool value)
     {

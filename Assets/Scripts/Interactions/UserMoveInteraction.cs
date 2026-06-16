@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Numerics;
 using UnityEngine;
 
 public class UserMoveParams : AInteractionParams
@@ -9,12 +8,12 @@ public class UserMoveParams : AInteractionParams
     public Vector3 position;
 }
 
-public class ConversationRequest : AInteractionRequest<UserMoveInteraction, UserMoveParams>
+public class UserMoveRequest : AInteractionRequest<UserMoveInteraction, UserMoveParams>
 {
-    public ConversationRequest(UserMoveParams parameters, IEnumerable<CreatureIdentity> targets)
-        : base(parameters, targets,
+    public UserMoveRequest(UserMoveParams parameters, CreatureIdentity target)
+        : base(parameters, target,
             // Request Factory
-            (p, participants) => new ConversationInteraction(p, participants))
+            (p, participants) => new UserMoveInteraction(p, participants))
     { }
 }
 
@@ -23,7 +22,7 @@ public class UserMoveInteraction : ACreatureInteraction<UserMoveParams>
     public UserMoveInteraction(UserMoveParams parameters, List<CreatureData> participants) : base(parameters, participants)
     { }
 
-    public override string InteractionName => "UserMove";
+    public override string Name => "UserMove";
 
     public override string Description => "Initiator will move creature to target position";
 
@@ -35,7 +34,7 @@ public class UserMoveInteraction : ACreatureInteraction<UserMoveParams>
 
     public override bool AllowEarlyLeaving => true;
 
-    public override InteractionPriority Priority => 100;
+    public override InteractionPriority Priority => InteractionPriority.User;
 
     public override bool InterruptLowerPriorityInteractions => true;
 
@@ -56,7 +55,7 @@ public class UserMoveInteraction : ACreatureInteraction<UserMoveParams>
         switch (StateOf(p).ActionIndex)
         {
             case 0:
-                DispatchAction(p, DriverActions.MoveTo(parameters.position));
+                DispatchAction(p, DriverActions.MoveTo(Parameters.position));
                 break;
         }
     }

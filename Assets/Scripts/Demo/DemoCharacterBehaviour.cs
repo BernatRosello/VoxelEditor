@@ -3,24 +3,24 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using UnityEngine;
+using rnd = UnityEngine.Random;
 
 public class DemoCharacterBehaviour : MonoBehaviour
 {
+    [SerializeField] private float minReqTime;
+    [SerializeField] private float maxReqTime;
+
     private float timer;
-
     private float timeToRequest;
-
     private readonly List<Action> requestPool = new();
 
     private void Awake()
     {
-        identity = GetComponent<CreatureIdentity>();
-
         timer = 0;
 
-        timeToRequest = requestTime.Value;
+        timeToRequest = rnd.Range(minReqTime, maxReqTime);
 
-        requestPool.Add(CreateConversationRequest);
+        requestPool.Add(CreateCircleDanceRequest);
 
         // requestPool.Add(CreateDanceRequest);
         // requestPool.Add(CreateGroupDanceRequest);
@@ -37,7 +37,7 @@ public class DemoCharacterBehaviour : MonoBehaviour
 
         timer = 0;
 
-        timeToRequest = requestTime.Value;
+        timeToRequest = rnd.Range(minReqTime, maxReqTime);
 
         if (requestPool.Count == 0)
         {
@@ -45,28 +45,30 @@ public class DemoCharacterBehaviour : MonoBehaviour
         }
 
         requestPool[
-            Random.Range(0, requestPool.Count)
+            rnd.Range(0, requestPool.Count)
         ]();
     }
 
-    private void CreateConversationRequest()
+    private void CreateCircleDanceRequest()
     {
         if (InteractionManager.Creatures.Count == 0)
         {
             return;
         }
 
-        int count = Random.Range(ConversationInteraction.MinParticipants, ConversationInteraction.MaxParticipants + 1);
-        count = Math.Clamp(count, 1, InteractionManager.Creatures.Count);
-        List<CreatureIdentity> candidates = InteractionManager.Creatures.OrderBy(_ => Random.value).Take(count).ToList();
+        CircleDanceInteraction temp = new(null, null);
 
-        ConversationParams p = new()
+        int count = rnd.Range(temp.MinParticipants, temp.MaxParticipants + 1);
+        count = Math.Clamp(count, 1, InteractionManager.Creatures.Count);
+        List<CreatureIdentity> candidates = InteractionManager.Creatures.OrderBy(_ => rnd.value).Take(count).ToList();
+
+        CircleDanceParams p = new()
         {
-            initiator = identity,
-            duration = Random.Range(5f, 15f)
+            initiator = candidates.First(),
+            duration = rnd.Range(5f, 15f)
         };
 
-        InteractionManager.Instance.RequestInteraction(new ConversationRequest(p, new[] { identity, candidates }));
+        InteractionManager.CreateRequest(new CircleDanceRequest(p, candidates.AsEnumerable()));
     }
 
     /*

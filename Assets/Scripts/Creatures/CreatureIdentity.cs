@@ -47,7 +47,8 @@ public struct CreatureIdentity : IEquatable<CreatureIdentity>
     }
     public override string ToString()
     {
-        return guid;
+        // return guid;
+        return guid.Substring(0,5);
     }
 
     public static bool operator ==(CreatureIdentity a, CreatureIdentity b)
