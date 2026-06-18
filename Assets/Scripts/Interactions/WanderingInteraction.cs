@@ -1,11 +1,5 @@
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Numerics;
-using System.Reflection.Metadata.Ecma335;
-using System.Runtime.CompilerServices;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public class WanderingParams : AInteractionParams
 {
@@ -24,6 +18,11 @@ public class WanderingRequest : AInteractionRequest<WanderingInteraction, Wander
             // Request Factory
             (p, participants) => new WanderingInteraction(p, participants))
     { }
+    public WanderingRequest(WanderingParams parameters, CreatureIdentity target)
+        : base(parameters, target,
+            // Request Factory
+            (p, participants) => new WanderingInteraction(p, participants))
+    { }
 }
 
 public class WanderingInteraction : ACreatureInteraction<WanderingParams>
@@ -31,8 +30,8 @@ public class WanderingInteraction : ACreatureInteraction<WanderingParams>
     public WanderingInteraction(WanderingParams parameters, List<CreatureData> participants) : base(parameters, participants)
     { }
 
-    public override string Name => "UserMove";
-    public override string Description => "Initiator will move creature to target position";
+    public override string Name => "Wandering";
+    public override string Description => "random movement";
     public override int MinParticipants => 1;
     public override int MaxParticipants => 1;
     public override bool AllowLateJoining => false;
@@ -42,9 +41,9 @@ public class WanderingInteraction : ACreatureInteraction<WanderingParams>
 
     private float totalEllapsedTime;
 
-    protected override void PostTick()
+    protected override void PostTick(float deltaTime)
     {
-        totalEllapsedTime += Time.deltaTime;
+        totalEllapsedTime += deltaTime;
     }
 
     protected override bool CheckLeave(CreatureData participantData)
@@ -55,8 +54,8 @@ public class WanderingInteraction : ACreatureInteraction<WanderingParams>
     protected override void UpdateInteraction(CreatureData p)
     {
         float currentMoveDuration = Parameters.frequency + Random.Range(-1f, 1f) * Parameters.frequencyVariance;
-        var dir = Vector3(Random.Rnage(-1f, 1f), 0, Random.Range(-1f, 1f)).normalized;
-        if (Random.Range(0f, 1f) <= moveChance)
+        var dir = new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f)).normalized;
+        if (Random.Range(0f, 1f) <= Parameters.moveChance)
         {
             Vector3 nextPosition = p.Driver.GetPosition() + dir * Random.Range(Parameters.minDistance, Parameters.maxDistance);
             // Version A - Makes sure that the character takes AT LEAST as much 

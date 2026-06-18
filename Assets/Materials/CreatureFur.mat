@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Fur Shell Lit
+  m_Name: CreatureFur
   m_Shader: {fileID: 4800000, guid: 589ea0397284e0e42b1985a0455d66b2, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -24,46 +24,46 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: 72aad4c9b4e9891458dd1229d86583bb, type: 3}
-        m_Scale: {x: 0.02, y: 0.02}
-        m_Offset: {x: 0, y: 0}
+        m_Texture: {fileID: 2800000, guid: 8209f98ec477c524dbfbc46a484a832f, type: 3}
+        m_Scale: {x: 0.5, y: 0.5}
+        m_Offset: {x: 0.83, y: 0.18}
     - _FurMap:
         m_Texture: {fileID: 2800000, guid: 3eb5ef796a53ffd4a8a2c606ef6e6c16, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalMap:
         m_Texture: {fileID: 2800000, guid: 6b22d957f2ae51c41aeda896a97ec8c5, type: 3}
-        m_Scale: {x: 0.1, y: 0.1}
+        m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AlphaCutout: 0.096
-    - _FurScale: 85.7
+    - _AlphaCutout: 0.065
+    - _FurScale: 3.3
     - _Metallic: 0
-    - _NormalScale: 0.121
-    - _Occlusion: 0.045
+    - _NormalScale: 0.128
+    - _Occlusion: 0.215
     - _RimCutoffLayer: 0
-    - _RimLightIntensity: 0.088
-    - _RimLightPower: 3.49
-    - _ShadowExtraBias: -0.111
-    - _ShellAmount: 10
-    - _ShellStep: 0.025
-    - _Smoothness: 0.036
+    - _RimLightIntensity: 0.164
+    - _RimLightPower: 6.99
+    - _ShadowExtraBias: -0.253
+    - _ShellAmount: 4
+    - _ShellStep: 0.0081
+    - _Smoothness: 0.268
     - _TouchMult: 15
     - _TouchPow: 0
     - _TouchThreshold: 0
     - _TouchThreshold2: 1.1
-    - _TransCutoffLayer: 3
-    - _TranslucencyPower: 2.49
-    - _TranslucencyStrength: 1.8
+    - _TransCutoffLayer: 2
+    - _TranslucencyPower: 2.58
+    - _TranslucencyStrength: 0.59
     - _TuochMult: 0
     m_Colors:
-    - _AmbientColor: {r: 0.4811321, g: 0.44253182, b: 0.12482201, a: 1}
-    - _BaseColor: {r: 0.7092827, g: 0.9339623, b: 0.8453562, a: 1}
-    - _BaseMove: {r: 0.1, g: 0.1, b: 0, a: 0.5}
+    - _AmbientColor: {r: 1, g: 1, b: 1, a: 1}
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _BaseMove: {r: 0.19, g: 0.37, b: 0.03, a: 0.5}
     - _TouchMove: {r: 2, g: 2, b: 2, a: 1}
-    - _TranslucencyTint: {r: 0.15332927, g: 0.809, b: 0.13753001, a: 1}
-    - _WindFreq: {r: 0.31, g: 0.56, b: 0.44, a: -0.19}
-    - _WindMove: {r: 0.37, g: 0.31, b: 0.17, a: 0.5}
+    - _TranslucencyTint: {r: 0.8113208, g: 0.8113208, b: 0.8113208, a: 1}
+    - _WindFreq: {r: 0.535, g: 0.465, b: 0.43, a: 0.17}
+    - _WindMove: {r: 0.5, g: 0.31, b: 0.17, a: 0.5}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
