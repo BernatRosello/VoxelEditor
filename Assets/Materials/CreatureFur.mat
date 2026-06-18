@@ -41,7 +41,7 @@ Material:
     - _FurScale: 3.3
     - _Metallic: 0
     - _NormalScale: 0.128
-    - _Occlusion: 0.215
+    - _Occlusion: 0.052
     - _RimCutoffLayer: 0
     - _RimLightIntensity: 0.164
     - _RimLightPower: 6.99
