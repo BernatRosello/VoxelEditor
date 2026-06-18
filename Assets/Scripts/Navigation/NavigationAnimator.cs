@@ -33,7 +33,11 @@ public class NavigationAnimator : MonoBehaviour
     private Animator animator;
     private Transform animatedTransform;
     [SerializeField] private FloatThresholds movementThreshold = new(0.5f, 0.3f);
+    public float MoveStartThreshold => movementThreshold.Start;
+    public float MoveStopThreshold => movementThreshold.Stop;
     [SerializeField] private FloatThresholds turningThreshold = new(30f, 5f);
+    public float TurnStartThreshold => turningThreshold.Start;
+    public float TurnStopThreshold => turningThreshold.Stop;
     [Space(10)]
     [SerializeField] private float turnWhileMovingThreshold = 91f;
     [SerializeField] private float rotationSmoothDegrees = 90f;
