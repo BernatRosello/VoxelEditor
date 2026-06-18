@@ -125,7 +125,7 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
-    - _MaxTessDistance: 65.4
+    - _MaxTessDistance: 10
     - _Metallic: 0
     - _NoiseScale: 0.16
     - _NoiseWeight: 0.05
@@ -136,11 +136,11 @@ Material:
     - _RimPower: 14
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
-    - _SnowHeight: 0.08
+    - _SnowHeight: 0.102
     - _SnowTextureOpacity: 0.27
     - _SnowTextureScale: 0.47
-    - _SparkCutoff: 0.54
-    - _SparkleScale: 2.5
+    - _SparkCutoff: 0.51
+    - _SparkleScale: 0.19
     - _SparkleScrollScale: 0.165
     - _SparkleScrollSpeed: 0.97
     - _SpecularHighlights: 1
@@ -152,9 +152,10 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
-    - _Color: {r: 0.6653955, g: 0.67300004, b: 0.64258194, a: 1}
+    - _Color: {r: 0.8207547, g: 0.7162246, b: 0.7162246, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _RimColor: {r: 0.20278569, g: 0.24236721, b: 0.46226418, a: 1}
     - _ShadowColor: {r: 0.13862582, g: 0.19682962, b: 0.41509432, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1

@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using UnityEditor.ShaderKeywordFilter;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -89,6 +92,9 @@ public static class DriverActions
 [RequireComponent(typeof(Animator))]
 public class ActionDriver : MonoBehaviour
 {
+    private IReadOnlyList<GameObject> meshObjects;
+    private readonly Dictionary<GameObject, int> originalLayers = new();
+
     private Animator animator;
     private NavigationAnimator nav;
     public Animator Animator => animator;
@@ -111,12 +117,15 @@ public class ActionDriver : MonoBehaviour
         nav = GetComponent<NavigationAnimator>();
 
         animator = GetComponent<Animator>();
+
+        meshObjects = GetComponentsInChildren<SkinnedMeshRenderer>().Select(m => m.gameObject).ToList();
     }
 
     private void Update()
     {
         if (!IsBusy)
         {
+            IdleUpdate();
             return;
         }
 
@@ -131,6 +140,17 @@ public class ActionDriver : MonoBehaviour
         completionCallback = null;
 
         callback?.Invoke();
+    }
+
+    private float idleEmoteTimer;
+    private float idleTime;
+    private void IdleUpdate()
+    {
+        if (idleTime > idleEmoteTimer)
+        {
+            idleEmoteTimer = 10 + UnityEngine.Random.Range(-5,10);
+            animator.SetTrigger("IdleEmote");
+        }
     }
 
     #region Internals
@@ -270,5 +290,59 @@ public class ActionDriver : MonoBehaviour
         return false;
     }
 
+    #endregion
+
+    #region VFX
+    private void CacheMeshLayers()
+    {
+        if (originalLayers.ContainsKey(meshObjects[0]))
+            return;
+
+        foreach(var go in meshObjects)
+        {
+            originalLayers[go] = go.layer;
+        }
+    }
+    private void ClearMeshLayers()
+    {
+        originalLayers.Clear();
+    }
+
+    private void SetMeshLayers(string layerName)
+    {
+        int v = LayerMask.NameToLayer(layerName);
+        foreach(var go in meshObjects)
+        {
+            go.layer = v;
+        }
+    }
+
+    public void SetOutlineGreen()
+    {
+        CacheMeshLayers();
+        SetMeshLayers("OutlineGreen");
+    }
+
+
+    public void SetOutlineBlue()
+    {
+        CacheMeshLayers();
+        SetMeshLayers("OutlineBlue");
+    }
+
+    public void SetOutlineRed()
+    {
+        CacheMeshLayers();
+        SetMeshLayers("OutlineRed");
+    }
+
+    public void SetOutlineNONE()
+    {
+        foreach(var kvp in originalLayers)
+        {
+            kvp.Key.layer = kvp.Value;
+        }
+        ClearMeshLayers();
+    }
     #endregion
 }

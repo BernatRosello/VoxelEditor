@@ -40,7 +40,7 @@ public class UserMoveInteraction : ACreatureInteraction<UserMoveParams>
 
     protected override bool CheckLeave(CreatureData participantData)
     {
-        bool result = AllParticipantsPastAction(0);
+        bool result = StateOf(participantData).ActionIndex > 0;
 
         // Debug.Log(
         //     $"{participantData.Identity} leave check = {result} " +

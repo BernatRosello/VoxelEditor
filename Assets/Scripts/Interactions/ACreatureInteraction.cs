@@ -152,7 +152,7 @@ public abstract class ACreatureInteraction
         InteractionManager.NotifyParticipantLeft(this, left);
     }
 
-    protected virtual void PostTick() {}
+    protected virtual void PostTick(float deltaTime) {}
 
     #endregion
 
@@ -163,6 +163,12 @@ public abstract class ACreatureInteraction
     /// Includes participants that are still pending to join
     /// </summary>
     public IReadOnlyList<CreatureData> AllParticipants => participants.Union(pendingJoin).ToList();
+
+    public CreatureInteractionState TryReadState(CreatureData creature)
+    {
+        participantStates.TryGetValue(creature, out var state);
+        return state;
+    }
 
     /// <summary>
     /// Condition for determining if an interaction meets the minimum requirements 
@@ -235,7 +241,7 @@ public abstract class ACreatureInteraction
     /// <see cref="CreatureInteractionState.ActionComplete"/>
     /// is <see langword="true"/>.
     /// </summary>
-    public void Tick()
+    public void Tick(float deltaTime)
     {
         while (pendingJoin.Count > 0)
         {
@@ -244,12 +250,12 @@ public abstract class ACreatureInteraction
 
         foreach (var p in participants)
         {
-            Debug.Log(
-                $"[{p.Identity}] " +
-                $"Phase={participantStates[p].Phase} " +
-                $"Action={participantStates[p].ActionIndex} " +
-                $"Complete={participantStates[p].ActionComplete}"
-            );
+            // Debug.Log(
+            //     $"[{p.Identity}] " +
+            //     $"Phase={participantStates[p].Phase} " +
+            //     $"Action={participantStates[p].ActionIndex} " +
+            //     $"Complete={participantStates[p].ActionComplete}"
+            // );
             switch (participantStates[p].Phase)
             {
                 case InteractionPhase.Join:
@@ -321,7 +327,7 @@ public abstract class ACreatureInteraction
             BaseRemoveParticipant(pendingLeave.Dequeue());
         }
 
-        PostTick();
+        PostTick(deltaTime);
     }
 
     #endregion

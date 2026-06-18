@@ -193,9 +193,9 @@ AnimatorStateTransition:
   m_TransitionDuration: 0.25
   m_TransitionOffset: 0
   m_ExitTime: 0.9582754
-  m_HasExitTime: 1
+  m_HasExitTime: 0
   m_HasFixedDuration: 1
-  m_InterruptionSource: 0
+  m_InterruptionSource: 1
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
 --- !u!1101 &-6087756297039238553
@@ -208,7 +208,7 @@ AnimatorStateTransition:
   m_Conditions:
   - m_ConditionMode: 4
     m_ConditionEvent: vel_ang
-    m_EventTreshold: 0.1
+    m_EventTreshold: 0.05
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 0}
   m_Solo: 0
@@ -234,16 +234,24 @@ BlendTree:
   - serializedVersion: 2
     m_Motion: {fileID: 273360651693137160, guid: 18c3608fdb9ea8542975376858905d46, type: 3}
     m_Threshold: 0
-    m_Position: {x: -1, y: -1}
+    m_Position: {x: 0.38, y: -0.36}
     m_TimeScale: 1
     m_CycleOffset: 0
     m_DirectBlendParameter: AngryHappy
     m_Mirror: 0
   - serializedVersion: 2
     m_Motion: {fileID: 7400000, guid: 581571a4f5d6ec442a3c7dd75571aad9, type: 2}
-    m_Threshold: 1
+    m_Threshold: 0.5
     m_Position: {x: 1, y: 1}
     m_TimeScale: 15
+    m_CycleOffset: 0
+    m_DirectBlendParameter: AngryHappy
+    m_Mirror: 0
+  - serializedVersion: 2
+    m_Motion: {fileID: -3244631949645142506, guid: 18c3608fdb9ea8542975376858905d46, type: 3}
+    m_Threshold: 1
+    m_Position: {x: -1.07, y: -1.06}
+    m_TimeScale: 1
     m_CycleOffset: 0
     m_DirectBlendParameter: AngryHappy
     m_Mirror: 0
@@ -314,7 +322,7 @@ AnimatorStateTransition:
   m_Conditions:
   - m_ConditionMode: 3
     m_ConditionEvent: vel_ang
-    m_EventTreshold: -0.1
+    m_EventTreshold: -0.05
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 0}
   m_Solo: 0
@@ -611,9 +619,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.25
+  m_TransitionDuration: 0.19
   m_TransitionOffset: 0
-  m_ExitTime: 0.75
+  m_ExitTime: 0.89
   m_HasExitTime: 1
   m_HasFixedDuration: 0
   m_InterruptionSource: 0
@@ -957,7 +965,7 @@ AnimatorController:
     m_Controller: {fileID: 9100000}
   - m_Name: AngryHappy
     m_Type: 1
-    m_DefaultFloat: 0.5
+    m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
     m_Controller: {fileID: 9100000}
@@ -1170,7 +1178,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Turn Left
-  m_Speed: 1.9
+  m_Speed: 1.1
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: -2622863808025592142}
@@ -1325,7 +1333,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Turn Right
-  m_Speed: 1.8
+  m_Speed: 1.1
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: 3444565518168324666}
@@ -1626,8 +1634,8 @@ AnimatorStateTransition:
   m_ExitTime: 0.38238317
   m_HasExitTime: 0
   m_HasFixedDuration: 0
-  m_InterruptionSource: 1
-  m_OrderedInterruption: 1
+  m_InterruptionSource: 0
+  m_OrderedInterruption: 0
   m_CanTransitionToSelf: 1
 --- !u!206 &8045861735081092780
 BlendTree:

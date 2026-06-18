@@ -80,7 +80,7 @@ public sealed class InteractionManager : MonoBehaviour
         {
             ACreatureInteraction interaction = interactions[i];
 
-            interaction.Tick();
+            interaction.Tick(TickTime);
 
             if (interaction.IsInteractionEmpty())
             {
@@ -91,6 +91,18 @@ public sealed class InteractionManager : MonoBehaviour
     }
 
     #region Participants
+    public static CreatureData TryGetCreatureData(CreatureIdentity creature)
+    {
+        if (!Instance) return null;
+        Instance.creatureData.TryGetValue(creature, out var data);
+        return data;
+    }
+    public static ACreatureInteraction TryGetInteraction(CreatureData creature)
+    {
+        if (!Instance)  return null;
+        Instance.participants.TryGetValue(creature, out var interaction);
+        return interaction;
+    }
 
     public CreatureData RegisterParticipant(CreatureIdentity identity, ActionDriver driver)
     {

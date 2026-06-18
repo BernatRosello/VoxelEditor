@@ -56,6 +56,8 @@ public class NavigationAnimator : MonoBehaviour
     private float cachedPathLength;
     private bool pathCachedFlag = true;
     private Vector3 smoothedSteeringTarget;
+    private Vector3 previousPosition;
+    private Vector3 actualVelocity;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
@@ -86,6 +88,12 @@ public class NavigationAnimator : MonoBehaviour
             return;
 
         ProcessMovement();
+    }
+
+    void LateUpdate()
+    {
+        actualVelocity = (animatedTransform.position - previousPosition) / Mathf.Max(Time.deltaTime, 0.0001f);
+        previousPosition = animatedTransform.position;
     }
 
     public void SetCurrentUp()
@@ -233,7 +241,7 @@ public class NavigationAnimator : MonoBehaviour
 
         float remainingDistance = GetRemainingDistance(agent);
         smoothedSteeringTarget = agent.steeringTarget;
-        Vector3 toTarget = Vector3.ProjectOnPlane(smoothedSteeringTarget - transform.position, surfaceUp);
+        Vector3 toTarget = Vector3.ProjectOnPlane(smoothedSteeringTarget - animatedTransform.position, surfaceUp);
 
         if (toTarget.sqrMagnitude < 0.001f)
             return;
@@ -252,6 +260,7 @@ public class NavigationAnimator : MonoBehaviour
         //
         if (!isMoving && !isTurning)
         {
+            Debug.Log($"Remaining Distance: {remainingDistance}/{movementThreshold.Start}");
             if (absAngle > turningThreshold.Start)
             {
                 animator.SetBool("IsTurning", true);
@@ -415,6 +424,7 @@ public class NavigationAnimator : MonoBehaviour
     {
         animatedTransform.position = animator.rootPosition;
         agent.nextPosition = animator.rootPosition;
+        agent.velocity = actualVelocity;
 
         if (animator.GetBool("IsTurning"))
         {   // Root Motion Rotation
