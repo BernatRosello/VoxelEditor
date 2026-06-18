@@ -74,23 +74,33 @@ public abstract class ACreatureInteraction
 
     /// <summary>
     /// Determines conditions for when a creature is allowed to join (be it during initialization or late join)
-    ///  <br/>
-    /// Base implementation: <br/>
-    ///     participants.Count < MaxParticipants
+    /// 
+    /// <para> Base implementation: </para>
+    ///     participants.Count &lt; MaxParticipants
     /// </summary>
     /// <param name="participant"></param>
     /// <returns></returns>
     protected virtual bool CheckJoin(CreatureData participant) { return participants.Count < MaxParticipants; }
     protected virtual bool JoinFinished(CreatureData participant) { return true; }
+
     /// <summary>
-    /// Determines conditions for when a creature is allowed to join (be it during initialization or late join)
+    /// Determines conditions for when a creature is allowed to join (be it during initialization or late join;)
     /// 
-    /// Base implementation:
-    ///     participants.Count < MinParticipants
+    /// <para> Base implementation: </para>
+    ///     participants.Count &gt; MinParticipants
     /// </summary>
     /// <param name="participantData"></param>
     /// <returns></returns>
     protected virtual bool CheckLeave(CreatureData participantData) { return participants.Count < MinParticipants; }
+
+    /// <summary>
+    /// Determines the completion condition used when calling Tick on the Leave Phase.
+    /// 
+    /// <para>Whenever it's true for a given participant it will finalize it's leaving 
+    /// and remove it from the interaction (after all participants have processed that tick).</para>
+    /// </summary>
+    /// <param name="participant"></param>
+    /// <returns></returns>
     protected virtual bool LeaveFinished(CreatureData participant) { return true; }
 
     /// <summary>
@@ -124,9 +134,12 @@ public abstract class ACreatureInteraction
 
     /// <summary>
     /// <para> UpdateInteraction() must guarantee one of these outcomes: </para>
-    /// <para> Dispatch an asynchronous action → participant.ActionComplete = false *This is applied automatically when dispatching actions (as long as completionCondition is evaluating to false)</para>
-    /// <para> Advance synchronously → continueUpdateTick = true *This is applied automatically when dispatching immediate actions (completionCondition == null)</para>
-    /// <para> Transition phase/end interaction → continueUpdateTick = false *This is applied automatically at the start of every updateTick</para>
+    /// <para> Dispatch an asynchronous action → participant.ActionComplete = false
+    ///     *This is applied automatically when dispatching actions (as long as completionCondition is evaluating to false)</para>
+    /// <para> Advance synchronously → continueUpdateTick = true
+    ///     *This is applied automatically when dispatching immediate actions (completionCondition == null)</para>
+    /// <para> Transition phase/end interaction → continueUpdateTick = false
+    ///     *This is applied automatically at the start of every updateTick</para>
     /// </summary>
     /// <param name="participant"></param>
     protected abstract void UpdateInteraction(CreatureData participant);
@@ -139,6 +152,8 @@ public abstract class ACreatureInteraction
         InteractionManager.NotifyParticipantLeft(this, left);
     }
 
+    protected virtual void PostTick() {}
+
     #endregion
 
     #region PUBLIC METHOD INTERFACE
@@ -148,6 +163,12 @@ public abstract class ACreatureInteraction
     /// Includes participants that are still pending to join
     /// </summary>
     public IReadOnlyList<CreatureData> AllParticipants => participants.Union(pendingJoin).ToList();
+
+    /// <summary>
+    /// Condition for determining if an interaction meets the minimum requirements 
+    /// to be created and Ticked or not.
+    /// </summary>
+    /// <returns></returns>
     public virtual bool ValidateInteraction()
     {
         return (participants.Count + pendingJoin.Count - pendingLeave.Count) >= MinParticipants;
@@ -300,6 +321,7 @@ public abstract class ACreatureInteraction
             BaseRemoveParticipant(pendingLeave.Dequeue());
         }
 
+        PostTick();
     }
 
     #endregion
@@ -405,11 +427,11 @@ public abstract class ACreatureInteraction
 
     /// <summary>
     /// Creates a completion condition that succeeds after
-    /// <paramref name="seconds"/> seconds have elapsed. </br>
-    /// </br>
-    /// Useful for adding durations to actions. </br>
-    /// </br>
-    /// Example: </br>
+    /// <paramref name="seconds"/> seconds have elapsed.
+    /// <para> Useful for adding durations to actions.
+    /// Can be used to make immedate actions asnychronous
+    /// by deferring their completion. </para>
+    /// <para> Example: </para>
     ///     DispatchAction(participant, DriverActions.SetBool("IsDancing", true), After(5f));
     /// </summary>
     protected Func<bool> After(float seconds)
@@ -421,9 +443,8 @@ public abstract class ACreatureInteraction
 
     /// <summary>
     /// Creates a completion condition that succeeds when
-    /// any supplied condition succeeds. </br>
-    /// </br>
-    /// i.e logical OR combination of all conditions
+    /// any supplied condition succeeds.
+    /// <para> i.e logical OR combination of all conditions </para>
     /// </summary>
     protected Func<bool> AnyOf(params Func<bool>[] conditions)
     {
@@ -432,9 +453,8 @@ public abstract class ACreatureInteraction
 
     /// <summary>
     /// Creates a completion condition that succeeds when
-    /// any supplied condition succeeds. </br>
-    /// </br>
-    /// i.e logical AND combination of all conditions
+    /// any supplied condition succeeds.
+    /// <para> i.e logical AND combination of all conditions </para>
     /// </summary>
     protected Func<bool> AllOf(params Func<bool>[] conditions)
     {
@@ -449,8 +469,6 @@ public abstract class ACreatureInteraction
     /// </para>
     /// <para>
     /// Once completed:
-    /// </para>
-    /// <para>
     /// - <see cref="CreatureInteractionState.ActionComplete"/> is set.
     /// - <see cref="CreatureInteractionState.ActionIndex"/> is incremented.
     /// </para>

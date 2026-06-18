@@ -59,4 +59,9 @@ public class UserMoveInteraction : ACreatureInteraction<UserMoveParams>
                 break;
         }
     }
+    
+    protected override void LeaveInteraction(CreatureData p)
+    {
+        DispatchAction(p, DriverActions.StopMoving());
+    }
 }

@@ -1,74 +1,146 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class MoveToClickPoint : MonoBehaviour
 {
-    private ActionDriver selectedDriver;
-    private PlayerControls playerControls;
-    [SerializeField] private bool moveSingleMode = true;
-
-    void Awake()
+    public enum RequestMode
     {
-        selectedDriver = null;//GetComponent<UnityEngine.AI.NavMeshAgent>();
-
-        playerControls = new PlayerControls();
-
-        playerControls.Player.Clicked.performed += OnClick;
+        None,
+        UserMove,
+        Dance,
+        Wander
     }
 
-    void OnEnable()
+    [Header("Settings")]
+    [SerializeField] private RequestMode activeRequest;
+
+    private readonly HashSet<Creature> selectedCreatures = new();
+
+    private PlayerControls controls;
+
+    private void Awake()
     {
-        playerControls.Player.Enable();
+        controls = new PlayerControls();
+
+        controls.Player.Click.performed += OnClick;
     }
 
-    void OnDisable()
+    private void OnEnable()
     {
-        playerControls.Player.Disable();
+        controls.Player.Enable();
+    }
+
+    private void OnDisable()
+    {
+        controls.Player.Click.performed -= OnClick;
+
+        controls.Player.Disable();
     }
 
     private void OnClick(InputAction.CallbackContext context)
     {
-        Vector2 mousePosition = context.ReadValue<Vector2>();
+        if (!TryRaycast(out RaycastHit hit))
+            return;
+
+        // Modifier actions defined in Input System
+        bool addMode = controls.Player.Select.IsPressed();
+        bool removeMode = controls.Player.Remove.IsPressed();
+
+        // Shift + Click
+        if (addMode)
+        {
+            Select(hit);
+            return;
+        }
+
+        // Ctrl + Click
+        if (removeMode)
+        {
+            Deselect(hit);
+            return;
+        }
+
+        // Normal click
+        CreateRequest(hit);
+    }
+
+    private bool TryRaycast(out RaycastHit hit)
+    {
+        hit = default;
+
+        Vector2 mousePosition = controls.Player.Point.ReadValue<Vector2>();
 
         Ray ray = Camera.main.ScreenPointToRay(mousePosition);
 
-        if (!moveSingleMode)
+        return Physics.Raycast(ray, out hit, 100f);
+    }
+
+    private void Select(RaycastHit hit)
+    {
+        if (!hit.transform.TryGetComponent(out Creature creature))
+            return;
+
+        selectedCreatures.Add(creature);
+
+        Debug.Log($"Selected {creature.name}");
+    }
+
+    private void Deselect(RaycastHit hit)
+    {
+        if (!hit.transform.TryGetComponent(out Creature creature))
+            return;
+
+        selectedCreatures.Remove(creature);
+
+        Debug.Log($"Deselected {creature.name}");
+    }
+
+    private void CreateRequest(RaycastHit hit)
+    {
+        if (activeRequest == RequestMode.None)
+            return;
+
+        int minimumSelectionCount;
+        switch(activeRequest)
         {
-            if (Physics.Raycast(ray, out RaycastHit hit, 100f))
-            {
-                var parameters = new CircleDanceParams { position = hit.point };
-                var req = new CircleDanceRequest(parameters, InteractionManager.Creatures);
-                InteractionManager.CreateRequest(req);
-            }
-        }
-        else if (selectedDriver == null)
-        {
-            // Select selectedDriver with raycast (if clicked it is set as selectedDriver)
-            if (Physics.Raycast(ray, out RaycastHit hit, 100f))
-            {
-                selectedDriver = hit.transform.GetComponent<ActionDriver>();
-            }
-        }
-        else
-        {
-            if (Physics.Raycast(ray, out RaycastHit hit, 100f))
-            {
-                // WARNING this will probably crop up weird BUGS because of Undefined Behavior
-                // if the selectedDriver was already busy with and action.
-                // To achieve this appropriately it should be implemented with an interaction.
-                // Something like: UserMove that allows selecting a series (or one, in this case)
-                // of creatures to move to a given location with a very high priority, in a way that shows-off
-                // the functioning of the interaction manager scheduling
-                // selectedDriver.SetDestination(hit.point);
-                // selectedDriver = null;
-                var parameters = new UserMoveParams { position = hit.point };
-                var req = new UserMoveRequest(parameters, selectedDriver.GetComponent<Creature>().Identity);
-                InteractionManager.CreateRequest(req);
-                selectedDriver = null;
-            }
+            case RequestMode.UserMove:
+                break;
+
+            case RequestMode.Dance:
+                break;
+
+            case RequestMode.Wander:
+                break;
         }
 
+        if (selectedCreatures.Count < minimumSelectionCount)
+        {
+            Debug.Log($"Cannot create {activeRequest} request. Need at least {minimumSelectionCount} selected creatures.");
+            return;
+        }
+
+        switch (activeRequest)
+        {
+            case RequestMode.UserMove:
+                var moveParams = new UserMoveParams { position = hit.point };
+                var moveRequest = new UserMoveRequest(moveParams, selectedCreatures);
+                InteractionManager.CreateRequest(moveRequest);
+                break;
+
+            case RequestMode.Dance:
+                var danceParams = new CircleDanceParams { position = hit.point };
+                var danceRequest = new CircleDanceRequest(danceParams, selectedCreatures);
+                InteractionManager.CreateRequest(danceRequest);
+                break;
+
+            case RequestMode.Wander:
+                var wanderRequest = new WanderRequest(selectedCreatures);
+                InteractionManager.CreateRequest(wanderRequest);
+                break;
+        }
+
+        // Request successfully created -> clear selection
+        selectedCreatures.Clear();
     }
 }

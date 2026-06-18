@@ -2,16 +2,19 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
+using System.Reflection.Metadata.Ecma335;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Rendering;
 
 public class WanderingParams : AInteractionParams
 {
+    public float duration;
     public float minDistance;
     public float maxDistance;
     public float frequency;
     public float frequencyVariance;
-    public float turnChance;
+    public float moveChance;
 }
 
 public class WanderingRequest : AInteractionRequest<WanderingInteraction, WanderingParams>
@@ -37,23 +40,45 @@ public class WanderingInteraction : ACreatureInteraction<WanderingParams>
     public override InteractionPriority Priority => 0;
     public override bool InterruptLowerPriorityInteractions => false;
 
+    private float totalEllapsedTime;
+
+    protected override void PostTick()
+    {
+        totalEllapsedTime += Time.deltaTime;
+    }
+
     protected override bool CheckLeave(CreatureData participantData)
     {
-        bool result = Random.Range(0, 100) == 0;
-
-        // Debug.Log(
-        //     $"{participantData.Identity} leave check = {result} " +
-        //     $"index={StateOf(participantData).ActionIndex} " +
-        //     $"complete={StateOf(participantData).ActionComplete}");
-
-        return result;
+        return totalEllapsedTime >= Parameters.duration;
     }
 
     protected override void UpdateInteraction(CreatureData p)
     {
-        switch (StateOf(p).ActionIndex)
+        float currentMoveDuration = Parameters.frequency + Random.Range(-1f, 1f) * Parameters.frequencyVariance;
+        var dir = Vector3(Random.Rnage(-1f, 1f), 0, Random.Range(-1f, 1f)).normalized;
+        if (Random.Range(0f, 1f) <= moveChance)
         {
-            // TODO
+            Vector3 nextPosition = p.Driver.GetPosition() + dir * Random.Range(Parameters.minDistance, Parameters.maxDistance);
+            // Version A - Makes sure that the character takes AT LEAST as much 
+            //          currentMoveDuration time before moving again.
+            // DispatchAction(p, DriverActions.MoveTo(nextPosition),
+            //     AllOf(
+            //         () => (lastMoveTime - totalEllapsedTime) >= currentMoveDuration,
+            //         () => p.Driver.HasReachedDestination()
+            //     ));]
+
+            // Version B - Changes target position as soon as the target either 
+            // reaches the target position, OR the currentMoveDuration runs out.
+            DispatchAction(p, DriverActions.MoveTo(nextPosition), currentMoveDuration);
         }
+        else
+        {
+            DispatchAction(p, DriverActions.FaceDirection(dir));
+        }
+    }
+
+    protected override void LeaveInteraction(CreatureData p)
+    {
+        DispatchAction(p, DriverActions.StopMoving());
     }
 }
