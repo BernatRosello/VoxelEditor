@@ -4,6 +4,7 @@ public class Creature : MonoBehaviour
 {
     [SerializeField]
     private CreatureIdentity identity;
+    private CreatureVisuals visuals;
 
     public CreatureIdentity Identity =>
         identity;
