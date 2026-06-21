@@ -10,13 +10,42 @@ public class NavigationAnimatorEditor : Editor
     {
         serializedObject.Update();
 
-        DrawPropertiesExcluding(serializedObject, "m_Script", "navSettings");
+        var iterator = serializedObject.GetIterator();
+
+        bool enterChildren = true;
 
         NavigationAnimator animator =
             (NavigationAnimator)target;
 
         NavigationAnimatorSettings settings =
             animator.navSettings;
+
+        while (iterator.NextVisible(enterChildren))
+        {
+            enterChildren = false;
+
+            if (iterator.name == "m_Script")
+                continue;
+
+            if (iterator.name == "navSurfaceTransform")
+            {
+                bool show = true;
+
+                if (settings != null)
+                {
+                    show =
+                        settings.NavSurfMode
+                        != NavSurfaceMode.WorldUp;
+                }
+
+                if (!show)
+                    continue;
+            }
+
+            EditorGUILayout.PropertyField(
+                iterator,
+                true);
+        }
 
         EditorGUILayout.Space();
 
@@ -29,12 +58,6 @@ public class NavigationAnimatorEditor : Editor
             serializedObject.ApplyModifiedProperties();
             return;
         }
-
-        EditorGUILayout.ObjectField(
-            "Settings Asset",
-            settings,
-            typeof(NavigationAnimatorSettings),
-            false);
 
         if (GUILayout.Button("Open Settings"))
         {

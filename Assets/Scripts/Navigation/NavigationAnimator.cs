@@ -8,7 +8,8 @@ public enum NavSurfaceMode
 {
     FlatTransform,      // Uses a transform's up vector
     SphereTransform,    // Uses a transform as the sphere center
-    RaycastSurface      // Uses physics geometry
+    RaycastSurface,      // Uses physics geometry
+    WorldUp
 }
 
 public class NavigationAnimator : MonoBehaviour
@@ -117,6 +118,9 @@ public class NavigationAnimator : MonoBehaviour
                 break;
             case NavSurfaceMode.FlatTransform:
                 surfaceUp = navSurfaceTransform.up;
+                break;
+            case NavSurfaceMode.WorldUp:
+                surfaceUp = Vector3.up;
                 break;
         }
     }

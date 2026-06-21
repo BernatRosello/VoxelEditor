@@ -9,11 +9,11 @@
 struct Attributes
 {
     float4 positionOS : POSITION;
-    float3 normalOS : NORMAL;
-    float4 tangentOS : TANGENT;
+    half3 normalOS : NORMAL;
+    half4 tangentOS : TANGENT;
     float2 texcoord : TEXCOORD0;
     float2 lightmapUV : TEXCOORD1;
-    // float4 color : COLOR;
+    half4 color : COLOR; // Alpha value will be discarded
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
@@ -21,13 +21,12 @@ struct Varyings
 {
     float4 positionCS : SV_POSITION;
     float3 positionWS : TEXCOORD0;
-    float3 normalWS : TEXCOORD1;
-    float3 tangentWS : TEXCOORD2;
+    half3 normalWS : TEXCOORD1;
+    half4 tangentWS : TEXCOORD2;
     float2 uv : TEXCOORD4;
     DECLARE_LIGHTMAP_OR_SH(lightmapUV, vertexSH, 5);
-    float4 fogFactorAndVertexLight : TEXCOORD6; // x: fogFactor, yzw: vertex light
-    half  layer : TEXCOORD7;
-    // float4 color : COLOR;
+    half4 fogFactorAndVertexLight : TEXCOORD6; // x: fogFactor, yzw: vertex light
+    half4 colorAndLayer : COLOR; // Layer is packed into the alpha channel
 };
 
 Attributes vert(Attributes input)
@@ -66,10 +65,10 @@ void AppendShellVertex(inout TriangleStream<Varyings> stream, Attributes input, 
     output.uv = TRANSFORM_TEX(input.texcoord * scale.xx, _BaseMap);
     output.normalWS = normalize(shellDir);
 
-    output.tangentWS = normalInput.tangentWS;
-    output.layer = (float)index / (_ShellAmount);
-    // output.color *= 1/(_ShellAmount - index);
-    // output.color = input.color;
+    output.tangentWS.xyz = normalInput.tangentWS;
+    output.tangentWS.w = input.tangentOS.w;
+    output.colorAndLayer = input.color; //Color
+    output.colorAndLayer.a = (float)index / (_ShellAmount); //Layer
 
     half3 vertexLight = VertexLighting(vertexInput.positionWS, normalInput.normalWS);
     half fogFactor = ComputeFogFactor(vertexInput.positionCS.z);
@@ -81,7 +80,7 @@ void AppendShellVertex(inout TriangleStream<Varyings> stream, Attributes input, 
     stream.Append(output);
 }
 
-[maxvertexcount(42)]
+[maxvertexcount(37)]
 void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
 {
     [loop] for (float i = 0; i < _ShellAmount; ++i)
@@ -105,21 +104,18 @@ float4 frag(Varyings input) : SV_Target
     float4 furColor = SAMPLE_TEXTURE2D(_FurMap, sampler_FurMap, furUv);
 
     // return furColor;
-    float alpha = furColor.r * (1.0 - input.layer);
-    if (input.layer > 0.0 && alpha < _AlphaCutout) discard;
+    float alpha = furColor.r * (1.0 - input.colorAndLayer.a);
+    if (input.colorAndLayer.a > 0.0 && alpha < _AlphaCutout) discard;
 
     float3 viewDirWS = SafeNormalize(GetCameraPositionWS() - input.positionWS);
-    float3 normalTS = UnpackNormalScale(
-        SAMPLE_TEXTURE2D(_NormalMap, sampler_FurMap, furUv), 
-        _NormalScale);
-    float3 bitangent = SafeNormalize(viewDirWS.y * cross(input.normalWS, input.tangentWS));
-    float3 normalWS = SafeNormalize(TransformTangentToWorld(
-        normalTS, 
-        float3x3(input.tangentWS, bitangent, input.normalWS)));
-
+    half normScale = input.colorAndLayer.a == 0 ? 0 : _NormalScale;
+    float3 normalTS = UnpackNormalScale(SAMPLE_TEXTURE2D(_NormalMap, sampler_FurMap, furUv), normScale);
+    float3 bitangent = cross(input.normalWS, input.tangentWS.xyz) * input.tangentWS.w;   
+    float3 normalWS = SafeNormalize(TransformTangentToWorld(normalTS, float3x3(input.tangentWS.xyz, bitangent, input.normalWS)));
     SurfaceData surfaceData = (SurfaceData)0;
     InitializeStandardLitSurfaceData(input.uv, surfaceData);
-    surfaceData.occlusion = lerp(1.0 - _Occlusion, 1.0, input.layer);
+    surfaceData.albedo *= input.colorAndLayer.rgb; // Vertex Color tint
+    surfaceData.occlusion = lerp(1.0 - _Occlusion, 1.0, input.colorAndLayer.a);
     surfaceData.albedo *= surfaceData.occlusion;
     surfaceData.alpha = 0.1;
 
@@ -137,6 +133,13 @@ float4 frag(Varyings input) : SV_Target
     inputData.bakedGI = SAMPLE_GI(input.lightmapUV, input.vertexSH, normalWS);
     inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(input.positionCS);
     
+
+    if (input.colorAndLayer.a == 0)
+    {
+        surfaceData.metallic = 0;
+        surfaceData.smoothness = 0;
+        surfaceData.alpha = 1;
+    }
     // To avoid the underlying shells to sheen through which looks wierd and "plasticky"
     float maxLayer = (_ShellAmount - 1.0) / _ShellAmount;
     float rimCutoffLayer = _RimCutoffLayer / (float)_ShellAmount;
@@ -145,7 +148,7 @@ float4 frag(Varyings input) : SV_Target
         rimFac = 0;
     else
         rimFac = saturate(
-            (input.layer - rimCutoffLayer) /
+            (input.colorAndLayer.a - rimCutoffLayer) /
             (maxLayer - rimCutoffLayer)
         );
 
@@ -155,7 +158,7 @@ float4 frag(Varyings input) : SV_Target
         transFac = 0;
     else
         transFac = saturate(
-            (input.layer - transCutoffLayer) /
+            (input.colorAndLayer.a - transCutoffLayer) /
             (maxLayer - transCutoffLayer)
         );
 
@@ -167,7 +170,7 @@ float4 frag(Varyings input) : SV_Target
         normalWS,
         viewDirWS,
         surfaceData.albedo,
-        input.layer,
+        input.colorAndLayer.a,
         transFac);
 
 #ifdef _ADDITIONAL_LIGHTS
@@ -184,14 +187,14 @@ float4 frag(Varyings input) : SV_Target
             normalWS,
             viewDirWS,
             surfaceData.albedo,
-            input.layer,
-            transFac * 0.5);
+            input.colorAndLayer.a,
+            transFac * 0.75);
 
     LIGHT_LOOP_END
 #endif
     // half4 test = half4(0,0,0,1);
     // return test + translucency.xyzx;
-    
+    return UniversalFragmentPBR(inputData, surfaceData);
     half4 color = UniversalFragmentPBR(inputData, surfaceData);
     ApplyRimLight(color.rgb, input.positionWS, viewDirWS, normalWS, rimFac);
     color.rgb += _AmbientColor * color.rgb;

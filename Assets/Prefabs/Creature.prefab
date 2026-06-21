@@ -130,7 +130,7 @@ GameObject:
   - component: {fileID: 4465469048388667007}
   - component: {fileID: 3605320444040179576}
   m_Layer: 0
-  m_Name: Arms.002
+  m_Name: Arms
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -371,7 +371,7 @@ GameObject:
   - component: {fileID: 8162910040321790808}
   - component: {fileID: 1889674800670866692}
   m_Layer: 0
-  m_Name: Head.002
+  m_Name: Head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -653,7 +653,7 @@ GameObject:
   - component: {fileID: 6037090908368590508}
   - component: {fileID: 7893003630377070218}
   m_Layer: 0
-  m_Name: Legs.002
+  m_Name: Legs
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -770,7 +770,7 @@ GameObject:
   - component: {fileID: 2292541165732457223}
   - component: {fileID: 41785700662641184}
   m_Layer: 0
-  m_Name: Torso.002
+  m_Name: Torso
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1057,7 +1057,7 @@ Animator:
   m_GameObject: {fileID: 7208582310752409297}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 1d20048445c8b2b4b92ce18a5460e3ad, type: 3}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 325343d19793dd645a9ab8038879c36e, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
   m_ApplyRootMotion: 1
@@ -1257,6 +1257,12 @@ MonoBehaviour:
     originGame: 
     originVersion: 
     creationTimestamp: 0
+  bodyMesh:
+    Head: {fileID: 1889674800670866692}
+    Eyes: {fileID: 9189787160712445790}
+    Torso: {fileID: 41785700662641184}
+    Arms: {fileID: 3605320444040179576}
+    Legs: {fileID: 7893003630377070218}
 --- !u!114 &6390798364072671962
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1477,7 +1483,7 @@ GameObject:
   - component: {fileID: 6938674229103304836}
   - component: {fileID: 9189787160712445790}
   m_Layer: 0
-  m_Name: Eyes.002
+  m_Name: Eyes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
