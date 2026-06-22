@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
@@ -39,8 +40,7 @@ public class Creature : MonoBehaviour
     {
         if (!identity.IsValid)
         {
-            identity =
-                CreatureIdentity.Create();
+            identity = CreatureIdentity.Create();
 
             UnityEditor.EditorUtility.SetDirty(this);
         }
@@ -62,8 +62,11 @@ public class Creature : MonoBehaviour
         // Visual initialization
         if (visuals == null)
         {
-            Debug.LogError($"Creature [{Identity}] has no visual data associated! Failed to init visuals...");
-            return;
+            Debug.LogError($"Creature [{Identity}] has no visual data associated! Failed to init visuals, loading defaults...");
+            CreatureVisuals newVisuals = Instantiate(CreatureEditorManager.Instance.DefaultVisuals);
+            visuals = newVisuals;
+            newVisuals.hideFlags = HideFlags.DontSave;
+            // return;
         }
         CreatureVisuals.InitMaterialPropertyBlock();
 

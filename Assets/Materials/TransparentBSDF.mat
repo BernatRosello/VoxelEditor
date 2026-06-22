@@ -20,15 +20,12 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: BSDF
-  m_Shader: {fileID: -6465566751694194690, guid: 7572c41abca35cd4d8cb9b7bd77d784b, type: 3}
+  m_Name: TransparentBSDF
+  m_Shader: {fileID: -6465566751694194690, guid: ffbbfbcb13a1c07469ce7ef64f29b898, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords:
-  - _GLOSSYREFLECTIONS_OFF
-  - _SPECULARHIGHLIGHTS_OFF
-  - _SPECULAR_COLOR
+  m_InvalidKeywords: []
   m_LightmapFlags: 1
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0

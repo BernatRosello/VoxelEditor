@@ -255,7 +255,10 @@ public class CreatureVisuals : ScriptableObject
             case MaterialOption.Fur:
                 ApplyFurProperties(material.furSettings, materialPropertyBlock);
                 break;
-            case MaterialOption.BSDF:
+            case MaterialOption.OpaqueBSDF:
+                ApplyBSDFProperties(material.bsdfSettings, materialPropertyBlock);
+                break;
+            case MaterialOption.TransparentBSDF:
                 ApplyBSDFProperties(material.bsdfSettings, materialPropertyBlock);
                 break;
         }
@@ -268,7 +271,13 @@ public class CreatureVisuals : ScriptableObject
         block.SetFloat("_Metallic", settings.Metallic);
         block.SetFloat("_Smoothness", settings.Smoothness);
         block.SetFloat("_Emission", settings.Emission);
-        block.SetFloat("_Opaque", settings.Opaqueness);
+        if (settings.Opaqueness < 0.99f)
+        {
+            block.SetFloat("_Opaque", settings.Opaqueness);
+        } else
+        {
+            
+        }
     }
 
     private static void ApplyFurProperties(FurSettings settings, MaterialPropertyBlock block)
@@ -334,7 +343,8 @@ public class CreatureVisuals : ScriptableObject
     public enum MaterialOption
     {
         Fur,
-        BSDF
+        OpaqueBSDF,
+        TransparentBSDF
     }
 
     [System.Serializable]
@@ -365,7 +375,7 @@ public class CreatureVisuals : ScriptableObject
         [Range(0, 1)]
         public float Smoothness;
 
-        [Range(0, 15)]
+        [Range(-1, 15)]
         public float Emission;
 
         [Range(0, 1)]

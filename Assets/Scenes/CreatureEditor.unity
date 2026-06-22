@@ -468,10 +468,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 14
+  m_fontSize: 19.85
   m_fontSizeBase: 14
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
@@ -1038,6 +1038,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 41785700662641184, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 8fe3cdb4efd3ed746b94f6531032c2c4, type: 2}
+    - target: {fileID: 41785700662641184, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
+      propertyPath: 'm_BlendShapeWeights.Array.data[0]'
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 41785700662641184, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
+      propertyPath: 'm_BlendShapeWeights.Array.data[1]'
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 404299646985834415, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
       propertyPath: m_Name
       value: Creature
@@ -1089,43 +1101,63 @@ PrefabInstance:
     - target: {fileID: 1889674800670866692, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 2f8b9d77c59895640bbaf8046461a9be, type: 2}
+      objectReference: {fileID: 2100000, guid: 8fe3cdb4efd3ed746b94f6531032c2c4, type: 2}
     - target: {fileID: 1889674800670866692, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
       propertyPath: 'm_BlendShapeWeights.Array.data[0]'
-      value: 0.16440283
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1889674800670866692, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
       propertyPath: 'm_BlendShapeWeights.Array.data[1]'
-      value: 100
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1889674800670866692, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
       propertyPath: 'm_BlendShapeWeights.Array.data[2]'
-      value: 0.94910884
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1889674800670866692, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
       propertyPath: 'm_BlendShapeWeights.Array.data[3]'
-      value: 0.41715467
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1889674800670866692, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
       propertyPath: 'm_BlendShapeWeights.Array.data[4]'
-      value: 0.84459144
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1889674800670866692, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
       propertyPath: 'm_BlendShapeWeights.Array.data[5]'
-      value: 0.8136161
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1889674800670866692, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
       propertyPath: 'm_BlendShapeWeights.Array.data[6]'
-      value: 0.8115513
+      value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 3065490528914170829, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
-      propertyPath: visuals
-      value: 
-      objectReference: {fileID: 11400000, guid: 06730fe62a6e82b45b18252f4c0d3910, type: 2}
+    - target: {fileID: 1889674800670866692, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
+      propertyPath: 'm_BlendShapeWeights.Array.data[7]'
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1889674800670866692, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
+      propertyPath: 'm_BlendShapeWeights.Array.data[8]'
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1889674800670866692, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
+      propertyPath: 'm_BlendShapeWeights.Array.data[9]'
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3326565113984851579, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 2f8b9d77c59895640bbaf8046461a9be, type: 2}
+    - target: {fileID: 3605320444040179576, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 8fe3cdb4efd3ed746b94f6531032c2c4, type: 2}
+    - target: {fileID: 3605320444040179576, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
+      propertyPath: 'm_BlendShapeWeights.Array.data[0]'
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3605320444040179576, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
+      propertyPath: 'm_BlendShapeWeights.Array.data[1]'
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4930948761895394148, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -1169,6 +1201,18 @@ PrefabInstance:
     - target: {fileID: 7208582310752409297, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
       propertyPath: m_Name
       value: CreatureRig
+      objectReference: {fileID: 0}
+    - target: {fileID: 7893003630377070218, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 8fe3cdb4efd3ed746b94f6531032c2c4, type: 2}
+    - target: {fileID: 7893003630377070218, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
+      propertyPath: 'm_BlendShapeWeights.Array.data[0]'
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7893003630377070218, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
+      propertyPath: 'm_BlendShapeWeights.Array.data[1]'
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8229661997809165174, guid: e43dafac7f8f88f43801362ffb850f57, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -3430,6 +3474,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CreatureEditorManager
   materialLibrary: {fileID: 11400000, guid: b586d1bf53375784ca7a31e277648949, type: 2}
+  defaultVisuals: {fileID: 11400000, guid: 06730fe62a6e82b45b18252f4c0d3910, type: 2}
   shapeToggle: {fileID: 1299120944}
   textureToggle: {fileID: 1987183228}
   shapeScrollRect: {fileID: 1945226312}
@@ -3440,9 +3485,9 @@ MonoBehaviour:
   textureTab: {fileID: 1261032211}
   materialDropdown: {fileID: 444294587}
   colorPicker: {fileID: 3366236419672698170}
+  bodyPartText: {fileID: 1589129907}
   selectedBodyPart: 0
   currentCreature: {fileID: 0}
-  bodyPartText: {fileID: 1589129907}
 --- !u!4 &1780545119
 Transform:
   m_ObjectHideFlags: 0

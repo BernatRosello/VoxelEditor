@@ -11,8 +11,10 @@ public class CreatureEditorManager : MonoBehaviour
 {
     public static CreatureEditorManager Instance;
     [SerializeField] private MaterialLibrary materialLibrary;
+    [SerializeField] private CreatureVisuals defaultVisuals;
 
     public static MaterialLibrary MaterialLibrary { get => Instance.materialLibrary; }
+    public CreatureVisuals DefaultVisuals { get => defaultVisuals; }
     public CreatureVisuals CurrentVisuals { get => currentCreature.Visuals; }
     public BodyMesh CurrentBodyMesh { get => currentCreature.BodyMesh; }
 
@@ -137,8 +139,10 @@ public class CreatureEditorManager : MonoBehaviour
         {
             case CreatureVisuals.MaterialOption.Fur:
                 return MaterialLibrary.FurMaterial;
-            case CreatureVisuals.MaterialOption.BSDF:
-                return MaterialLibrary.BSDF;
+            case CreatureVisuals.MaterialOption.OpaqueBSDF:
+                return MaterialLibrary.OpaqueBSDF;
+            case CreatureVisuals.MaterialOption.TransparentBSDF:
+                return MaterialLibrary.TransparentBSDF;
             default:
                 return null;
         }

@@ -13,4 +13,5 @@ MonoBehaviour:
   m_Name: MaterialLibrary
   m_EditorClassIdentifier: Assembly-CSharp::MaterialLibrary
   furMaterial: {fileID: 2100000, guid: 2f8b9d77c59895640bbaf8046461a9be, type: 2}
-  bsdf: {fileID: 2100000, guid: 8fe3cdb4efd3ed746b94f6531032c2c4, type: 2}
+  transparentBSDF: {fileID: 2100000, guid: ba736ef64b01ec243ac6b2ef6496df6a, type: 2}
+  opaqueBSDF: {fileID: 2100000, guid: 8fe3cdb4efd3ed746b94f6531032c2c4, type: 2}

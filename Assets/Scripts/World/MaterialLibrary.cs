@@ -6,9 +6,10 @@ public class MaterialLibrary : ScriptableObject
 {
 
     [SerializeField] private Material furMaterial;
-    [SerializeField] private Material bsdf;
+    [SerializeField] private Material transparentBSDF;
+    [SerializeField] private Material opaqueBSDF;
 
     public Material FurMaterial { get => furMaterial; }
-    public Material BSDF { get => bsdf; }
-
-    }
+    public Material OpaqueBSDF { get => opaqueBSDF; }
+    public Material TransparentBSDF { get => transparentBSDF; }
+}
