@@ -185,6 +185,8 @@ public class FlexibleColorPicker : MonoBehaviour {
         }
     }
 
+    public Color StartingColor { get => startingColor; set => startingColor = value; }
+
     /// <summary>
     /// Equivalent to fcp.color
     /// Returns starting color if FCP is not initialized.

@@ -13,7 +13,7 @@ struct Attributes
     half4 tangentOS : TANGENT;
     float2 texcoord : TEXCOORD0;
     float2 lightmapUV : TEXCOORD1;
-    half4 color : COLOR; // Alpha value will be discarded
+    // half4 color : COLOR; // Alpha value will be discarded
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
@@ -26,7 +26,8 @@ struct Varyings
     float2 uv : TEXCOORD4;
     DECLARE_LIGHTMAP_OR_SH(lightmapUV, vertexSH, 5);
     half4 fogFactorAndVertexLight : TEXCOORD6; // x: fogFactor, yzw: vertex light
-    half4 colorAndLayer : COLOR; // Layer is packed into the alpha channel
+    // half4 colorAndLayer : COLOR; // Layer is packed into the alpha channel
+    half layer : TEXCOORD7;
 };
 
 Attributes vert(Attributes input)
@@ -67,8 +68,9 @@ void AppendShellVertex(inout TriangleStream<Varyings> stream, Attributes input, 
 
     output.tangentWS.xyz = normalInput.tangentWS;
     output.tangentWS.w = input.tangentOS.w;
-    output.colorAndLayer = input.color; //Color
-    output.colorAndLayer.a = (float)index / (_ShellAmount); //Layer
+    // output.colorAndLayer = input.color; //Color
+    // output.colorAndLayer.a = (float)index / (_ShellAmount); //Layer
+    output.layer = (float)index / (_ShellAmount); 
 
     half3 vertexLight = VertexLighting(vertexInput.positionWS, normalInput.normalWS);
     half fogFactor = ComputeFogFactor(vertexInput.positionCS.z);
@@ -80,7 +82,7 @@ void AppendShellVertex(inout TriangleStream<Varyings> stream, Attributes input, 
     stream.Append(output);
 }
 
-[maxvertexcount(37)]
+[maxvertexcount(42)]
 void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
 {
     [loop] for (float i = 0; i < _ShellAmount; ++i)
@@ -104,18 +106,18 @@ float4 frag(Varyings input) : SV_Target
     float4 furColor = SAMPLE_TEXTURE2D(_FurMap, sampler_FurMap, furUv);
 
     // return furColor;
-    float alpha = furColor.r * (1.0 - input.colorAndLayer.a);
-    if (input.colorAndLayer.a > 0.0 && alpha < _AlphaCutout) discard;
+    float alpha = furColor.r * (1.0 - input.layer);
+    if (input.layer > 0.0 && alpha < _AlphaCutout) discard;
 
     float3 viewDirWS = SafeNormalize(GetCameraPositionWS() - input.positionWS);
-    half normScale = input.colorAndLayer.a == 0 ? 0 : _NormalScale;
+    half normScale = input.layer == 0 ? 0 : _NormalScale;
     float3 normalTS = UnpackNormalScale(SAMPLE_TEXTURE2D(_NormalMap, sampler_FurMap, furUv), normScale);
     float3 bitangent = cross(input.normalWS, input.tangentWS.xyz) * input.tangentWS.w;   
     float3 normalWS = SafeNormalize(TransformTangentToWorld(normalTS, float3x3(input.tangentWS.xyz, bitangent, input.normalWS)));
     SurfaceData surfaceData = (SurfaceData)0;
     InitializeStandardLitSurfaceData(input.uv, surfaceData);
-    surfaceData.albedo *= input.colorAndLayer.rgb; // Vertex Color tint
-    surfaceData.occlusion = lerp(1.0 - _Occlusion, 1.0, input.colorAndLayer.a);
+    // surfaceData.albedo *= input.colorAndLayer.rgb; // Vertex Color tint
+    surfaceData.occlusion = lerp(1.0 - _Occlusion, 1.0, input.layer);
     surfaceData.albedo *= surfaceData.occlusion;
     surfaceData.alpha = 0.1;
 
@@ -134,7 +136,7 @@ float4 frag(Varyings input) : SV_Target
     inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(input.positionCS);
     
 
-    if (input.colorAndLayer.a == 0)
+    if (input.layer == 0)
     {
         surfaceData.metallic = 0;
         surfaceData.smoothness = 0;
@@ -148,7 +150,7 @@ float4 frag(Varyings input) : SV_Target
         rimFac = 0;
     else
         rimFac = saturate(
-            (input.colorAndLayer.a - rimCutoffLayer) /
+            (input.layer - rimCutoffLayer) /
             (maxLayer - rimCutoffLayer)
         );
 
@@ -158,7 +160,7 @@ float4 frag(Varyings input) : SV_Target
         transFac = 0;
     else
         transFac = saturate(
-            (input.colorAndLayer.a - transCutoffLayer) /
+            (input.layer - transCutoffLayer) /
             (maxLayer - transCutoffLayer)
         );
 
@@ -170,7 +172,7 @@ float4 frag(Varyings input) : SV_Target
         normalWS,
         viewDirWS,
         surfaceData.albedo,
-        input.colorAndLayer.a,
+        input.layer,
         transFac);
 
 #ifdef _ADDITIONAL_LIGHTS
@@ -187,7 +189,7 @@ float4 frag(Varyings input) : SV_Target
             normalWS,
             viewDirWS,
             surfaceData.albedo,
-            input.colorAndLayer.a,
+            input.layer,
             transFac * 0.75);
 
     LIGHT_LOOP_END

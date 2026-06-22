@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -13,12 +15,17 @@ public struct BodyMesh
 
 public class Creature : MonoBehaviour
 {
+
     [SerializeField] private CreatureIdentity identity;
     [SerializeField] private CreatureVisuals visuals;
     [SerializeField] private BodyMesh bodyMesh;
+    [SerializeField] private List<BodyPartCollider> bodyPartColliders;
 
     public CreatureIdentity Identity =>
         identity;
+
+    public CreatureVisuals Visuals { get => visuals; set => visuals = value; }
+    public BodyMesh BodyMesh { get => bodyMesh; set => bodyMesh = value; }
 
     [ContextMenu("Reassign GUID")]
     private void ResetGUID()
@@ -43,6 +50,8 @@ public class Creature : MonoBehaviour
         bodyMesh.Torso = transform.Find("Torso").GetComponent<SkinnedMeshRenderer>();
         bodyMesh.Arms = transform.Find("Arms").GetComponent<SkinnedMeshRenderer>();
         bodyMesh.Legs = transform.Find("Legs").GetComponent<SkinnedMeshRenderer>();
+
+        bodyPartColliders = transform.GetComponentsInChildren<BodyPartCollider>().ToList();
     }
 
 #endif
@@ -56,10 +65,27 @@ public class Creature : MonoBehaviour
             Debug.LogError($"Creature [{Identity}] has no visual data associated! Failed to init visuals...");
             return;
         }
-        CreatureVisuals.SetMaterials(bodyMesh, visuals);
-        CreatureVisuals.SetBlendShapeWeights(bodyMesh, visuals);
-        CreatureVisuals.SetColors(bodyMesh, visuals);
+        CreatureVisuals.InitMaterialPropertyBlock();
 
+        CreatureVisuals.ApplyMaterials(bodyMesh, visuals);
+        CreatureVisuals.ApplyBlendShapeWeights(bodyMesh, visuals);
+        CreatureVisuals.ApplyColors(bodyMesh, visuals);
+
+    }
+
+    public void EnableBodyPartColliders()
+    {
+        foreach(var col in bodyPartColliders)
+        {
+            col.EnableCollider();
+        }
+    }
+    public void DisableBodyPartColliders()
+    {
+        foreach(var col in bodyPartColliders)
+        {
+            col.DisableCollider();
+        }
     }
 
     private void Awake()

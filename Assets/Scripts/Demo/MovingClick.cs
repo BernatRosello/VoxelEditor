@@ -170,13 +170,12 @@ Participant[{creature.Identity}] State
 
     private void OnEnable()
     {
+        controls.Player.Click.performed += OnClick;
         controls.Player.Enable();
     }
-
     private void OnDisable()
     {
         controls.Player.Click.performed -= OnClick;
-
         controls.Player.Disable();
     }
 

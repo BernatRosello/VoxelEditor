@@ -15,30 +15,95 @@ MonoBehaviour:
   headBlendShapes:
     Float: 100
     Shrink: 100
-    Cylinder: 0
-    Sphere: 0
-    Taper: 0
-    PointyEars: 0
-    DroopyEars: 0
+    Cylinder: 0.7250309
+    Sphere: 80.16264
+    Taper: 51.169598
+    PointyEars: 100
+    DroopyEars: -69.382126
     Unicorn: 0
     Spikes: 0
     Mohawk: 0
-  headColor: {r: 0.8490566, g: 0, b: 0, a: 0}
+  headColor: {r: 0.8726268, g: 0.32470065, b: 0.32470065, a: 0}
+  headMaterial:
+    type: 0
+    furSettings:
+      Metallic: 0
+      Smoothness: 0
+      FurLength: 0
+      FurDensity: 0
+      FurThickness: 0.005
+    bsdfSettings:
+      Metallic: 0
+      Smoothness: 0
+      Emission: 0
+      Opaqueness: 0
   eyesBlendShapes:
     Size: 0
     Distance: 0
     Cylinder: 0
     Bore: 0
-  eyesColor: {r: 0.47508815, g: 0.35924706, b: 0.6509434, a: 0}
+  eyesColor: {r: 0.46418753, g: 0.24922436, b: 0.24922436, a: 0}
+  eyesMaterial:
+    type: 0
+    furSettings:
+      Metallic: 0
+      Smoothness: 0
+      FurLength: 0
+      FurDensity: 0
+      FurThickness: 0
+    bsdfSettings:
+      Metallic: 0
+      Smoothness: 0
+      Emission: 0
+      Opaqueness: 0
   torsoBlendShapes:
     Cylinder: 0
     Taper: 0
-  torsoColor: {r: 1, g: 1, b: 1, a: 0}
+  torsoColor: {r: 0, g: 0, b: 0, a: 0}
+  torsoMaterial:
+    type: 0
+    furSettings:
+      Metallic: 0
+      Smoothness: 0
+      FurLength: 0
+      FurDensity: 0
+      FurThickness: 0
+    bsdfSettings:
+      Metallic: 0
+      Smoothness: 0
+      Emission: 0
+      Opaqueness: 0
   armsBlendShapes:
     Cylinder: 0
     Taper: 0
   armsColor: {r: 1, g: 1, b: 1, a: 0}
+  armsMaterial:
+    type: 0
+    furSettings:
+      Metallic: 0
+      Smoothness: 0
+      FurLength: 0
+      FurDensity: 0
+      FurThickness: 0
+    bsdfSettings:
+      Metallic: 0
+      Smoothness: 0
+      Emission: 0
+      Opaqueness: 0
   legsBlendShapes:
     Cylinder: 0
     Taper: 0
-  legsColor: {r: 1, g: 1, b: 1, a: 0}
+  legsColor: {r: 0.8113208, g: 0, b: 0.38062027, a: 0}
+  legsMaterial:
+    type: 0
+    furSettings:
+      Metallic: 0
+      Smoothness: 0
+      FurLength: 0
+      FurDensity: 0
+      FurThickness: 0
+    bsdfSettings:
+      Metallic: 0
+      Smoothness: 0
+      Emission: 0
+      Opaqueness: 0
