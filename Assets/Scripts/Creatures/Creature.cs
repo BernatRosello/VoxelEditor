@@ -63,7 +63,7 @@ public class Creature : MonoBehaviour
         if (visuals == null)
         {
             Debug.LogError($"Creature [{Identity}] has no visual data associated! Failed to init visuals, loading defaults...");
-            CreatureVisuals newVisuals = Instantiate(CreatureEditorManager.Instance.DefaultVisuals);
+            CreatureVisuals newVisuals = ScriptableObjectExtensions.Clone(CreatureEditorManager.Instance.DefaultVisuals);
             visuals = newVisuals;
             newVisuals.hideFlags = HideFlags.DontSave;
             // return;
@@ -93,12 +93,6 @@ public class Creature : MonoBehaviour
 
     private void Awake()
     {
-        if (visuals == null)
-        {
-            Debug.LogWarning($"Creature [{Identity}] has no visual data associated, creating new default instance...");
-            visuals = ScriptableObject.CreateInstance<CreatureVisuals>();
-        }
         LoadVisuals();
-
     }
 }
