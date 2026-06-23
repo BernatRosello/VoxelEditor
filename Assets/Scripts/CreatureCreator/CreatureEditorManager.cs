@@ -30,6 +30,7 @@ public class CreatureEditorManager : MonoBehaviour
     [SerializeField] private FlexibleColorPicker colorPicker;
     [SerializeField] private TMP_Text bodyPartText;
     [SerializeField] private BodyPart selectedBodyPart;
+    [SerializeField] private CameraDragArea dragArea;
     [SerializeField] private Creature currentCreature;
     private PlayerControls controls;
 
@@ -52,7 +53,6 @@ public class CreatureEditorManager : MonoBehaviour
 
         controls = new PlayerControls();
 
-        controls.Player.Click.performed += OnClick;
         // Bind tab toggles
         shapeToggle.onValueChanged.AddListener(_ => OnTabChanged());
         textureToggle.onValueChanged.AddListener(_ => OnTabChanged());
@@ -111,6 +111,27 @@ public class CreatureEditorManager : MonoBehaviour
 
     private void OnClick(InputAction.CallbackContext context)
     {
+        Debug.Log("1");
+
+        var cam = Camera.main;
+
+        Debug.Log($"2 - Camera = {cam}");
+
+        var mouse = Mouse.current;
+
+        Debug.Log($"3 - Mouse = {mouse}");
+
+        var pos = mouse.position.ReadValue();
+
+        Debug.Log($"4 - Position = {pos}");
+
+        Ray ray1 = cam.ScreenPointToRay(pos);
+
+        Debug.Log("5");
+
+        if (dragArea.IsDraggingCamera)
+            return;
+
         Vector2 mousePosition = controls.Player.Point.ReadValue<Vector2>();
 
         Ray ray = Camera.main.ScreenPointToRay(mousePosition);
