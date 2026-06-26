@@ -59,6 +59,9 @@ public class NavigationAnimator : MonoBehaviour
     private Vector3 smoothedSteeringTarget;
     private Vector3 previousPosition;
     private Vector3 actualVelocity;
+    private bool navigationActive;
+    public bool NavigationActive { get => navigationActive; set => navigationActive = value; }
+    
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
@@ -228,6 +231,8 @@ public class NavigationAnimator : MonoBehaviour
 
     private void ProcessMovement()
     {
+        if (!navigationActive) return;
+        
         if (!agent.hasPath)
         {
             pathCachedFlag = false;

@@ -100,13 +100,34 @@ inline float3 TransformHClipToWorld(float4 positionCS)
     return mul(UNITY_MATRIX_I_VP, positionCS).xyz;
 }
 
+float3 RGBtoHSV(float3 c)
+{
+    float4 K = float4(0., -1./3., 2./3., -1.);
+    float4 p = lerp(float4(c.bg, K.wz), float4(c.gb, K.xy), step(c.b, c.g));
+    float4 q = lerp(float4(p.xyw, c.r), float4(c.r, p.yzx), step(p.x, c.r));
+
+    float d = q.x - min(q.w, q.y);
+    float e = 1e-10;
+
+    return float3(
+        abs(q.z + (q.w - q.y) / (6. * d + e)),
+        d / (q.x + e),
+        q.x
+    );
+}
+
+float3 HSVtoRGB(float3 c)
+{
+    float4 K = float4(1., 2./3., 1./3., 3.);
+    float3 p = abs(frac(c.xxx + K.xyz) * 6. - K.www);
+    return c.z * lerp(K.xxx, saturate(p - K.xxx), c.y);
+}
+
 float4 frag(Varyings input) : SV_Target
 {
     float2 furUv = input.uv * (_FurScale);
-    float4 furColor = SAMPLE_TEXTURE2D(_FurMap, sampler_FurMap, furUv);
-
-    // return furColor;
-    float alpha = furColor.r * (1.0 - input.layer);
+    float4 furHeightMap = SAMPLE_TEXTURE2D(_FurMap, sampler_FurMap, furUv);
+    float alpha = furHeightMap.r * (1.0 - input.layer);
     if (input.layer > 0.0 && alpha < _AlphaCutout) discard;
 
     float3 viewDirWS = SafeNormalize(GetCameraPositionWS() - input.positionWS);
@@ -116,8 +137,23 @@ float4 frag(Varyings input) : SV_Target
     float3 normalWS = SafeNormalize(TransformTangentToWorld(normalTS, float3x3(input.tangentWS.xyz, bitangent, input.normalWS)));
     SurfaceData surfaceData = (SurfaceData)0;
     InitializeStandardLitSurfaceData(input.uv, surfaceData);
-    // surfaceData.albedo *= input.colorAndLayer.rgb; // Vertex Color tint
     surfaceData.occlusion = lerp(1.0 - _Occlusion, 1.0, input.layer);
+
+    float3 tex = surfaceData.albedo;
+
+    // Convert both to HSV
+    float3 texHSV = RGBtoHSV(tex);
+    float3 baseHSV = RGBtoHSV(_BaseColor.rgb);
+
+    // Replace the hue
+    texHSV.x = baseHSV.x;
+
+    // Optionally scale saturation too
+    texHSV.y *= baseHSV.y;
+
+    // Convert back
+    surfaceData.albedo = HSVtoRGB(texHSV);
+    
     surfaceData.albedo *= surfaceData.occlusion;
     surfaceData.alpha = 0.1;
 
@@ -194,9 +230,7 @@ float4 frag(Varyings input) : SV_Target
 
     LIGHT_LOOP_END
 #endif
-    // half4 test = half4(0,0,0,1);
-    // return test + translucency.xyzx;
-    return UniversalFragmentPBR(inputData, surfaceData);
+
     half4 color = UniversalFragmentPBR(inputData, surfaceData);
     ApplyRimLight(color.rgb, input.positionWS, viewDirWS, normalWS, rimFac);
     color.rgb += _AmbientColor * color.rgb;

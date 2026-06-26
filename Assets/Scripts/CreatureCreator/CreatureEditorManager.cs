@@ -66,12 +66,12 @@ public class CreatureEditorManager : MonoBehaviour
 
     private void OnEnable()
     {
-        controls.Player.Click.performed += OnClick;
+        controls.Player.Click.canceled += OnClick;
         controls.Player.Enable();
     }
     private void OnDisable()
     {
-        controls.Player.Click.performed -= OnClick;
+        controls.Player.Click.canceled -= OnClick;
         controls.Player.Disable();
     }
 
@@ -93,6 +93,24 @@ public class CreatureEditorManager : MonoBehaviour
         textureTab.gameObject.SetActive(!tabToShape);
     }
 
+    public void TurnCreatureRight()
+    {
+        var ad = currentCreature.GetComponent<ActionDriver>();
+        ad.StartTurnRight();
+    }
+
+    public void TurnCreatureLeft()
+    {
+        var ad = currentCreature.GetComponent<ActionDriver>();
+        ad.StartTurnLeft();
+    }
+    
+    public void StopTurnCreature()
+    {
+        var ad = currentCreature.GetComponent<ActionDriver>();
+        ad.StopTurn();
+    }
+
 
 
 #if UNITY_EDITOR
@@ -111,24 +129,6 @@ public class CreatureEditorManager : MonoBehaviour
 
     private void OnClick(InputAction.CallbackContext context)
     {
-        Debug.Log("1");
-
-        var cam = Camera.main;
-
-        Debug.Log($"2 - Camera = {cam}");
-
-        var mouse = Mouse.current;
-
-        Debug.Log($"3 - Mouse = {mouse}");
-
-        var pos = mouse.position.ReadValue();
-
-        Debug.Log($"4 - Position = {pos}");
-
-        Ray ray1 = cam.ScreenPointToRay(pos);
-
-        Debug.Log("5");
-
         if (dragArea.IsDraggingCamera)
             return;
 

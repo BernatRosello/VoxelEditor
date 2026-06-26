@@ -7,6 +7,7 @@ Properties
     [MainColor] _BaseColor("Color", Color) = (0.5, 0.5, 0.5, 1)
     _AmbientColor("Ambient Color", Color) = (0.0, 0.0, 0.0, 1)
     _BaseMap("Albedo", 2D) = "white" {}
+    _PatternAmount("Pattern Amount", Range(0,4)) = 1
     [Gamma] _Metallic("Metallic", Range(0.0, 1.0)) = 0.5
     _Smoothness("Smoothness", Range(0.0, 1.0)) = 0.5
 

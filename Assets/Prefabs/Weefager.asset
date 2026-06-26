@@ -1,0 +1,114 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6032075cff5fb564794b4ab815fb744f, type: 3}
+  m_Name: Weefager
+  m_EditorClassIdentifier: Assembly-CSharp::CreatureVisuals
+  headBlendShapes:
+    Float: 9.037792
+    Shrink: 78.43433
+    Cylinder: 24.130821
+    Sphere: 100
+    Taper: -100
+    PointyEars: 0
+    DroopyEars: 0
+    Unicorn: 0
+    Spikes: 0
+    Mohawk: 0
+  headColor: {r: 1, g: 0, b: 0.6364689, a: 0}
+  headMaterial:
+    type: 0
+    furSettings:
+      Metallic: 0
+      Pattern: 0
+      Smoothness: 0.12088839
+      FurLength: 0.014
+      FurDensity: 3.3994355
+      FurThickness: 0.021911707
+    bsdfSettings:
+      Metallic: 0
+      Smoothness: 0
+      Emission: 0
+      Opaqueness: 0
+  eyesBlendShapes:
+    Size: 138.75237
+    Distance: -50
+    Cylinder: 75.60997
+    Bore: 0
+  eyesColor: {r: 0, g: 0, b: 0, a: 0}
+  eyesMaterial:
+    type: 1
+    furSettings:
+      Metallic: 0
+      Pattern: 0
+      Smoothness: 0
+      FurLength: 0
+      FurDensity: 0
+      FurThickness: 0
+    bsdfSettings:
+      Metallic: 1
+      Smoothness: 0
+      Emission: 0
+      Opaqueness: 1
+  torsoBlendShapes:
+    Cylinder: 74.91179
+    Taper: 100
+  torsoColor: {r: 1, g: 0, b: 0.6364689, a: 0}
+  torsoMaterial:
+    type: 2
+    furSettings:
+      Metallic: 0
+      Pattern: 0
+      Smoothness: 0
+      FurLength: 0
+      FurDensity: 0
+      FurThickness: 0
+    bsdfSettings:
+      Metallic: 0.40643683
+      Smoothness: 0.47480753
+      Emission: 0
+      Opaqueness: 0
+  armsBlendShapes:
+    Cylinder: 100
+    Taper: 0
+  armsColor: {r: 1, g: 0, b: 0.6364689, a: 0}
+  armsMaterial:
+    type: 2
+    furSettings:
+      Metallic: 0
+      Pattern: 0
+      Smoothness: 0
+      FurLength: 0
+      FurDensity: 0
+      FurThickness: 0
+    bsdfSettings:
+      Metallic: 0.25561902
+      Smoothness: 0.47681844
+      Emission: 0
+      Opaqueness: 0
+  legsBlendShapes:
+    Cylinder: 100
+    Taper: 0
+  legsColor: {r: 1, g: 0, b: 0.6364689, a: 0}
+  legsMaterial:
+    type: 2
+    furSettings:
+      Metallic: 0
+      Pattern: 0
+      Smoothness: 0
+      FurLength: 0
+      FurDensity: 0
+      FurThickness: 0
+    bsdfSettings:
+      Metallic: 0.29583701
+      Smoothness: 0.47279668
+      Emission: 0
+      Opaqueness: 0

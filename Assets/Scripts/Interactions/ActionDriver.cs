@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using UnityEditor.ShaderKeywordFilter;
 using UnityEngine;
-using UnityEngine.AI;
 
 public delegate void DriverAction(ActionDriver driver);
 
@@ -271,6 +268,26 @@ public class ActionDriver : MonoBehaviour
         GetCurrentAnimatorState()
     {
         return animator.GetCurrentAnimatorStateInfo(0);
+    }
+
+    public void StartTurnRight()
+    {
+        nav.NavigationActive = false;
+        animator.SetBool("IsTurning", true);
+        animator.SetFloat("vel_ang", 1);
+    }
+
+    public void StartTurnLeft()
+    {
+        nav.NavigationActive = false;
+        animator.SetBool("IsTurning", true);
+        animator.SetFloat("vel_ang", -1);
+    }
+
+    public void StopTurn()
+    {
+        nav.NavigationActive = true;
+        animator.SetFloat("vel_ang", 0);
     }
 
     #endregion

@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.tlabaltoh.sdf-ui-toolkit": "https://github.com/TLabAltoh/Unity-SDF-UI-Toolkit.git?path=/com.tlabaltoh.sdf-ui-toolkit#upm",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.ai.navigation": "2.0.12",
     "com.unity.cinemachine": "3.1.6",
