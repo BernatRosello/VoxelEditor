@@ -21,6 +21,9 @@ public class CameraDragArea : MonoBehaviour,
     [SerializeField] CinemachineInputAxisController orbitInput;
     private Vector2 pressPosition;
     [SerializeField] private float dragThreshold;
+    [SerializeField] private float zoomGain = 1.05f;
+    [SerializeField] private float xGain = 1f;
+    [SerializeField] private float yGain = 1f;
 
     void Awake()
     {
@@ -49,7 +52,7 @@ public class CameraDragArea : MonoBehaviour,
                     c.Input.Gain = 0;
                     break;
                 case "Orbit Scale":
-                    c.Input.Gain = 1;
+                    c.Input.Gain = zoomGain;
                     break;
             }
         }
@@ -72,10 +75,10 @@ public class CameraDragArea : MonoBehaviour,
                     switch (c.Name)
                     {
                         case "Look Orbit X":
-                            c.Input.Gain = 1;
+                            c.Input.Gain = xGain;
                             break;
                         case "Look Orbit Y":
-                            c.Input.Gain = -1;
+                            c.Input.Gain = -yGain;
                             break;
                         case "Orbit Scale":
                             c.Input.Gain = 0;
@@ -104,7 +107,7 @@ public class CameraDragArea : MonoBehaviour,
                     c.Input.Gain = 0;
                     break;
                 case "Orbit Scale":
-                    c.Input.Gain = 1;
+                    c.Input.Gain = zoomGain;
                     break;
             }
         }

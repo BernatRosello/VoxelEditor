@@ -67,6 +67,6 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "VoxelEditor.slnx",
+    "dotnet.defaultSolution": "TFG2_VoxelEditor.slnx",
     "dotnet.enableWorkspaceBasedDevelopment": false
 }
