@@ -189,10 +189,13 @@ public class ActionDriver : MonoBehaviour
     }
 
     internal bool HasReachedDestination(
-        float tolerance = 0.15f)
+        float tolerance = -1.0f)
     {
         if (!nav.HasDestination())
             return true;
+
+        if (tolerance == -1.0f)
+            tolerance = Mathf.Min(nav.MoveStartThreshold, nav.MoveStopThreshold);
 
         return nav.GetRemainingDistance() < tolerance;
     }
@@ -222,7 +225,7 @@ public class ActionDriver : MonoBehaviour
         FaceDirection(position - GetPosition());
     }
 
-    public bool IsFacingDirection(Vector3 dir, float toleranceDegrees = 5f, bool verticalCheck = false)
+    public bool IsFacingDirection(Vector3 dir, float toleranceDegrees = -1.0f, bool verticalCheck = false)
     {
         if (dir.sqrMagnitude < 0.0001f)
             return true;
@@ -231,6 +234,9 @@ public class ActionDriver : MonoBehaviour
             dir.y = 0;
 
         float angle = Vector3.Angle(CachedTransform.forward, dir.normalized);
+
+        if (toleranceDegrees == -1.0f)
+            toleranceDegrees = Mathf.Min(nav.TurnStartThreshold, nav.TurnStopThreshold);
 
         return angle <= toleranceDegrees;
     }

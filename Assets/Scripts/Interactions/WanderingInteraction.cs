@@ -64,7 +64,7 @@ public class WanderingInteraction : ACreatureInteraction<WanderingParams>
             //     AllOf(
             //         () => (lastMoveTime - totalEllapsedTime) >= currentMoveDuration,
             //         () => p.Driver.HasReachedDestination()
-            //     ));]
+            //     ));
 
             // Version B - Changes target position as soon as the target either 
             // reaches the target position, OR the currentMoveDuration runs out.
@@ -72,7 +72,7 @@ public class WanderingInteraction : ACreatureInteraction<WanderingParams>
         }
         else
         {
-            DispatchAction(p, DriverActions.FaceDirection(dir));
+            DispatchAction(p, DriverActions.FaceDirection(dir), currentMoveDuration);
         }
     }
 

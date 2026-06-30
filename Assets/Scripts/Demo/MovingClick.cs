@@ -170,7 +170,7 @@ Participant[{creature.Identity}] State
 
     private void OnEnable()
     {
-        controls.Player.Click.performed += OnClick;
+        // Callback added inside Awake()
         controls.Player.Enable();
     }
     private void OnDisable()

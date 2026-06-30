@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Grass
+  m_Shader: {fileID: 4800000, guid: 589ea0397284e0e42b1985a0455d66b2, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BaseMap:
+        m_Texture: {fileID: 2800000, guid: 72aad4c9b4e9891458dd1229d86583bb, type: 3}
+        m_Scale: {x: 0.003, y: 0.005}
+        m_Offset: {x: 0, y: 0}
+    - _FurMap:
+        m_Texture: {fileID: 2800000, guid: 3eb5ef796a53ffd4a8a2c606ef6e6c16, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: 6b22d957f2ae51c41aeda896a97ec8c5, type: 3}
+        m_Scale: {x: 0.1, y: 0.1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _AlphaCutout: 0.134
+    - _FurScale: 83
+    - _Metallic: 0
+    - _NormalScale: 0.121
+    - _Occlusion: 0.208
+    - _RimCutoffLayer: 0
+    - _RimLightIntensity: 0.072
+    - _RimLightPower: 3.71
+    - _ShadowExtraBias: -0.253
+    - _ShellAmount: 10
+    - _ShellStep: 0.025
+    - _Smoothness: 0.023
+    - _TouchMult: 15
+    - _TouchPow: 0
+    - _TouchThreshold: 0
+    - _TouchThreshold2: 1.1
+    - _TransCutoffLayer: 4
+    - _TranslucencyPower: 2.12
+    - _TranslucencyStrength: 1.54
+    - _TuochMult: 0
+    m_Colors:
+    - _AmbientColor: {r: 0.94509804, g: 0.6843398, b: 0.0039215684, a: 1}
+    - _BaseColor: {r: 0, g: 1, b: 0.36922634, a: 1}
+    - _BaseMove: {r: 0.1, g: 0.1, b: 0, a: 0.5}
+    - _TouchMove: {r: 2, g: 2, b: 2, a: 1}
+    - _TranslucencyTint: {r: 0.2906771, g: 0.9150943, b: 0, a: 1}
+    - _WindFreq: {r: 0.31, g: 0.56, b: 0.44, a: -0.19}
+    - _WindMove: {r: 0.37, g: 0.31, b: 0.17, a: 0.5}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
