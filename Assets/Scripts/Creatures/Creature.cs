@@ -52,6 +52,11 @@ public class Creature : MonoBehaviour
         bodyMesh.Legs = transform.Find("Legs").GetComponent<SkinnedMeshRenderer>();
 
         bodyPartColliders = transform.GetComponentsInChildren<BodyPartCollider>().ToList();
+
+        foreach (var bp in bodyPartColliders)
+        {
+            bp.creature = this;
+        }
     }
 
 #endif
@@ -62,7 +67,7 @@ public class Creature : MonoBehaviour
         // Visual initialization
         if (visuals == null)
         {
-            Debug.LogWarning($"Creature [{Identity}] has no visual data associated! Failed to init visuals, loading defaults...");
+            Debug.LogWarning($"Creature [{Identity}] has no visual data associated! Failed to init visuals, loading creature editor defaults...");
             CreatureVisuals newVisuals = ScriptableObjectExtensions.Clone(CreatureEditorManager.Instance.DefaultVisuals);
             visuals = newVisuals;
             newVisuals.hideFlags = HideFlags.DontSave;

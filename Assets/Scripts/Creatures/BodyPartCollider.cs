@@ -16,6 +16,7 @@ public class BodyPartCollider : MonoBehaviour
     [SerializeField] private BodyPart bodyPart;
     private Collider coll;
     public BodyPart BodyPart { get => bodyPart; }
+    public Creature creature;
 
 #if UNITY_EDITOR
 

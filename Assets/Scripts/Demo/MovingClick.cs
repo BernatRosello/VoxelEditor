@@ -14,8 +14,10 @@ public class MoveToClickPoint : MonoBehaviour
         Wander
     }
 
-    [Header("Settings")]
     [SerializeField] private RequestMode activeRequest;
+    [Header("Settings")]
+    [SerializeField] private float raycastDistance = 100f;
+    [SerializeField] private LayerMask raycastMask;
     [Header("Hover UI")]
     [SerializeField] private RectTransform hoverPanel;
     [SerializeField] private TMP_Text hoverText;
@@ -26,7 +28,6 @@ public class MoveToClickPoint : MonoBehaviour
     private PlayerControls controls;
     [SerializeField] private List<int> minimumSelected = new();
     private List<ActionDriver> outlinedCreatures = new();
-
 
     private void Awake()
     {
@@ -43,7 +44,7 @@ public class MoveToClickPoint : MonoBehaviour
 
     private void UpdateHoverUI()
     {
-        ActionDriver hoveredDriver = GetHoveredCreature();
+        ActionDriver hoveredDriver = GetHoveredCreatureDriver();
 
         if (hoveredDriver == null)
         {
@@ -105,7 +106,7 @@ Participant[{creature.Identity}] State
 
     private void UpdateOutlines()
     {
-        ActionDriver hovered = GetHoveredCreature();
+        ActionDriver hovered = GetHoveredCreatureDriver();
 
         bool adding = controls.Player.Select.IsPressed();
         bool removing = controls.Player.Remove.IsPressed();
@@ -158,14 +159,19 @@ Participant[{creature.Identity}] State
         }
     }
 
-    private ActionDriver GetHoveredCreature()
+    private ActionDriver GetHoveredCreatureDriver()
     {
         if (!TryRaycast(out RaycastHit hit))
             return null;
 
-        hit.transform.TryGetComponent(out ActionDriver creature);
 
-        return creature;
+
+        Creature c = GetCreature(hit);hit.transform.TryGetComponent(out BodyPartCollider body);
+        if (c == null) return null;
+        
+        c.TryGetComponent(out ActionDriver creatureDriver);
+        // Debug.Log($"Fetched CreatureDriver {creatureDriver} from {body.creature.Identity}'s {body.BodyPart}");
+        return creatureDriver;
     }
 
     private void OnEnable()
@@ -191,14 +197,14 @@ Participant[{creature.Identity}] State
         // Shift + Click
         if (addMode)
         {
-            Select(hit);
+            Select(GetCreature(hit));
             return;
         }
 
         // Ctrl + Click
         if (removeMode)
         {
-            Deselect(hit);
+            Deselect(GetCreature(hit));
             return;
         }
 
@@ -209,17 +215,25 @@ Participant[{creature.Identity}] State
     private bool TryRaycast(out RaycastHit hit)
     {
         hit = default;
-
         Vector2 mousePosition = controls.Player.Point.ReadValue<Vector2>();
-
         Ray ray = Camera.main.ScreenPointToRay(mousePosition);
-
-        return Physics.Raycast(ray, out hit, 100f);
+        return Physics.Raycast(ray, out hit, raycastDistance, raycastMask);
     }
 
-    private void Select(RaycastHit hit)
+    private Creature GetCreature(RaycastHit hit)
     {
-        if (!hit.transform.TryGetComponent(out Creature creature))
+        hit.transform.TryGetComponent(out BodyPartCollider body);
+        if (body == null)
+        {
+            Debug.Log($"Failed to hit valid BodyPartCollider, instead hit: {hit.transform.gameObject}");
+            return null;
+        }
+        return body.creature;
+    }
+
+    private void Select(Creature creature)
+    {
+        if (creature == null)
             return;
 
         selectedCreatures.Add(creature);
@@ -227,9 +241,9 @@ Participant[{creature.Identity}] State
         Debug.Log($"Selected {creature.name}");
     }
 
-    private void Deselect(RaycastHit hit)
+    private void Deselect(Creature creature)
     {
-        if (!hit.transform.TryGetComponent(out Creature creature))
+        if (creature == null)
             return;
 
         selectedCreatures.Remove(creature);

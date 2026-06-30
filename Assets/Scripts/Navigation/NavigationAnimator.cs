@@ -63,7 +63,7 @@ public class NavigationAnimator : MonoBehaviour
     private Vector3 smoothedSteeringTarget;
     private Vector3 previousPosition;
     private Vector3 actualVelocity;
-    private bool navigationActive;
+    private bool navigationActive;  
     public bool NavigationActive { get => navigationActive; set => navigationActive = value; }
     
 
@@ -85,6 +85,7 @@ public class NavigationAnimator : MonoBehaviour
         animator.SetFloat("vel_y", 0);
         animator.SetFloat("vel_ang", 0);
         animator.SetFloat("LocomotionSpeedParam", 1.0f);
+        navigationActive = true;
     }
 
     // Update is called once per frame

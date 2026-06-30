@@ -245,7 +245,7 @@ public class CreatureVisuals : ScriptableObject
     {
         InitMaterialPropertyBlock();
 
-        renderer.sharedMaterial = CreatureEditorManager.GetMaterial(material.type);
+        renderer.sharedMaterial = MaterialLibrarySingleton.GetMaterial(material.type);
         renderer.GetPropertyBlock(materialPropertyBlock);
         materialPropertyBlock.SetColor("_BaseColor", color);
 

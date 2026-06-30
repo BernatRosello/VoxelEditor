@@ -120,7 +120,7 @@ public class CircleDanceInteraction : ACreatureInteraction<CircleDanceParams>
             case 5:
                 // Debug.Log($"Creature[{p.Identity}] reached CHECKPOINT ActionIndex == 5.");
                 rad = Mathf.Lerp(0, 2 * Mathf.PI, (float)IndexOf(p) / ActiveParticipants.Count);
-                participantSlot = gatherPosition - new Vector3((float)Mathf.Cos(rad), 0, (float)Mathf.Sin(rad)) * 2;
+                participantSlot = gatherPosition - new Vector3((float)Mathf.Cos(rad), 0, (float)Mathf.Sin(rad)) * 3;
                 // Debug.Log($"Moving to participantSlot {participantSlot}");
                 DispatchAction(p, DriverActions.MoveTo(participantSlot));
                 break;
