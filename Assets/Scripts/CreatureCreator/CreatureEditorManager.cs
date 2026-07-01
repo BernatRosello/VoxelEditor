@@ -10,7 +10,6 @@ using UnityEngine.UI;
 public class CreatureEditorManager : MonoBehaviour
 {
     public static CreatureEditorManager Instance;
-    [SerializeField] private MaterialLibrary materialLibrary;
     [SerializeField] private CreatureVisuals defaultVisuals;
     
     public CreatureVisuals DefaultVisuals { get => defaultVisuals; }

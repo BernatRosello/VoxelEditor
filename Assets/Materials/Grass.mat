@@ -37,7 +37,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AlphaCutout: 0.134
+    - _AlphaCutout: 0.106
     - _FurScale: 83
     - _Metallic: 0
     - _NormalScale: 0.083
@@ -47,7 +47,7 @@ Material:
     - _RimLightIntensity: 0.083
     - _RimLightPower: 3.71
     - _ShadowExtraBias: -0.253
-    - _ShellAmount: 12
+    - _ShellAmount: 14
     - _ShellStep: 0.0169
     - _Smoothness: 0.214
     - _TouchMult: 15
