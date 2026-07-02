@@ -53,7 +53,9 @@ public class NavigationAnimator : MonoBehaviour
     [SerializeField] private float longPathLength = 20f;
     [SerializeField] private AnimationCurve longPathSpeedCurve;
     public NavigationAnimatorSettings navSettings;
-    [SerializeField] private Transform navSurfaceTransform;
+    [SerializeField] public Transform navSurfaceTransform;
+
+    private float currentMaxSpeed;
 
 
     private Vector3 surfaceUp = Vector3.up;
@@ -65,7 +67,7 @@ public class NavigationAnimator : MonoBehaviour
     private Vector3 actualVelocity;
     private bool navigationActive;  
     public bool NavigationActive { get => navigationActive; set => navigationActive = value; }
-    
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
@@ -86,6 +88,7 @@ public class NavigationAnimator : MonoBehaviour
         animator.SetFloat("vel_ang", 0);
         animator.SetFloat("LocomotionSpeedParam", 1.0f);
         navigationActive = true;
+        currentMaxSpeed = maximumSpeed;
     }
 
     // Update is called once per frame
@@ -361,6 +364,7 @@ public class NavigationAnimator : MonoBehaviour
             }
 
             float desiredSpeed = GetSpeedAlongPath(remainingDistance, cachedPathLength);
+            desiredSpeed = Mathf.Clamp(desiredSpeed, -maximumSpeed, maximumSpeed);
 
             animator.SetFloat("vel_x", localVelocity.x * desiredSpeed, 0.1f, Time.deltaTime);
 
@@ -466,6 +470,9 @@ public class NavigationAnimator : MonoBehaviour
             Gizmos.DrawLine(animator.rootPosition, animator.rootPosition + toTarget);
         }
     }
+
+    internal void SetMaxSpeed(float speed) { currentMaxSpeed = speed; }
+    internal void ResetMaxSpeed() { currentMaxSpeed = maximumSpeed; }
 
     internal void SetDestination(Vector3 destination)
     {

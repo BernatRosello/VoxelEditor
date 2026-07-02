@@ -24,13 +24,15 @@ public class CircleDanceInteraction : ACreatureInteraction<CircleDanceParams>
     Vector3 gatherPosition;
     public CircleDanceInteraction(CircleDanceParams parameters, List<CreatureData> participants) : base(parameters, participants)
     {
-        if (parameters == null || !parameters.position.HasValue)
+        if (participants == null) return;
+        
+        if ((parameters == null || !parameters.position.HasValue))
         {
             CreatureData init;
             if (parameters == null || parameters.initiator == null)
                 init = participants[0];
             else
-                init = participants.FirstOrDefault(p => p.Identity != parameters.initiator);
+                init = participants.FirstOrDefault(p => p.Identity == parameters.initiator);
 
             if (participants.Count == 2 && init != null)
             {

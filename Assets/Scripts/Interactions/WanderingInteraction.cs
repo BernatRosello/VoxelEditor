@@ -53,26 +53,35 @@ public class WanderingInteraction : ACreatureInteraction<WanderingParams>
 
     protected override void UpdateInteraction(CreatureData p)
     {
-        float currentMoveDuration = Parameters.frequency + Random.Range(-1f, 1f) * Parameters.frequencyVariance;
-        var dir = new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f)).normalized;
-        if (Random.Range(0f, 1f) <= Parameters.moveChance)
+        if (StateOf(p).ActionIndex % 2 == 0)
         {
-            Vector3 nextPosition = p.Driver.GetPosition() + dir * Random.Range(Parameters.minDistance, Parameters.maxDistance);
-            // Version A - Makes sure that the character takes AT LEAST as much 
-            //          currentMoveDuration time before moving again.
-            // DispatchAction(p, DriverActions.MoveTo(nextPosition),
-            //     AllOf(
-            //         () => (lastMoveTime - totalEllapsedTime) >= currentMoveDuration,
-            //         () => p.Driver.HasReachedDestination()
-            //     ));
+            float currentMoveDuration = Parameters.frequency + Random.Range(-1f, 1f) * Parameters.frequencyVariance;
+            var dir = new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f)).normalized;
+            if (Random.Range(0f, 1f) <= Parameters.moveChance)
+            {
+                Vector3 nextPosition = p.Driver.GetPosition() + dir * Random.Range(Parameters.minDistance, Parameters.maxDistance);
+                // Version A - Makes sure that the character takes AT LEAST as much 
+                //          currentMoveDuration time before moving again.
+                // DispatchAction(p, DriverActions.MoveTo(nextPosition),
+                //     AllOf(
+                //         () => (lastMoveTime - totalEllapsedTime) >= currentMoveDuration,
+                //         () => p.Driver.HasReachedDestination()
+                //     ));
 
-            // Version B - Changes target position as soon as the target either 
-            // reaches the target position, OR the currentMoveDuration runs out.
-            DispatchAction(p, DriverActions.MoveTo(nextPosition), currentMoveDuration);
+                // Version B - Changes target position as soon as the target either 
+                // reaches the target position, OR the currentMoveDuration runs out.
+                DispatchAction(p, DriverActions.MoveTo(nextPosition, p.Stats.Energy * 1.5f), currentMoveDuration);
+            }
+            else
+            {
+                DispatchAction(p, DriverActions.FaceDirection(dir), currentMoveDuration);
+            }
         }
         else
         {
-            DispatchAction(p, DriverActions.FaceDirection(dir), currentMoveDuration);
+            // After each move decrease the energy as it is "used up"
+            p.Stats.Energy -= 0.1f;
+            DispatchAction(p, DriverActions.SetFloat("CalmEnergetic", p.Stats.Energy));
         }
     }
 

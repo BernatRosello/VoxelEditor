@@ -51,7 +51,7 @@ public sealed class InteractionManager : MonoBehaviour
                 continue;
             }
 
-            RegisterParticipant(c.Identity, driver);
+            RegisterParticipant(c.Identity, c.Stats, driver);
         }
     }
 
@@ -104,9 +104,9 @@ public sealed class InteractionManager : MonoBehaviour
         return interaction;
     }
 
-    public CreatureData RegisterParticipant(CreatureIdentity identity, ActionDriver driver)
+    public CreatureData RegisterParticipant(CreatureIdentity identity, CreatureBehaviourStats stats, ActionDriver driver)
     {
-        CreatureData participant = new(driver, identity);
+        CreatureData participant = new(driver, stats, identity);
         creatureData[identity] = participant;
         return participant;
     }

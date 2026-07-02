@@ -13,11 +13,11 @@ public sealed class DriverActionDefinition
 
 public static class DriverActions
 {
-    public static DriverActionDefinition MoveTo(Vector3 destination)
+    public static DriverActionDefinition MoveTo(Vector3 destination, float? maxSpeed = null)
     {
         return new()
         {
-            Action = (driver) => { driver.MoveTo(destination); },
+            Action = driver => driver.MoveTo(destination, maxSpeed),
             CompletionCondition = driver => driver.HasReachedDestination()
         };
     }
@@ -76,11 +76,19 @@ public static class DriverActions
         };
     }
 
-    public static DriverActionDefinition SetBool(string trigger, bool value)
+    public static DriverActionDefinition SetBool(string boolean, bool value)
     {
         return new()
         {
-            Action = (driver) => { driver.SetBool(trigger, value); }
+            Action = (driver) => { driver.SetBool(boolean, value); }
+        };
+    }
+
+    public static DriverActionDefinition SetFloat(string floating, float value)
+    {
+        return new()
+        {
+            Action = (driver) => { driver.SetFloat(floating, value); }
         };
     }
 }
@@ -183,8 +191,9 @@ public class ActionDriver : MonoBehaviour
 
     #region Navigation
 
-    internal void MoveTo(Vector3 destination)
+    internal void MoveTo(Vector3 destination, float? maxSpeed = null)
     {
+        if (maxSpeed.HasValue) nav.SetMaxSpeed(maxSpeed.Value);
         nav.SetDestination(destination);
     }
 

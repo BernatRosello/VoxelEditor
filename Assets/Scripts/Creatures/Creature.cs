@@ -16,17 +16,17 @@ public struct BodyMesh
 
 public class Creature : MonoBehaviour
 {
-
+    [SerializeField] private CreatureBehaviourStats stats;
     [SerializeField] private CreatureIdentity identity;
     [SerializeField] private CreatureVisuals visuals;
     [SerializeField] private BodyMesh bodyMesh;
     [SerializeField] private List<BodyPartCollider> bodyPartColliders;
 
-    public CreatureIdentity Identity =>
-        identity;
+    public CreatureIdentity Identity => identity;
 
     public CreatureVisuals Visuals { get => visuals; set => visuals = value; }
     public BodyMesh BodyMesh { get => bodyMesh; set => bodyMesh = value; }
+    public CreatureBehaviourStats Stats { get => stats; set => stats = value; }
 
     [ContextMenu("Reassign GUID")]
     private void ResetGUID()
