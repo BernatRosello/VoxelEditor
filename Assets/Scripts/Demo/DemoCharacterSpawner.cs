@@ -14,7 +14,7 @@ public class DemoCharacterSpawner : MonoBehaviour
 
     [Header("Spawn Animation")]
     [SerializeField] private float spawnDuration = 0.4f;
-    [SerializeField]    private AnimationCurve spawnCurve =        AnimationCurve.EaseInOut(0, 0, 1, 1);
+    [SerializeField] private AnimationCurve spawnCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
     [SerializeField] private int startupSpawnAmount = 20;
 
     // [Header("Randomization")]
@@ -32,11 +32,7 @@ public class DemoCharacterSpawner : MonoBehaviour
     [ContextMenu("Spawn Creature")]
     public void SpawnCreature(bool runtime = false)
     {
-        if (!NavMeshUtility.TryGetRandomPosition(
-                Vector3.zero,
-                spawnRadius,
-                navMeshEdgeClearance,
-                out Vector3 position))
+        if (!NavMeshUtility.TryGetRandomPosition(Vector3.zero, spawnRadius, navMeshEdgeClearance, out Vector3 position))
         {
             Debug.LogWarning("Couldn't find a valid spawn location.");
             return;
@@ -62,8 +58,10 @@ public class DemoCharacterSpawner : MonoBehaviour
 
     private void RandomizeCreature(Creature creature)
     {
+        creature.CreateIdentity();
         creature.Stats = ObjectRandomizer.RandomizeObject(creature.Stats);
         creature.Visuals = ObjectRandomizer.RandomizeObject(creature.Visuals);
+        creature.LoadVisuals();
     }
 
     private IEnumerator SpawnAnimation(Transform t)

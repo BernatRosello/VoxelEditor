@@ -303,8 +303,8 @@ SkinnedMeshRenderer:
   - {fileID: 3758127050379451040}
   - {fileID: 411229703254580963}
   m_BlendShapeWeights:
-  - 0
-  - 0
+  - 100
+  - -75
   m_RootBone: {fileID: 7645182923545557139}
   m_AABB:
     m_Center: {x: 0.0011196136, y: 0.74587834, z: -0.0059864596}
@@ -581,16 +581,16 @@ SkinnedMeshRenderer:
   - {fileID: 3758127050379451040}
   - {fileID: 411229703254580963}
   m_BlendShapeWeights:
-  - 0
-  - 0
-  - 0
-  - 0
-  - 0
-  - 0
-  - 0
-  - 0
-  - 0
-  - 0
+  - 92.285446
+  - -75
+  - 87.5558
+  - -10.049767
+  - 89.60606
+  - 93.05091
+  - -99.09805
+  - 100
+  - 2.0116687
+  - 100
   m_RootBone: {fileID: 7645182923545557139}
   m_AABB:
     m_Center: {x: -0.0029544234, y: 1.305753, z: 0.059405446}
@@ -900,8 +900,8 @@ SkinnedMeshRenderer:
   - {fileID: 3758127050379451040}
   - {fileID: 411229703254580963}
   m_BlendShapeWeights:
-  - 0
-  - 0
+  - 100
+  - -200
   m_RootBone: {fileID: 7645182923545557139}
   m_AABB:
     m_Center: {x: -0.0019190907, y: 0.20559141, z: 0.007472679}
@@ -932,8 +932,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6355132845460530057}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.7071068, y: 5.3196805e-37, z: -5.3196805e-37, w: 0.7071068}
-  m_LocalPosition: {x: -0.002807892, y: 0.7023277, z: 0.0019749831}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.78, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -991,7 +991,7 @@ SkinnedMeshRenderer:
   m_Quality: 0
   m_UpdateWhenOffscreen: 0
   m_SkinnedMotionVectors: 1
-  m_Mesh: {fileID: -4684438407512441539, guid: 1d20048445c8b2b4b92ce18a5460e3ad, type: 3}
+  m_Mesh: {fileID: -4684438407512441539, guid: 294e4ae9915035e4e8a177e4cd0c2406, type: 3}
   m_Bones:
   - {fileID: 7645182923545557139}
   - {fileID: 6762748713169076320}
@@ -1017,7 +1017,8 @@ SkinnedMeshRenderer:
   - {fileID: 3758127050379451040}
   - {fileID: 411229703254580963}
   m_BlendShapeWeights:
-  - 0
+  - 36.2
+  - 100
   - 0
   m_RootBone: {fileID: 7645182923545557139}
   m_AABB:
@@ -1548,12 +1549,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38c954148378a1b45b7e47cfef54623b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Creature
+  stats:
+    Happiness: 1
+    Energy: 1
   identity:
-    guid: 1c16722514b849abb28427e281619d73
+    guid: 000000000000000000000
     originGame: 
     originVersion: 
     creationTimestamp: 0
   visuals: {fileID: 0}
+  defaultVisuals: {fileID: 11400000, guid: 06730fe62a6e82b45b18252f4c0d3910, type: 2}
   bodyMesh:
     Head: {fileID: 1889674800670866692}
     Eyes: {fileID: 9189787160712445790}
@@ -1913,7 +1918,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 2f8b9d77c59895640bbaf8046461a9be, type: 2}
+  - {fileID: 2100000, guid: 8fe3cdb4efd3ed746b94f6531032c2c4, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1966,10 +1971,10 @@ SkinnedMeshRenderer:
   - {fileID: 3758127050379451040}
   - {fileID: 411229703254580963}
   m_BlendShapeWeights:
-  - 0
-  - 0
-  - 0
-  - 0
+  - -100
+  - 24.844826
+  - 160.5665
+  - 1.3662696
   m_RootBone: {fileID: 7645182923545557139}
   m_AABB:
     m_Center: {x: -0.0009577349, y: 1.2771537, z: 0.35601893}

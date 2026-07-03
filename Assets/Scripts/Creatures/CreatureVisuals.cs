@@ -306,6 +306,7 @@ public class CreatureVisuals : ScriptableObject
     {
         body.Torso.SetBlendShapeWeight(TorsoBlendShapes.CylinderIndex, visuals.torsoBlendShapes.Cylinder);
         body.Torso.SetBlendShapeWeight(TorsoBlendShapes.TaperIndex, visuals.torsoBlendShapes.Taper);
+        body.Torso.SetBlendShapeWeight(TorsoBlendShapes.QloIndex, visuals.torsoBlendShapes.Qlo);
     }
 
     private static void ApplyEyesBlendShapeWeights(BodyMesh body, CreatureVisuals visuals)
@@ -461,8 +462,13 @@ public class CreatureVisuals : ScriptableObject
         [Range(-100f, 100f)]
         public float Taper;
 
+        [Range(0f, 100f)]
+        public float Qlo;
+
+
         public const int CylinderIndex = 0;
         public const int TaperIndex = 1;
+        public const int QloIndex = 2;
     }
 
     [System.Serializable]

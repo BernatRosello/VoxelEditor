@@ -19,6 +19,7 @@ public class Creature : MonoBehaviour
     [SerializeField] private CreatureBehaviourStats stats;
     [SerializeField] private CreatureIdentity identity;
     [SerializeField] private CreatureVisuals visuals;
+    [SerializeField] private CreatureVisuals defaultVisuals;
     [SerializeField] private BodyMesh bodyMesh;
     [SerializeField] private List<BodyPartCollider> bodyPartColliders;
 
@@ -29,7 +30,7 @@ public class Creature : MonoBehaviour
     public CreatureBehaviourStats Stats { get => stats; set => stats = value; }
 
     [ContextMenu("Reassign GUID")]
-    private void ResetGUID()
+    public void CreateIdentity()
     {
         identity = CreatureIdentity.Create();
     }
@@ -62,13 +63,13 @@ public class Creature : MonoBehaviour
 #endif
 
     [ContextMenu("Load Visuals")]
-    private void LoadVisuals()
+    public void LoadVisuals()
     {
         // Visual initialization
         if (visuals == null)
         {
             Debug.LogWarning($"Creature [{Identity}] has no visual data associated! Failed to init visuals, loading creature editor defaults...");
-            CreatureVisuals newVisuals = ScriptableObjectExtensions.Clone(CreatureEditorManager.Instance.DefaultVisuals);
+            CreatureVisuals newVisuals = ScriptableObjectExtensions.Clone(defaultVisuals);
             visuals = newVisuals;
             newVisuals.hideFlags = HideFlags.DontSave;
             // return;

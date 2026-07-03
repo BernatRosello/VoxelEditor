@@ -4,7 +4,6 @@ using Unity.Rendering;
 [CreateAssetMenu(menuName = "Creature/Material Library")]
 public class MaterialLibrary : ScriptableObject
 {
-
     [SerializeField] private Material furMaterial;
     [SerializeField] private Material transparentBSDF;
     [SerializeField] private Material opaqueBSDF;

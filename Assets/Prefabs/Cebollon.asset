@@ -10,40 +10,40 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6032075cff5fb564794b4ab815fb744f, type: 3}
-  m_Name: DefaultVisuals
+  m_Name: Cebollon
   m_EditorClassIdentifier: Assembly-CSharp::CreatureVisuals
   headBlendShapes:
-    Float: 92.285446
-    Shrink: -75
-    Cylinder: 87.5558
-    Sphere: -10.049767
-    Taper: 89.60606
-    PointyEars: 93.05091
-    DroopyEars: -99.09805
-    Unicorn: 100
-    Spikes: 2.0116687
-    Mohawk: 100
-  headColor: {r: 0.14542013, g: 0.6619968, b: 0.9419935, a: 1}
+    Float: -100
+    Shrink: 150
+    Cylinder: 100
+    Sphere: 100
+    Taper: -100
+    PointyEars: -16.420395
+    DroopyEars: 16.114807
+    Unicorn: 4.6348453
+    Spikes: -0.5991161
+    Mohawk: 37.89393
+  headColor: {r: 0.8735124, g: 0.9007729, b: 0.6350732, a: 1}
   headMaterial:
     type: 0
     furSettings:
-      Metallic: 0.019412884
-      Pattern: 4
+      Metallic: 0
+      Pattern: 2.596258
       Smoothness: 0.7007381
-      FurLength: 0.0042998963
-      FurDensity: 4.352648
-      FurThickness: 0.046727944
+      FurLength: 0.0040243044
+      FurDensity: 10.617461
+      FurThickness: 0.0233
     bsdfSettings:
       Metallic: 0
       Smoothness: 0.5
       Emission: 0
       Opaqueness: 1
   eyesBlendShapes:
-    Size: -100
-    Distance: 24.844826
-    Cylinder: 160.5665
-    Bore: 1.3662696
-  eyesColor: {r: 0.046542466, g: 0.22515233, b: 0.6369576, a: 1}
+    Size: 0
+    Distance: 80
+    Cylinder: 0
+    Bore: 0
+  eyesColor: {r: 0, g: 0, b: 0, a: 1}
   eyesMaterial:
     type: 1
     furSettings:
@@ -55,22 +55,22 @@ MonoBehaviour:
       FurThickness: 0.0233
     bsdfSettings:
       Metallic: 0
-      Smoothness: 1
-      Emission: -0.5
+      Smoothness: 0.5
+      Emission: 0
       Opaqueness: 1
   torsoBlendShapes:
-    Cylinder: 125.36045
-    Taper: 9.088588
-  torsoColor: {r: 0.09128958, g: 0.6322328, b: 0.95848155, a: 1}
+    Cylinder: 200
+    Taper: 100
+  torsoColor: {r: 0.927773, g: 0.9419937, b: 0.8033874, a: 1}
   torsoMaterial:
-    type: 0
+    type: 2
     furSettings:
       Metallic: 0
       Pattern: 0
       Smoothness: 0.02
-      FurLength: 0.006182717
-      FurDensity: 2.6976295
-      FurThickness: 0.03729271
+      FurLength: 0.00802
+      FurDensity: 4.99
+      FurThickness: 0.0233
     bsdfSettings:
       Metallic: 0
       Smoothness: 0.5
@@ -78,17 +78,17 @@ MonoBehaviour:
       Opaqueness: 1
   armsBlendShapes:
     Cylinder: 100
-    Taper: -75
-  armsColor: {r: 0.038648188, g: 0.57406557, b: 0.9708485, a: 1}
+    Taper: 100
+  armsColor: {r: 0.92138314, g: 0.9058469, b: 0.7006811, a: 1}
   armsMaterial:
     type: 0
     furSettings:
       Metallic: 0
       Pattern: 0
       Smoothness: 0.02
-      FurLength: 0.0032893908
-      FurDensity: 3.417615
-      FurThickness: 0.0134272035
+      FurLength: 0.003748711
+      FurDensity: 4.99
+      FurThickness: 0.0233
     bsdfSettings:
       Metallic: 0
       Smoothness: 0.5
@@ -96,17 +96,17 @@ MonoBehaviour:
       Opaqueness: 1
   legsBlendShapes:
     Cylinder: 100
-    Taper: -200
-  legsColor: {r: 0, g: 0.5117959, b: 0.97497004, a: 1}
+    Taper: 100
+  legsColor: {r: 0.8867156, g: 0.92294335, b: 0.6984567, a: 1}
   legsMaterial:
     type: 0
     furSettings:
       Metallic: 0
       Pattern: 0
       Smoothness: 0.02
-      FurLength: 0.005103706
+      FurLength: 0.00802
       FurDensity: 4.99
-      FurThickness: 0.030632589
+      FurThickness: 0.0233
     bsdfSettings:
       Metallic: 0
       Smoothness: 0.5

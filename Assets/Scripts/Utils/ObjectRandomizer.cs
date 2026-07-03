@@ -17,10 +17,17 @@ public static class ObjectRandomizer
 
     private static void RandomizeObject(object obj)
     {
+        Debug.Log($"Randomizing obj({obj}) of type({(obj?.GetType())})");
+        if (obj == null)
+        {
+            Debug.Log("Skipping null");
+            return;
+        }
         Type type = obj.GetType();
 
         foreach (FieldInfo field in type.GetFields(Flags))
         {
+            Debug.Log($"Randomizing field({field})");
             if (field.IsInitOnly)
                 continue;
 
