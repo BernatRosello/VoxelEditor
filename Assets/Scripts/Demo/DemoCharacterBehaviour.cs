@@ -15,6 +15,7 @@ public class DemoCharacterBehaviour : MonoBehaviour
         CircleDance,
         Follow,
         WalkTo,
+        Idle,
         DoNothing
     }
     [System.Serializable]
@@ -43,6 +44,7 @@ public class DemoCharacterBehaviour : MonoBehaviour
         requestPool[InteractionRequest.Wander] = CreateWanderRequest;
         requestPool[InteractionRequest.WalkTo] = CreateWalkToRequest;
         requestPool[InteractionRequest.Follow] = CreateFollowRequest;
+        requestPool[InteractionRequest.Idle] = CreateIdleRequest;
     }
 
     private void OnValidate()
@@ -171,5 +173,17 @@ public class DemoCharacterBehaviour : MonoBehaviour
         };
 
         InteractionManager.CreateRequest(new FollowTransformRequest(p, candidates.First()));
+    }
+
+    private void CreateIdleRequest()
+    {
+        CreatureIdentity candidate = InteractionManager.Creatures.OrderBy(_ => rnd.value).First();
+
+        IdleParams p = new()
+        {
+            duration = 120
+        };
+
+        InteractionManager.CreateRequest(new IdleInteractionRequest(p, candidate));
     }
 }

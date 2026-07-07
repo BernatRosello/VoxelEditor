@@ -1543,15 +1543,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemoCharacterBehaviour
   interactionWeights:
   - request: 0
-    weight: 3
+    weight: 2
   - request: 1
     weight: 1
   - request: 2
-    weight: 2
+    weight: 1
   - request: 3
     weight: 1
   - request: 4
-    weight: 0
+    weight: 2
+  - request: 5
+    weight: 1
   minReqTime: 0.5
   maxReqTime: 2
 --- !u!114 &1185857093
