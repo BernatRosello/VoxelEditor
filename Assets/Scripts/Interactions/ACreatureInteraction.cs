@@ -140,6 +140,8 @@ public abstract class ACreatureInteraction
     ///     *This is applied automatically when dispatching immediate actions (completionCondition == null)</para>
     /// <para> Transition phase/end interaction → continueUpdateTick = false
     ///     *This is applied automatically at the start of every updateTick</para>
+    /// <para> Manual increment/decrement of ActionIndex → participant.ActionIndex = ...
+    ///     </para>
     /// </summary>
     /// <param name="participant"></param>
     protected abstract void UpdateInteraction(CreatureData participant);
@@ -152,7 +154,7 @@ public abstract class ACreatureInteraction
         InteractionManager.NotifyParticipantLeft(this, left);
     }
 
-    protected virtual void PostTick(float deltaTime) {}
+    protected virtual void PostTick(float deltaTime) { }
 
     #endregion
 
@@ -293,8 +295,37 @@ public abstract class ACreatureInteraction
                             {
                                 break;
                             }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                            var state = participantStates[p];
+                            int previousActionIndex = state.ActionIndex;
+                            bool previousActionComplete = state.ActionComplete;
+                            bool previousContinueUpdateTick = continueUpdateTick;
+#endif
+
                             UpdateInteraction(p);
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                            state = participantStates[p];
+
+                            bool progressed =
+                                state.ActionIndex != previousActionIndex ||          // Action index changed.
+                                state.ActionComplete != previousActionComplete ||    // Async action dispatched.
+                                continueUpdateTick != previousContinueUpdateTick;    // Synchronous advance or phase transition.
+
+                            if (!progressed)
+                            {
+                                throw new InvalidOperationException(
+                                    $"{GetType().Name}.{nameof(UpdateInteraction)}() violated the interaction contract.\n\n" +
+                                    $"The method returned without advancing the interaction state. This would cause the interaction to stall indefinitely.\n\n" +
+                                    $"Every call to {nameof(UpdateInteraction)}() must guarantee one of the following:\n" +
+                                    $" • DispatchAction(...) for an asynchronous action.\n" +
+                                    $" • DispatchAction(...) for an immediate action.\n" +
+                                    $" • Set continueUpdateTick appropriately to transition/end the update phase.\n" +
+                                    $" • Manually modify participant.ActionIndex.\n\n" +
+                                    $"Check that every execution path in your implementation performs one of these actions.");
+                            }
+#endif
                         } while (!CheckLeave(p) && continueUpdateTick);
 
                     }
