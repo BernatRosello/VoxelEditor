@@ -17,7 +17,7 @@ public static class ObjectRandomizer
 
     private static void RandomizeObject(object obj)
     {
-        Debug.Log($"Randomizing obj({obj}) of type({(obj?.GetType())})");
+        // Debug.Log($"Randomizing obj({obj}) of type({(obj?.GetType())})");
         if (obj == null)
         {
             Debug.Log("Skipping null");
@@ -27,7 +27,7 @@ public static class ObjectRandomizer
 
         foreach (FieldInfo field in type.GetFields(Flags))
         {
-            Debug.Log($"Randomizing field({field})");
+            // Debug.Log($"Randomizing field({field})");
             if (field.IsInitOnly)
                 continue;
 

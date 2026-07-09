@@ -102,7 +102,7 @@ public class CircleDanceInteraction : ACreatureInteraction<CircleDanceParams>
                 break;
 
             case 2:
-                Debug.Log($"Creature[{p.Identity}] reached CHECKPOINT ActionIndex == 2.");
+                // Debug.Log($"Creature[{p.Identity}] reached CHECKPOINT ActionIndex == 2.");
                 StateOf(p).ActionIndex++;
                 break;
             case 3:
@@ -128,7 +128,7 @@ public class CircleDanceInteraction : ACreatureInteraction<CircleDanceParams>
                 break;
 
             default:
-                Debug.Log($"C[{p.Identity}] ActionIndex out of scripted range: {StateOf(p).ActionIndex} ActionComplete({StateOf(p).ActionComplete})");
+                // Debug.Log($"C[{p.Identity}] ActionIndex out of scripted range: {StateOf(p).ActionIndex} ActionComplete({StateOf(p).ActionComplete})");
                 break;
         }
     }

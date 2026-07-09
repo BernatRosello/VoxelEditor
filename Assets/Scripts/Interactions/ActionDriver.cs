@@ -91,10 +91,19 @@ public static class DriverActions
             Action = (driver) => { driver.SetFloat(floating, value); }
         };
     }
+
+    public static DriverActionDefinition EmitParticle(CreatureParticle particle, int count = 1)
+    {
+        return new()
+        {
+            Action = (driver) => { driver.EmitParticle(particle, count); }
+        };
+    }
 }
 
 [RequireComponent(typeof(NavigationAnimator))]
 [RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(ParticleController))]
 public class ActionDriver : MonoBehaviour
 {
     private IReadOnlyList<GameObject> meshObjects;
@@ -102,6 +111,7 @@ public class ActionDriver : MonoBehaviour
 
     private Animator animator;
     private NavigationAnimator nav;
+    private ParticleController particleController;
     public Animator Animator => animator;
 
     public Transform CachedTransform
@@ -115,13 +125,46 @@ public class ActionDriver : MonoBehaviour
 
     public bool IsBusy => completionCondition != null;
 
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        bool dirty = false;
+
+        if (particleController == null)
+        {
+            particleController = GetComponent<ParticleController>();
+            dirty = true;
+        }
+
+        if (nav == null)
+        {
+            nav = GetComponent<NavigationAnimator>();
+            dirty = true;
+        }
+
+        if (animator == null)
+        {
+            animator = GetComponent<Animator>();
+            dirty = true;
+        }
+
+        if (dirty)
+        {
+            UnityEditor.EditorUtility.SetDirty(this);
+        }
+    }
+#endif
+
     private void Awake()
     {
         CachedTransform = transform;
 
-        nav = GetComponent<NavigationAnimator>();
+        if (particleController == null) particleController = GetComponent<ParticleController>();
 
-        animator = GetComponent<Animator>();
+        if (nav == null) nav = GetComponent<NavigationAnimator>();
+
+        if (animator == null) animator = GetComponent<Animator>();
 
         meshObjects = GetComponentsInChildren<SkinnedMeshRenderer>().Select(m => m.gameObject).ToList();
     }
@@ -149,11 +192,12 @@ public class ActionDriver : MonoBehaviour
 
     private float idleEmoteTimer;
     private float idleTime;
+
     private void IdleUpdate()
     {
         if (idleTime > idleEmoteTimer)
         {
-            idleEmoteTimer = 10 + UnityEngine.Random.Range(-5,10);
+            idleEmoteTimer = 10 + UnityEngine.Random.Range(-5, 10);
             animator.SetTrigger("IdleEmote");
         }
     }
@@ -330,7 +374,7 @@ public class ActionDriver : MonoBehaviour
         if (originalLayers.ContainsKey(meshObjects[0]))
             return;
 
-        foreach(var go in meshObjects)
+        foreach (var go in meshObjects)
         {
             originalLayers[go] = go.layer;
         }
@@ -343,7 +387,7 @@ public class ActionDriver : MonoBehaviour
     private void SetMeshLayers(string layerName)
     {
         int v = LayerMask.NameToLayer(layerName);
-        foreach(var go in meshObjects)
+        foreach (var go in meshObjects)
         {
             go.layer = v;
         }
@@ -370,11 +414,16 @@ public class ActionDriver : MonoBehaviour
 
     public void SetOutlineNONE()
     {
-        foreach(var kvp in originalLayers)
+        foreach (var kvp in originalLayers)
         {
             kvp.Key.layer = kvp.Value;
         }
         ClearMeshLayers();
+    }
+
+    internal void EmitParticle(CreatureParticle particle, int count = 1)
+    {
+        particleController.EmitParticles(particle, count);
     }
     #endregion
 }

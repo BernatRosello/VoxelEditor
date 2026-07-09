@@ -145,7 +145,7 @@ public class CreatureEditorManager : MonoBehaviour
         var creature = hit.transform.GetComponentInParent<Creature>();
         if (creature != currentCreature)
         {
-            Debug.Log("Changing Selected Creature");
+            // Debug.Log("Changing Selected Creature");
             SetCurrentCreature(creature);
         }
 

@@ -20,6 +20,9 @@ public sealed class InteractionManager : MonoBehaviour
 
     [SerializeField] private float TPS = 20;
     private float TickTime => 1.0f / TPS;
+
+    public static IReadOnlyCollection<ACreatureInteraction> Interactions => Instance.interactions;
+
     private float tickTimer;
 
     [Header("NavMesh Configurations")]
@@ -82,9 +85,9 @@ public sealed class InteractionManager : MonoBehaviour
 
             interaction.Tick(TickTime);
 
-            if (interaction.IsInteractionEmpty())
+            if (!interaction.ValidateInteraction())
             {
-                Debug.Log($"Removed empty '{interaction.Name}' Interaction");
+                Debug.Log($"Removed '{interaction.Name}' Interaction in no longer valid state");
                 interactions.RemoveAt(i);
             }
         }

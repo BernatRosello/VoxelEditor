@@ -39,16 +39,10 @@ public class FollowTransformInteraction : ACreatureInteraction<FollowTransformPa
 
     public override bool InterruptLowerPriorityInteractions => true;
     
-    private float totalEllapsedTime;
-
-    protected override void PostTick(float deltaTime)
-    {
-        totalEllapsedTime += deltaTime;
-    }
 
     protected override bool CheckLeave(CreatureData participantData)
     {
-        return (totalEllapsedTime >= Parameters.duration) || Parameters.followTarget == null;
+        return (TotalEllapsedTime >= Parameters.duration) || Parameters.followTarget == null;
     }
        
     protected override void UpdateInteraction(CreatureData p)

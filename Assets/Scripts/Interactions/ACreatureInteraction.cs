@@ -45,6 +45,7 @@ public abstract class ACreatureInteraction<TParams> : ACreatureInteraction where
 
 public abstract class ACreatureInteraction
 {
+    protected static bool DebugBaseClass = false;
     #region COMPILE TIME
     public abstract string Name { get; }
     public abstract string Description { get; }
@@ -62,6 +63,7 @@ public abstract class ACreatureInteraction
     private readonly Queue<CreatureData> pendingJoin = new();
     private readonly Queue<CreatureData> pendingLeave = new();
     protected bool continueUpdateTick;
+    private float ellapsed;
     #endregion
 
     public ACreatureInteraction(List<CreatureData> participantList)
@@ -76,22 +78,22 @@ public abstract class ACreatureInteraction
     /// Determines conditions for when a creature is allowed to join (be it during initialization or late join)
     /// 
     /// <para> Base implementation: </para>
-    ///     participants.Count &lt; MaxParticipants
+    ///     ParticipantCount &lt; MaxParticipants
     /// </summary>
     /// <param name="participant"></param>
     /// <returns></returns>
-    protected virtual bool CheckJoin(CreatureData participant) { return participants.Count < MaxParticipants; }
+    protected virtual bool CheckJoin(CreatureData participant) { return TotalParticipantCount < MaxParticipants; }
     protected virtual bool JoinFinished(CreatureData participant) { return true; }
 
     /// <summary>
     /// Determines conditions for when a creature is allowed to join (be it during initialization or late join;)
     /// 
     /// <para> Base implementation: </para>
-    ///     participants.Count &gt; MinParticipants
+    ///     ParticipantCount &gt; MinParticipants
     /// </summary>
     /// <param name="participantData"></param>
     /// <returns></returns>
-    protected virtual bool CheckLeave(CreatureData participantData) { return participants.Count < MinParticipants; }
+    protected virtual bool CheckLeave(CreatureData participantData) { return TotalParticipantCount < MinParticipants; }
 
     /// <summary>
     /// Determines the completion condition used when calling Tick on the Leave Phase.
@@ -129,7 +131,7 @@ public abstract class ACreatureInteraction
     protected virtual void JoinInteraction(CreatureData participant) { }
     protected virtual void OnParticipantJoined(CreatureData joined)
     {
-        Debug.Log($"C[{joined.Identity}] JOINED the interaction[{this.Name}]");
+        if (DebugBaseClass) Debug.Log($"C[{joined.Identity}] JOINED the interaction[{this.Name}]");
     }
 
     /// <summary>
@@ -145,12 +147,12 @@ public abstract class ACreatureInteraction
     /// </summary>
     /// <param name="participant"></param>
     protected abstract void UpdateInteraction(CreatureData participant);
-    protected virtual void LeaveInteraction(CreatureData participant) { Debug.Log($"C[{participant.Identity}] Leaving..."); }
+    protected virtual void LeaveInteraction(CreatureData participant) { if (DebugBaseClass) Debug.Log($"C[{participant.Identity}] Leaving..."); }
 
     // Base must be called if overriden to ensure that interaction manager is correctly notified of internal participant abandoment of interaction
     protected virtual void OnParticipantLeft(CreatureData left)
     {
-        Debug.Log($"C[{left.Identity}] LEFT the interaction[{this.Name}]");
+        if (DebugBaseClass) Debug.Log($"C[{left.Identity}] LEFT the interaction[{this.Name}]");
         InteractionManager.NotifyParticipantLeft(this, left);
     }
 
@@ -165,6 +167,14 @@ public abstract class ACreatureInteraction
     /// Includes participants that are still pending to join
     /// </summary>
     public IReadOnlyList<CreatureData> AllParticipants => participants.Union(pendingJoin).ToList();
+    public int TotalParticipantCount => participants.Count + pendingJoin.Count + pendingLeave.Count;
+    public int OccupiedParticipantSlotCount => participants.Count + pendingJoin.Count;
+    /// <summary>
+    /// Time the interaction has gone on for
+    /// <para> *May actually be lower than real ellapsed time since the start of the interaction,
+    ///  depending on the deltaTime and call frequency to the Tick() function. </para>
+    /// </summary>
+    public float TotalEllapsedTime => ellapsed;
 
     public CreatureInteractionState TryReadState(CreatureData creature)
     {
@@ -179,12 +189,7 @@ public abstract class ACreatureInteraction
     /// <returns></returns>
     public virtual bool ValidateInteraction()
     {
-        return (participants.Count + pendingJoin.Count - pendingLeave.Count) >= MinParticipants;
-    }
-
-    public virtual bool IsInteractionEmpty()
-    {
-        return participants.Count == 0;
+        return TotalParticipantCount >= MinParticipants;
     }
 
     public virtual bool CanJoin(CreatureData c) => true;
@@ -193,8 +198,8 @@ public abstract class ACreatureInteraction
         if (!AllowLateJoining ||
             pendingJoin.Contains(participant) ||
             participants.Contains(participant) ||
-            participantStates[participant].Phase == InteractionPhase.Join ||
-            participants.Count >= MaxParticipants)
+            pendingLeave.Contains(participant) ||
+            TotalParticipantCount >= MaxParticipants)
         {
             return false;
         }
@@ -209,6 +214,7 @@ public abstract class ACreatureInteraction
     {
         if (!AllowEarlyLeaving ||
             pendingLeave.Contains(participant) ||
+            pendingJoin.Contains(participant) ||
             !participants.Contains(participant) ||
             participantStates[participant].Phase == InteractionPhase.Leave)
         {
@@ -252,7 +258,7 @@ public abstract class ACreatureInteraction
 
         foreach (var p in participants)
         {
-            // Debug.Log(
+            // if (DebugBaseClass) Debug.Log(
             //     $"[{p.Identity}] " +
             //     $"Phase={participantStates[p].Phase} " +
             //     $"Action={participantStates[p].ActionIndex} " +
@@ -269,7 +275,7 @@ public abstract class ACreatureInteraction
 
                     JoinInteraction(p);
 
-                    if (JoinFinished(p))
+                    if (participantStates[p].ActionComplete && JoinFinished(p))
                     {
                         OnParticipantJoined(p);
                         participantStates[p].Phase = InteractionPhase.Update;
@@ -281,13 +287,16 @@ public abstract class ACreatureInteraction
 
                     if (CheckLeave(p))
                     {
-                        Debug.Log($"C[{p.Identity}] met leaving conditions, abandoning Update Phase...");
+                        if (DebugBaseClass) Debug.Log($"C[{p.Identity}] met leaving conditions, abandoning Update Phase...");
                         participantStates[p].Phase = InteractionPhase.Leave;
                         break;
                     }
 
                     if (participantStates[p].ActionComplete)
                     {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        int lockedOutCounter = 0;
+#endif
                         continueUpdateTick = false;
                         do
                         {
@@ -311,19 +320,24 @@ public abstract class ACreatureInteraction
                             bool progressed =
                                 state.ActionIndex != previousActionIndex ||          // Action index changed.
                                 state.ActionComplete != previousActionComplete ||    // Async action dispatched.
-                                continueUpdateTick != previousContinueUpdateTick;    // Synchronous advance or phase transition.
+                                continueUpdateTick == previousContinueUpdateTick && continueUpdateTick == true;    // Synchronous advance or phase transition.
 
                             if (!progressed)
                             {
-                                throw new InvalidOperationException(
-                                    $"{GetType().Name}.{nameof(UpdateInteraction)}() violated the interaction contract.\n\n" +
-                                    $"The method returned without advancing the interaction state. This would cause the interaction to stall indefinitely.\n\n" +
-                                    $"Every call to {nameof(UpdateInteraction)}() must guarantee one of the following:\n" +
-                                    $" • DispatchAction(...) for an asynchronous action.\n" +
-                                    $" • DispatchAction(...) for an immediate action.\n" +
-                                    $" • Set continueUpdateTick appropriately to transition/end the update phase.\n" +
-                                    $" • Manually modify participant.ActionIndex.\n\n" +
-                                    $"Check that every execution path in your implementation performs one of these actions.");
+                                lockedOutCounter++;
+                                if (lockedOutCounter > 20)
+                                {
+                                    Debug.Break();
+                                    throw new InvalidOperationException(
+                                        $"{GetType().Name}.{nameof(UpdateInteraction)}() violated the interaction contract.\n\n" +
+                                        $"The method returned without advancing the interaction state. This would cause the interaction to stall indefinitely.\n\n" +
+                                        $"Every call to {nameof(UpdateInteraction)}() must guarantee one of the following:\n" +
+                                        $" • DispatchAction(...) for an asynchronous action.\n" +
+                                        $" • DispatchAction(...) for an immediate action.\n" +
+                                        $" • Set continueUpdateTick appropriately to transition/end the update phase.\n" +
+                                        $" • Manually modify participant.ActionIndex.\n\n" +
+                                        $"Check that every execution path in your implementation performs one of these actions.");
+                                }
                             }
 #endif
                         } while (!CheckLeave(p) && continueUpdateTick);
@@ -335,7 +349,7 @@ public abstract class ACreatureInteraction
 
                     if (!participantStates[p].ActionComplete)
                     {
-                        Debug.Log(
+                        if (DebugBaseClass) Debug.Log(
                             $"[{p.Identity}] Waiting to enter Leave. " +
                             $"DriverBusy={p.Driver.IsBusy}");
                         break;
@@ -343,7 +357,7 @@ public abstract class ACreatureInteraction
 
                     LeaveInteraction(p);
 
-                    if (LeaveFinished(p))
+                    if (participantStates[p].ActionComplete && LeaveFinished(p))
                     {
                         OnParticipantLeft(p);
                         pendingLeave.Enqueue(p);
@@ -358,13 +372,18 @@ public abstract class ACreatureInteraction
             BaseRemoveParticipant(pendingLeave.Dequeue());
         }
 
+        ellapsed += deltaTime;
         PostTick(deltaTime);
     }
 
     #endregion
 
     #region HELPER METHODS
-
+    public override string ToString()
+    {
+        // return guid;
+        return $"{Name} participants({TotalParticipantCount}/{MaxParticipants})";
+    }
     private void BaseAddParticipant(CreatureData p)
     {
         participants.Add(p);
@@ -408,16 +427,17 @@ public abstract class ACreatureInteraction
         return participantStates[creature];
     }
 
+    protected bool ParticipantFinishedAction(CreatureData participant, int actionIndex)
+    {
+        CreatureInteractionState state = participantStates[participant];
+        return state.ActionIndex < actionIndex || (state.ActionIndex == actionIndex && !state.ActionComplete);
+    }
+
     protected bool AllParticipantsPastAction(int actionIndex)
     {
         foreach (var participant in participants)
         {
-            CreatureInteractionState state = participantStates[participant];
-
-            if (state.ActionIndex < actionIndex || (state.ActionIndex == actionIndex && !state.ActionComplete))
-            {
-                return false;
-            }
+            if (!ParticipantFinishedAction(participant, actionIndex)) return false;
         }
 
         return true;
@@ -437,7 +457,7 @@ public abstract class ACreatureInteraction
             if (flags[(participant, currentAction)] != true)
             {
                 flags[(participant, currentAction)] = true;
-                Debug.Log($"C[{participant.Identity}] -> Action[{StateOf(participant).ActionIndex}] is Un-Synchronized");
+                if (DebugBaseClass) Debug.Log($"C[{participant.Identity}] -> Action[{StateOf(participant).ActionIndex}] is Un-Synchronized");
             }
             return false;
         }
@@ -453,7 +473,7 @@ public abstract class ACreatureInteraction
                 if (flags[(participant, currentAction)] != true)
                 {
                     flags[(participant, currentAction)] = true;
-                    Debug.Log($"C[{participant.Identity}] -> Action[{StateOf(participant).ActionIndex}] is Synchronized. Waiting for C[{other.Identity}] to reach Action[{currentAction}]");
+                    if (DebugBaseClass) Debug.Log($"C[{participant.Identity}] -> Action[{StateOf(participant).ActionIndex}] is Synchronized. Waiting for C[{other.Identity}] to reach Action[{currentAction}]");
                 }
                 return true;
             }
@@ -530,7 +550,7 @@ public abstract class ACreatureInteraction
     /// </param>
     protected void DispatchAction(CreatureData participant, DriverActionDefinition action, Func<bool> completionConditionOverride = null)
     {
-        Debug.Log($"C[{participant.Identity}]: Action[{participantStates[participant].ActionIndex}] Dispatched");
+        if (DebugBaseClass) Debug.Log($"C[{participant.Identity}]: Action[{participantStates[participant].ActionIndex}] Dispatched");
         participantStates[participant].ActionComplete = false;
         Func<bool> completeExpr = completionConditionOverride ??
             (action.CompletionCondition == null
@@ -545,7 +565,7 @@ public abstract class ACreatureInteraction
             action.Action,
             () =>
             {
-                Debug.Log($"C[{participant.Identity}]: Action[{participantStates[participant].ActionIndex}] COMPLETE");
+                if (DebugBaseClass) Debug.Log($"C[{participant.Identity}]: Action[{participantStates[participant].ActionIndex}] COMPLETE");
                 participantStates[participant].ActionComplete = true;
                 participantStates[participant].ActionIndex++;
             },

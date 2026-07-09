@@ -49,4 +49,39 @@ public class MaterialLibrarySingleton : MonoBehaviour
                 return null;
         }
     }
+
+    public static Material GetMaterial(CreatureParticle particle)
+    {
+        switch (particle)
+        {
+            case CreatureParticle.Conversation:
+                return MaterialLibrary.ConversationParticle;
+            case CreatureParticle.Pathing:
+                return MaterialLibrary.PathingParticle;
+            case CreatureParticle.PathingBlocked:
+                return MaterialLibrary.PathingBlockedParticle;
+            case CreatureParticle.Happy:
+                return MaterialLibrary.HappyParticle;
+            case CreatureParticle.Sad:
+                return MaterialLibrary.SadParticle;
+            case CreatureParticle.Angry:
+                return MaterialLibrary.AngryParticle;
+            case CreatureParticle.EnergyHigh:
+                return MaterialLibrary.EnergyHighParticle;
+            case CreatureParticle.EnergyLow:
+                return MaterialLibrary.EnergyLowParticle;
+            case CreatureParticle.Love:
+                return MaterialLibrary.LoveParticle;
+            case CreatureParticle.Cancel:
+                return MaterialLibrary.CancelParticle;
+            case CreatureParticle.Bro:
+                return MaterialLibrary.BroParticle;
+            case CreatureParticle.PathingMultiple:
+                return MaterialLibrary.PathingMultipleParticle;
+            case CreatureParticle.PointHand:
+                return MaterialLibrary.PointHandParticle;
+            default:
+                return null;
+        }
+    }
 }

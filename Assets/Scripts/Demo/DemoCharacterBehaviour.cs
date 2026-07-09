@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using Unity.Android.Gradle;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using rnd = UnityEngine.Random;
@@ -16,7 +14,9 @@ public class DemoCharacterBehaviour : MonoBehaviour
         Follow,
         WalkTo,
         Idle,
-        DoNothing
+        DoNothing,
+        Talk,
+        TryJoinRandomInteraction
     }
     [System.Serializable]
     public class InteractionRequestWeight
@@ -45,6 +45,8 @@ public class DemoCharacterBehaviour : MonoBehaviour
         requestPool[InteractionRequest.WalkTo] = CreateWalkToRequest;
         requestPool[InteractionRequest.Follow] = CreateFollowRequest;
         requestPool[InteractionRequest.Idle] = CreateIdleRequest;
+        requestPool[InteractionRequest.Talk] = CreateTalkRequest;
+        requestPool[InteractionRequest.TryJoinRandomInteraction] = TryJoinRandomOngoing;
     }
 
     private void OnValidate()
@@ -185,5 +187,32 @@ public class DemoCharacterBehaviour : MonoBehaviour
         };
 
         InteractionManager.CreateRequest(new IdleInteractionRequest(p, candidate));
+    }
+
+    private void CreateTalkRequest()
+    {
+        TalkInteraction temp = new(null, null);
+
+        int count = rnd.Range(temp.MinParticipants, temp.MaxParticipants + 1);
+        count = Math.Clamp(count, 1, InteractionManager.Creatures.Count);
+        List<CreatureIdentity> candidates = InteractionManager.Creatures.OrderBy(_ => rnd.value).Take(count).ToList();
+
+        TalkParams p = new()
+        {
+            duration = rnd.Range(10f, 60f)
+        };
+
+        InteractionManager.CreateRequest(new TalkInteractionRequest(p, candidates.AsEnumerable()));
+    }
+
+    private void TryJoinRandomOngoing()
+    {
+        if (InteractionManager.Interactions.Count == 0) return;
+        
+        var p = InteractionManager.TryGetCreatureData(InteractionManager.Creatures.OrderBy(_ => rnd.value).First());
+        var ongoing = InteractionManager.Interactions.OrderBy(_ => rnd.value).First();
+        var allowed = InteractionManager.Instance.TryJoinInteraction(ongoing, p);
+        
+        Debug.Log($"Creature({p.Identity}) attempted to join Interaction({ongoing})");
     }
 }

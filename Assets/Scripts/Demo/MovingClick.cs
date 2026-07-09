@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using TMPro;
+using Unity.VisualScripting;
 
 public class MoveToClickPoint : MonoBehaviour
 {
@@ -11,7 +12,8 @@ public class MoveToClickPoint : MonoBehaviour
         None,
         UserMove,
         Dance,
-        Wander
+        Wander,
+        Idle
     }
 
     [SerializeField] private RequestMode activeRequest;
@@ -28,6 +30,8 @@ public class MoveToClickPoint : MonoBehaviour
     private PlayerControls controls;
     [SerializeField] private List<int> minimumSelected = new();
     private List<ActionDriver> outlinedCreatures = new();
+
+    [SerializeField] private int m_avgEmotesPerMinute = 5;
 
     private void Awake()
     {
@@ -166,9 +170,9 @@ Participant[{creature.Identity}] State
 
 
 
-        Creature c = GetCreature(hit);hit.transform.TryGetComponent(out BodyPartCollider body);
+        Creature c = GetCreature(hit); hit.transform.TryGetComponent(out BodyPartCollider body);
         if (c == null) return null;
-        
+
         c.TryGetComponent(out ActionDriver creatureDriver);
         // Debug.Log($"Fetched CreatureDriver {creatureDriver} from {body.creature.Identity}'s {body.BodyPart}");
         return creatureDriver;
@@ -225,7 +229,7 @@ Participant[{creature.Identity}] State
         hit.transform.TryGetComponent(out BodyPartCollider body);
         if (body == null)
         {
-            Debug.Log($"Failed to hit valid BodyPartCollider, instead hit: {hit.transform.gameObject}");
+            // Debug.Log($"Failed to hit valid BodyPartCollider, instead hit: {hit.transform.gameObject}");
             return null;
         }
         return body.creature;
@@ -238,7 +242,7 @@ Participant[{creature.Identity}] State
 
         selectedCreatures.Add(creature);
 
-        Debug.Log($"Selected {creature.name}");
+        // Debug.Log($"Selected {creature.name}");
     }
 
     private void Deselect(Creature creature)
@@ -248,7 +252,7 @@ Participant[{creature.Identity}] State
 
         selectedCreatures.Remove(creature);
 
-        Debug.Log($"Deselected {creature.name}");
+        // Debug.Log($"Deselected {creature.name}");
     }
 
     private void CreateRequest(RaycastHit hit)
@@ -289,6 +293,19 @@ Participant[{creature.Identity}] State
                     InteractionManager.CreateRequest(wanderRequest);
                 }
                 break;
+
+            case RequestMode.Idle:
+
+                IdleParams p = new()
+                {
+                    duration = 120, avgEmotesPerMinute = m_avgEmotesPerMinute
+                };
+                foreach (var c in selectedCreatures)
+                {
+                    InteractionManager.CreateRequest(new IdleInteractionRequest(p, c.Identity));
+                }
+                break;
+
         }
 
         // Request successfully created -> clear selection

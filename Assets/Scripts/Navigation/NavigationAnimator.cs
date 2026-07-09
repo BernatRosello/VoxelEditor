@@ -277,7 +277,7 @@ public class NavigationAnimator : MonoBehaviour
         //
         if (!isMoving && !isTurning)
         {
-            Debug.Log($"Remaining Distance: {remainingDistance}/{movementThreshold.Start}");
+            // Debug.Log($"Remaining Distance: {remainingDistance}/{movementThreshold.Start}");
             if (absAngle > turningThreshold.Start)
             {
                 animator.SetBool("IsTurning", true);

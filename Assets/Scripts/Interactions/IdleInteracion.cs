@@ -1,9 +1,12 @@
 using System.Collections.Generic;
+using Unity.Cinemachine;
+using UnityEngine;
 using rnd = UnityEngine.Random;
 
 public class IdleParams : AInteractionParams
 {
     public float duration;
+    public int avgEmotesPerMinute;
 }
 
 public class IdleInteractionRequest : AInteractionRequest<IdleInteraction, IdleParams>
@@ -38,26 +41,27 @@ public class IdleInteraction : ACreatureInteraction<IdleParams>
 
     public override bool InterruptLowerPriorityInteractions => false;
 
-    float ellapsed;
-    bool trigger;
+    bool trigger = true;
 
     protected override bool CheckLeave(CreatureData participantData)
     {
-        return base.CheckLeave(participantData) && ellapsed >= Parameters.duration;
+        return base.CheckLeave(participantData) && TotalEllapsedTime >= Parameters.duration;
     }
 
     protected override void PostTick(float deltaTime)
     {
-        ellapsed += deltaTime;
-        trigger = rnd.value < (1 / 60f * deltaTime);
+        trigger = rnd.value < (Parameters.avgEmotesPerMinute / 60f * deltaTime);
     }
 
     protected override void UpdateInteraction(CreatureData participant)
     {
         if (trigger)
         {
-            trigger = false;
-            DispatchAction(participant, DriverActions.SetTrigger("EmoteTrigerr"));
+            DispatchAction(participant, DriverActions.EmitParticle(CreatureParticle.Cancel, 3));
+            Debug.Log($"[{participant.Identity}] Triggered an emote");
+            DispatchAction(participant, DriverActions.SetTrigger("EmoteTrigger"));
         }
+        continueUpdateTick = false;
+        trigger = false;
     }
 }

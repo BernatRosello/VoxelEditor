@@ -37,6 +37,5 @@ public class UIUtils
     }
 
     hoverPanel.position = mouse + offset;
-    Debug.Log($"{hoverPanel.pivot}");
 }
 }

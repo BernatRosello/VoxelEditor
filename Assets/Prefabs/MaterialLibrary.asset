@@ -15,3 +15,16 @@ MonoBehaviour:
   furMaterial: {fileID: 2100000, guid: 2f8b9d77c59895640bbaf8046461a9be, type: 2}
   transparentBSDF: {fileID: 2100000, guid: ba736ef64b01ec243ac6b2ef6496df6a, type: 2}
   opaqueBSDF: {fileID: 2100000, guid: 8fe3cdb4efd3ed746b94f6531032c2c4, type: 2}
+  conversation: {fileID: 2100000, guid: 647091fb43b336f4b9f8ff9af7183845, type: 2}
+  pathing: {fileID: 2100000, guid: f5ce7fe44754f9649bd13df7946cdab9, type: 2}
+  pathingBlocked: {fileID: 2100000, guid: d04ccfb14d768dd44a313bd05849d9b8, type: 2}
+  energyHigh: {fileID: 2100000, guid: c2b755ca644aff04fb018bbd739ef211, type: 2}
+  energyLow: {fileID: 2100000, guid: d9bbeb865c51b644babdaf9aaf686fd8, type: 2}
+  love: {fileID: 2100000, guid: 33b4bc327b0fa374892610a6be40dc6a, type: 2}
+  happy: {fileID: 2100000, guid: 385e44b74f6827e40996d57ea02ea6fd, type: 2}
+  sad: {fileID: 2100000, guid: 73cfe4a2111ab8f459dd726a9f693c4b, type: 2}
+  angry: {fileID: 2100000, guid: 2525a7c223a20ed4bbf9850165c1608f, type: 2}
+  cancel: {fileID: 2100000, guid: e61c0cd72e5376d44b38549fbe8fd96a, type: 2}
+  bro: {fileID: 2100000, guid: 7e3a7dd94afaed943baec228fc2babc0, type: 2}
+  pathingMultiple: {fileID: 2100000, guid: 228063ebc668e184c89235ddd4e8129b, type: 2}
+  pointHand: {fileID: 2100000, guid: 18fc68b4cc45ba646af1c47d835bd76f, type: 2}

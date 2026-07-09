@@ -39,16 +39,9 @@ public class WanderingInteraction : ACreatureInteraction<WanderingParams>
     public override InteractionPriority Priority => 0;
     public override bool InterruptLowerPriorityInteractions => false;
 
-    private float totalEllapsedTime;
-
-    protected override void PostTick(float deltaTime)
-    {
-        totalEllapsedTime += deltaTime;
-    }
-
     protected override bool CheckLeave(CreatureData participantData)
     {
-        return totalEllapsedTime >= Parameters.duration;
+        return TotalEllapsedTime >= Parameters.duration;
     }
 
     protected override void UpdateInteraction(CreatureData p)
