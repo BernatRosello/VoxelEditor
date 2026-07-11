@@ -42,3 +42,5 @@ MonoBehaviour:
   partyHat: {fileID: 2100000, guid: c6e359f1f993fa94c8ac3126885272e8, type: 2}
   joke: {fileID: 2100000, guid: a2a50e8c772bb6848ac5c037eab87900, type: 2}
   receivingHands: {fileID: 2100000, guid: e07350b7e04a28041be1daa54009eb6c, type: 2}
+  upArrow: {fileID: 2100000, guid: 6d0439e5f62b6fe47a2fb67da976d04f, type: 2}
+  downArrow: {fileID: 2100000, guid: 482d2dad5a4ba034e84207a80810d8f7, type: 2}

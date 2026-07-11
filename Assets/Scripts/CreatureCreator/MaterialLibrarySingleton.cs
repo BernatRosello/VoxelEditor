@@ -108,6 +108,10 @@ public class MaterialLibrarySingleton : MonoBehaviour
                 return MaterialLibrary.JokeParticle;
             case CreatureParticle.ReceivingHands:
                 return MaterialLibrary.ReceivingHandsParticle;
+            case CreatureParticle.UpArrow:
+                return MaterialLibrary.UpArrowParticle;
+            case CreatureParticle.DownArrow:
+                return MaterialLibrary.DownArrowParticle;
             default:
                 return null;
         }

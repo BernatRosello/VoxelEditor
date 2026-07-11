@@ -36,6 +36,8 @@ public class MaterialLibrary : ScriptableObject
     [SerializeField] private Material partyHat;
     [SerializeField] private Material joke;
     [SerializeField] private Material receivingHands;
+    [SerializeField] private Material upArrow;
+    [SerializeField] private Material downArrow;
 
 
     public Material FurMaterial { get => furMaterial; }
@@ -70,4 +72,6 @@ public class MaterialLibrary : ScriptableObject
     public Material PartyHatParticle { get => partyHat; set => partyHat = value; }
     public Material JokeParticle { get => joke; set => joke = value; }
     public Material ReceivingHandsParticle { get => receivingHands; set => receivingHands = value; }
+    public Material UpArrowParticle { get => upArrow; set => upArrow = value; }
+    public Material DownArrowParticle { get => downArrow; set => downArrow = value; }
 }

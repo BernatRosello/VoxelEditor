@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -99,12 +100,29 @@ public class TalkInteraction : ACreatureInteraction<TalkParams>
         {
             DispatchAction(participant, DriverActions.EmitParticle(CreatureParticle.Conversation));         // Action 4 + n
             Debug.Log($"[{participant.Identity}] Triggered Talking anim!");
-            DispatchAction(participant, DriverActions.SetTrigger("TalkTrigger", waitOnState:"Talk Emote")); // Action 4 + n + 1
+            DispatchAction(participant, DriverActions.SetTrigger("TalkTrigger", waitOnState: "Talk Emote")); // Action 4 + n + 1
+            StateOf(participant).ActionIndex = 1;
         }
-        else if (StateOf(participant).ActionIndex % 4 == 0)
+        else
         {
-            DispatchAction(participant, DriverActions.EmitParticle(participant.Stats.GetEmotionParticle()));
-            DispatchAction(participant, DriverActions.FacePosition(GetConversationCenter()), 3);
+            switch (StateOf(participant).ActionIndex)
+            {
+                case 1:
+                    DispatchAction(participant, DriverActions.EmitParticle(participant.Stats.GetEmotionParticle()));
+                    DispatchAction(participant, DriverActions.FacePosition(GetConversationCenter()), 3);
+                    StateOf(participant).ActionIndex = 2;
+                    break;
+                default:
+                    var mod = rnd.Range(-0.1f, 0.1f);
+                    participant.Stats.Happiness += mod;
+                    List<CreatureParticle> particles = new() { CreatureParticle.Happy };
+                    if (mod > 0)
+                        particles.Add(CreatureParticle.UpArrow);
+                    else
+                        particles.Add(CreatureParticle.DownArrow);
+                    DispatchAction(participant, DriverActions.EmitParticles(particles));
+                    break;
+            }
         }
         continueUpdateTick = false;
         trigger = false;

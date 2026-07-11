@@ -102,11 +102,19 @@ public static class DriverActions
         };
     }
 
-    public static DriverActionDefinition EmitParticle(CreatureParticle particle, int count = 1)
+    public static DriverActionDefinition EmitParticle(CreatureParticle particle,  int count = 1)
     {
         return new()
         {
             Action = (driver) => { driver.EmitParticle(particle, count); }
+        };
+    }
+
+    public static DriverActionDefinition EmitParticles(IEnumerable<CreatureParticle> particles)
+    {
+        return new()
+        {
+            Action = (driver) => { driver.EmitParticles(particles); }
         };
     }
 }
@@ -450,7 +458,13 @@ public class ActionDriver : MonoBehaviour
         ClearMeshLayers();
     }
 
-    internal void EmitParticle(CreatureParticle particle, int count = 1)
+    internal void EmitParticles(IEnumerable<CreatureParticle> particles)
+    {
+        foreach (var p in particles)
+            EmitParticle(p);
+    }
+
+    internal void EmitParticle(CreatureParticle particle, float scale = 1, int count = 1)
     {
         particleController.EmitParticles(particle, count);
     }

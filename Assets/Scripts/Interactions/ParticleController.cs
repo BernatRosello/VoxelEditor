@@ -1,5 +1,10 @@
 using UnityEngine;
 
+#if UNITY_EDITOR
+using UnityEditor;
+using System.Linq;
+#endif
+
 public enum CreatureParticle
 {
     Conversation,
@@ -28,7 +33,9 @@ public enum CreatureParticle
     Handshake,
     PartyHat,
     Joke,
-    ReceivingHands
+    ReceivingHands,
+    UpArrow,
+    DownArrow
 }
 
 [RequireComponent(typeof(ParticleSystem))]
@@ -45,19 +52,42 @@ public class ParticleController : MonoBehaviour
 
 
 #if UNITY_EDITOR
+
     private void OnValidate()
     {
         if (particleSystem == null)
-        {
             particleSystem = GetComponent<ParticleSystem>();
-            UnityEditor.EditorUtility.SetDirty(this);
-        }
+
+        var tsa = particleSystem.textureSheetAnimation;
+
+        while (tsa.spriteCount > 0)
+            tsa.RemoveSprite(0);
+
+        const string folder = "Assets/Sprites/CreatureParticles";
+
+        var sprites = AssetDatabase.FindAssets("t:Sprite", new[] { folder })
+            .Select(g => AssetDatabase.LoadAssetAtPath<Sprite>(AssetDatabase.GUIDToAssetPath(g)))
+            .OrderBy(s => s.name)
+            .ToArray();
+
+        foreach (var sprite in sprites)
+            tsa.AddSprite(sprite);
+
+        EditorUtility.SetDirty(particleSystem);
     }
 #endif
 
-    public void EmitParticles(CreatureParticle particle, int count = 1)
+// TODO: THIS APPROACH IS NOT POSSIBLE BECAUSE UNITY FUCKING SUCKS SO WE ARE GOING TO NEED TO HAVE A SINGLE FUCKING PARTICLE SYSTEM PER-PARTICLE SPRITE!
+    public void EmitParticles(CreatureParticle particle, float scale = 1f, int count = 1)
     {
-        particleSystem.GetComponent<ParticleSystemRenderer>().sharedMaterial = MaterialLibrarySingleton.GetMaterial(particle);
-        particleSystem.Emit(count);
+        float frameScalar = (float)frame/ (float)( textureSheetAnim.numTilesX * textureSheetAnim.numTilesY );
+        textureSheetAnim.startFrame = new ParticleSystem.MinMaxCurve( frameScalar );
+        particleSystem.textureSheetAnimation.startFrame = particle;
+        var emit = new ParticleSystem.EmitParams
+        {
+            startSize = scale
+        };
+
+        particleSystem.Emit(emit, count);
     }
 }
