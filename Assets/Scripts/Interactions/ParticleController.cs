@@ -14,13 +14,27 @@ public enum CreatureParticle
     Cancel,
     Bro,
     PathingMultiple,
-    PointHand
+    PointHand,
+    Puppet,
+    QuestionMark,
+    ThumbsUp,
+    ThumbsDown,
+    UnkownPerson,
+    KnownPerson,
+    MusicNotes,
+    BabyNew,
+    Alien,
+    Investigate,
+    Handshake,
+    PartyHat,
+    Joke,
+    ReceivingHands
 }
 
 [RequireComponent(typeof(ParticleSystem))]
 public class ParticleController : MonoBehaviour
 {
-    [SerializeField] private ParticleSystem particleSystem;
+    [SerializeField] private new ParticleSystem particleSystem;
     void Awake()
     {
         if (particleSystem == null)

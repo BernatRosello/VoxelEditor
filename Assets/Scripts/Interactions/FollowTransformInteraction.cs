@@ -50,6 +50,7 @@ public class FollowTransformInteraction : ACreatureInteraction<FollowTransformPa
         Vector3 targetPos = Parameters.followTarget.position;
         Vector3 moveVec = p.Driver.GetPosition() - targetPos;
         Vector3 movePos = targetPos - moveVec.normalized * 0.5f;
+        DispatchAction(p, DriverActions.EmitParticle(CreatureParticle.PathingMultiple));
         DispatchAction(p, DriverActions.MoveTo(movePos));
     }
     

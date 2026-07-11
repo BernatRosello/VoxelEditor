@@ -40,12 +40,13 @@ public class IdleInteraction : ACreatureInteraction<IdleParams>
     public override InteractionPriority Priority => InteractionPriority.Background;
 
     public override bool InterruptLowerPriorityInteractions => false;
+    public override string DebugInfo => $"duration({TotalEllapsedTime}s/{Parameters.duration}s)";
 
     bool trigger = true;
 
     protected override bool CheckLeave(CreatureData participantData)
     {
-        return base.CheckLeave(participantData) && TotalEllapsedTime >= Parameters.duration;
+        return base.CheckLeave(participantData) && (TotalEllapsedTime >= Parameters.duration);
     }
 
     protected override void PostTick(float deltaTime)
@@ -57,9 +58,9 @@ public class IdleInteraction : ACreatureInteraction<IdleParams>
     {
         if (trigger)
         {
-            DispatchAction(participant, DriverActions.EmitParticle(CreatureParticle.Cancel, 3));
+            DispatchAction(participant, DriverActions.EmitParticle(CreatureParticle.Cancel, 2));
             Debug.Log($"[{participant.Identity}] Triggered an emote");
-            DispatchAction(participant, DriverActions.SetTrigger("EmoteTrigger"));
+            DispatchAction(participant, DriverActions.SetTrigger("EmoteTrigger", waitOnState:"Idle Emote"));
         }
         continueUpdateTick = false;
         trigger = false;

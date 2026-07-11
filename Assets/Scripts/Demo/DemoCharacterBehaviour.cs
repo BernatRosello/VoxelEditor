@@ -70,14 +70,22 @@ public class DemoCharacterBehaviour : MonoBehaviour
     {
         timer += Time.deltaTime;
 
-        if (timer < timeToRequest)
+        if ((timer < timeToRequest) || (maxReqTime <= 0))
         {
             return;
         }
 
         timer = 0;
+        timeToRequest = rnd.Range(minReqTime, maxReqTime);
 
-        if (requestPool.Count == 0 || InteractionManager.Creatures.Count == 0)
+
+        float totalWeight = 0f;
+        foreach (var entry in interactionWeights)
+        {
+            totalWeight += entry.weight >= 0 ? entry.weight : 0;
+        }
+
+        if (requestPool.Count == 0 || InteractionManager.Creatures.Count == 0 || totalWeight == 0)
         {
             return;
         }
@@ -149,11 +157,11 @@ public class DemoCharacterBehaviour : MonoBehaviour
         WanderingParams p = new()
         {
             duration = rnd.value * 30,
-            minDistance = 2,
-            maxDistance = 10,
-            frequency = 2,
-            frequencyVariance = 3,
-            moveChance = 0.65f
+            minDistance = 3,
+            maxDistance = 15,
+            frequency = 3,
+            frequencyVariance = 2.5f,
+            moveChance = 0.5f
         };
 
         InteractionManager.CreateRequest(new WanderingRequest(p, candidate));
@@ -199,7 +207,7 @@ public class DemoCharacterBehaviour : MonoBehaviour
 
         TalkParams p = new()
         {
-            duration = rnd.Range(10f, 60f)
+            duration = rnd.Range(6f, 40f)
         };
 
         InteractionManager.CreateRequest(new TalkInteractionRequest(p, candidates.AsEnumerable()));
@@ -208,7 +216,7 @@ public class DemoCharacterBehaviour : MonoBehaviour
     private void TryJoinRandomOngoing()
     {
         if (InteractionManager.Interactions.Count == 0) return;
-        
+
         var p = InteractionManager.TryGetCreatureData(InteractionManager.Creatures.OrderBy(_ => rnd.value).First());
         var ongoing = InteractionManager.Interactions.OrderBy(_ => rnd.value).First();
         var allowed = InteractionManager.Instance.TryJoinInteraction(ongoing, p);

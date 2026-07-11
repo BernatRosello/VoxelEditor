@@ -80,6 +80,34 @@ public class MaterialLibrarySingleton : MonoBehaviour
                 return MaterialLibrary.PathingMultipleParticle;
             case CreatureParticle.PointHand:
                 return MaterialLibrary.PointHandParticle;
+            case CreatureParticle.Puppet:
+                return MaterialLibrary.PuppetParticle;
+            case CreatureParticle.QuestionMark:
+                return MaterialLibrary.QuestionMarkParticle;
+            case CreatureParticle.ThumbsUp:
+                return MaterialLibrary.ThumbsUpParticle;
+            case CreatureParticle.ThumbsDown:
+                return MaterialLibrary.ThumbsDownParticle;
+            case CreatureParticle.UnkownPerson:
+                return MaterialLibrary.UnkownPersonParticle;
+            case CreatureParticle.KnownPerson:
+                return MaterialLibrary.KnownPersonParticle;
+            case CreatureParticle.MusicNotes:
+                return MaterialLibrary.MusicNotesParticle;
+            case CreatureParticle.BabyNew:
+                return MaterialLibrary.BabyNewParticle;
+            case CreatureParticle.Alien:
+                return MaterialLibrary.AlienParticle;
+            case CreatureParticle.Investigate:
+                return MaterialLibrary.InvestigateParticle;
+            case CreatureParticle.Handshake:
+                return MaterialLibrary.HandshakeParticle;
+            case CreatureParticle.PartyHat:
+                return MaterialLibrary.PartyHatParticle;
+            case CreatureParticle.Joke:
+                return MaterialLibrary.JokeParticle;
+            case CreatureParticle.ReceivingHands:
+                return MaterialLibrary.ReceivingHandsParticle;
             default:
                 return null;
         }

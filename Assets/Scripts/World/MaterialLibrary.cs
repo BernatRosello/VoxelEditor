@@ -22,8 +22,22 @@ public class MaterialLibrary : ScriptableObject
     [SerializeField] private Material bro;
     [SerializeField] private Material pathingMultiple;
     [SerializeField] private Material pointHand;
+    [SerializeField] private Material puppet;
+    [SerializeField] private Material questionMark;
+    [SerializeField] private Material thumbsUp;
+    [SerializeField] private Material thumbsDown;
+    [SerializeField] private Material unkownPerson;
+    [SerializeField] private Material knownPerson;
+    [SerializeField] private Material musicNotes;
+    [SerializeField] private Material babyNew;
+    [SerializeField] private Material alien;
+    [SerializeField] private Material investigate;
+    [SerializeField] private Material handshake;
+    [SerializeField] private Material partyHat;
+    [SerializeField] private Material joke;
+    [SerializeField] private Material receivingHands;
 
-    
+
     public Material FurMaterial { get => furMaterial; }
     public Material OpaqueBSDF { get => opaqueBSDF; }
     public Material TransparentBSDF { get => transparentBSDF; }
@@ -42,4 +56,18 @@ public class MaterialLibrary : ScriptableObject
     public Material BroParticle { get => bro; set => bro = value; }
     public Material PathingMultipleParticle { get => pathingMultiple; set => pathingMultiple = value; }
     public Material PointHandParticle { get => pointHand; set => pointHand = value; }
+    public Material PuppetParticle { get => puppet; set => puppet = value; }
+    public Material QuestionMarkParticle { get => questionMark; set => questionMark = value; }
+    public Material ThumbsUpParticle { get => thumbsUp; set => thumbsUp = value; }
+    public Material ThumbsDownParticle { get => thumbsDown; set => thumbsDown = value; }
+    public Material UnkownPersonParticle { get => unkownPerson; set => unkownPerson = value; }
+    public Material KnownPersonParticle { get => knownPerson; set => knownPerson = value; }
+    public Material MusicNotesParticle { get => musicNotes; set => musicNotes = value; }
+    public Material BabyNewParticle { get => babyNew; set => babyNew = value; }
+    public Material AlienParticle { get => alien; set => alien = value; }
+    public Material InvestigateParticle { get => investigate; set => investigate = value; }
+    public Material HandshakeParticle { get => handshake; set => handshake = value; }
+    public Material PartyHatParticle { get => partyHat; set => partyHat = value; }
+    public Material JokeParticle { get => joke; set => joke = value; }
+    public Material ReceivingHandsParticle { get => receivingHands; set => receivingHands = value; }
 }

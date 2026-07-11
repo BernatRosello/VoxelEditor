@@ -39,14 +39,15 @@ public class TalkInteraction : ACreatureInteraction<TalkParams>
     public override InteractionPriority Priority => InteractionPriority.Normal;
 
     public override bool InterruptLowerPriorityInteractions => true;
+    public override string DebugInfo => $"duration({TotalEllapsedTime}s/{Parameters.duration}s)";
 
     bool trigger = true;
-    private const int avgEmotesPerMinute = 20;
+    private const int avgEmotesPerMinute = 30;
     private Dictionary<CreatureIdentity, int> leaveActionIndex = new();
 
     protected override bool CheckLeave(CreatureData participantData)
     {
-        return base.CheckLeave(participantData) && TotalEllapsedTime >= Parameters.duration;
+        return base.CheckLeave(participantData) && (TotalEllapsedTime >= Parameters.duration);
     }
 
     protected override void PostTick(float deltaTime)
@@ -64,32 +65,45 @@ public class TalkInteraction : ACreatureInteraction<TalkParams>
         return center;
     }
 
+    protected override void AddParticipantData(CreatureData p)
+    {
+        leaveActionIndex[p.Identity] = 0;
+    }
+
     protected override void JoinInteraction(CreatureData participant)
     {
-        if (StateOf(participant).ActionIndex == 0)
+        switch (StateOf(participant).ActionIndex)
         {
-            NavMeshUtility.TryGetRandomPosition(GetConversationCenter(), 5, 1, out Vector3 talkingPos);
+            case 0:
+                NavMeshUtility.TryGetRandomPosition(GetConversationCenter(), 5, 1, out Vector3 talkingPos);
 
-            // 20 second timeout as a safeguard to avoid stalling the interaction join
-            DispatchAction(participant, DriverActions.MoveTo(talkingPos, 2.5f), 20);
+                // 20 second timeout as a safeguard to avoid stalling the interaction join
+                DispatchAction(participant, DriverActions.EmitParticle(CreatureParticle.Pathing));      // Action 0
+                DispatchAction(participant, DriverActions.MoveTo(talkingPos, 2.5f), 20);                // Action 1
+                break;
+            case 2:
+                DispatchAction(participant, DriverActions.EmitParticle(CreatureParticle.Handshake));    // Action 2
+                DispatchAction(participant, DriverActions.SetTrigger("GreetTrigger", "Greet Emote"));   // Action 3
+                break;
         }
     }
 
     protected override bool JoinFinished(CreatureData participant)
     {
-        return true;//ParticipantFinishedAction(participant, 0);
+        return true;//ParticipantFinishedAction(participant, 1);
     }
 
     protected override void UpdateInteraction(CreatureData participant)
     {
         if (trigger)
         {
-            DispatchAction(participant, DriverActions.EmitParticle(CreatureParticle.Conversation));
+            DispatchAction(participant, DriverActions.EmitParticle(CreatureParticle.Conversation));         // Action 4 + n
             Debug.Log($"[{participant.Identity}] Triggered Talking anim!");
-            DispatchAction(participant, DriverActions.SetTrigger("TalkTrigger"));
+            DispatchAction(participant, DriverActions.SetTrigger("TalkTrigger", waitOnState:"Talk Emote")); // Action 4 + n + 1
         }
-        else
+        else if (StateOf(participant).ActionIndex % 4 == 0)
         {
+            DispatchAction(participant, DriverActions.EmitParticle(participant.Stats.GetEmotionParticle()));
             DispatchAction(participant, DriverActions.FacePosition(GetConversationCenter()), 3);
         }
         continueUpdateTick = false;
@@ -101,6 +115,7 @@ public class TalkInteraction : ACreatureInteraction<TalkParams>
     {
         if (StateOf(participant).ActionIndex == leaveActionIndex[participant.Identity])
         {
+            DispatchAction(participant, DriverActions.EmitParticle(CreatureParticle.Cancel));   // ActionIndex: leaveActionIndex[participant.Identity]
             Vector3 conversationCenter = new();
             foreach (var p in ActiveParticipants)
             {
@@ -109,12 +124,17 @@ public class TalkInteraction : ACreatureInteraction<TalkParams>
             var leavePos = (conversationCenter - participant.Driver.GetPosition()).normalized * 3;
 
             // 10 second timeout as a safeguard to avoid stalling the interaction leave
-            DispatchAction(participant, DriverActions.MoveTo(leavePos, 2.5f), 10);
+            DispatchAction(participant, DriverActions.MoveTo(leavePos, 2.5f), 5);               // ActionIndex: leaveActionIndex[participant.Identity] + 1
         }
     }
 
     protected override bool LeaveFinished(CreatureData participant)
     {
         return true;//ParticipantFinishedAction(participant, leaveActionIndex[participant.Identity]);
+    }
+
+    protected override void RemoveParticipantData(CreatureData p)
+    {
+        leaveActionIndex.Remove(p.Identity);
     }
 }

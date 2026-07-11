@@ -36,8 +36,16 @@ public class WanderingInteraction : ACreatureInteraction<WanderingParams>
     public override int MaxParticipants => 1;
     public override bool AllowLateJoining => false;
     public override bool AllowEarlyLeaving => true;
-    public override InteractionPriority Priority => 0;
+    public override InteractionPriority Priority => InteractionPriority.Background;
     public override bool InterruptLowerPriorityInteractions => false;
+    public override string DebugInfo =>
+    $@"
+    duration: {TotalEllapsedTime}s/{Parameters.duration}s
+    minDistance: {Parameters.minDistance}
+    maxDistance: {Parameters.maxDistance}
+    frequency: {Parameters.frequency}
+    frequencyVariance: {Parameters.frequencyVariance}
+    moveChance: {Parameters.moveChance}";
 
     protected override bool CheckLeave(CreatureData participantData)
     {
@@ -46,12 +54,15 @@ public class WanderingInteraction : ACreatureInteraction<WanderingParams>
 
     protected override void UpdateInteraction(CreatureData p)
     {
-        if (StateOf(p).ActionIndex % 2 == 0)
+        // Must Check taking into account the fact that ActionIndex increments
+        // by 2 every tick because of the immediate EmitParticle actions!
+        if (StateOf(p).ActionIndex % 4 == 0)
         {
             float currentMoveDuration = Parameters.frequency + Random.Range(-1f, 1f) * Parameters.frequencyVariance;
             var dir = new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f)).normalized;
             if (Random.Range(0f, 1f) <= Parameters.moveChance)
             {
+                DispatchAction(p, DriverActions.EmitParticle(CreatureParticle.Pathing));
                 Vector3 nextPosition = p.Driver.GetPosition() + dir * Random.Range(Parameters.minDistance, Parameters.maxDistance);
                 // Version A - Makes sure that the character takes AT LEAST as much 
                 //          currentMoveDuration time before moving again.
@@ -67,11 +78,13 @@ public class WanderingInteraction : ACreatureInteraction<WanderingParams>
             }
             else
             {
+                DispatchAction(p, DriverActions.EmitParticle(CreatureParticle.PointHand));
                 DispatchAction(p, DriverActions.FaceDirection(dir), currentMoveDuration);
             }
         }
         else
         {
+            DispatchAction(p, DriverActions.EmitParticle(CreatureParticle.EnergyLow));
             // After each move decrease the energy as it is "used up"
             p.Stats.Energy -= 0.1f;
             DispatchAction(p, DriverActions.SetFloat("CalmEnergetic", p.Stats.Energy));

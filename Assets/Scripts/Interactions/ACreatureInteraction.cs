@@ -49,6 +49,7 @@ public abstract class ACreatureInteraction
     #region COMPILE TIME
     public abstract string Name { get; }
     public abstract string Description { get; }
+    public virtual string DebugInfo { get => ""; }
     public abstract int MinParticipants { get; }
     public abstract int MaxParticipants { get; }
     public abstract bool AllowLateJoining { get; }
@@ -86,7 +87,7 @@ public abstract class ACreatureInteraction
     protected virtual bool JoinFinished(CreatureData participant) { return true; }
 
     /// <summary>
-    /// Determines conditions for when a creature is allowed to join (be it during initialization or late join;)
+    /// Determines conditions for when a creature must leave (internal "wants to leave" condition, different than CanLeave() which would check if it could)
     /// 
     /// <para> Base implementation: </para>
     ///     ParticipantCount &gt; MinParticipants
@@ -192,6 +193,11 @@ public abstract class ACreatureInteraction
         return TotalParticipantCount >= MinParticipants;
     }
 
+    /// <summary>
+    /// User configurable preconditions for a creature to be allowed to join into an interaction.
+    /// </summary>
+    /// <param name="c"></param>
+    /// <returns> true when allowed to join, false when otherwise</returns>
     public virtual bool CanJoin(CreatureData c) => true;
     public bool TryJoin(CreatureData participant)
     {
@@ -209,6 +215,11 @@ public abstract class ACreatureInteraction
         return true;
     }
 
+    /// <summary>
+    /// User configurable preconditions for a creature to be allowed to leave an interaction.
+    /// </summary>
+    /// <param name="c"></param>
+    /// <returns> true when allowed to join, false when otherwise</returns>
     public virtual bool CanLeave(CreatureData c) => true;
     public bool TryLeave(CreatureData participant)
     {
@@ -430,7 +441,7 @@ public abstract class ACreatureInteraction
     protected bool ParticipantFinishedAction(CreatureData participant, int actionIndex)
     {
         CreatureInteractionState state = participantStates[participant];
-        return state.ActionIndex < actionIndex || (state.ActionIndex == actionIndex && !state.ActionComplete);
+        return (state.ActionIndex > actionIndex) || (state.ActionIndex == actionIndex && state.ActionComplete);
     }
 
     protected bool AllParticipantsPastAction(int actionIndex)

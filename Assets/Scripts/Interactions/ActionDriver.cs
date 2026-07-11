@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
+using UnityEditor.Search;
 using UnityEngine;
 
 public delegate void DriverAction(ActionDriver driver);
@@ -68,11 +71,18 @@ public static class DriverActions
         };
     }
 
-    public static DriverActionDefinition SetTrigger(string trigger)
+    public static DriverActionDefinition SetTrigger(string trigger, string waitOnState = "")
     {
         return new()
         {
-            Action = (driver) => { driver.SetTrigger(trigger); }
+            Action = (driver) => { driver.SetTrigger(trigger); },
+            CompletionCondition = waitOnState != "" ? driver =>
+            {
+                var res = driver.QueryAnimatorStateCompletion(waitOnState);
+                Debug.Log($"[{driver.GetComponent<Creature>().Identity}] completion of waitOnState \"{waitOnState}\" triggered by \"{trigger}\": {res}");
+                return res;
+            }
+            : null
         };
     }
 
@@ -112,7 +122,6 @@ public class ActionDriver : MonoBehaviour
     private Animator animator;
     private NavigationAnimator nav;
     private ParticleController particleController;
-    public Animator Animator => animator;
 
     public Transform CachedTransform
     {
@@ -122,8 +131,44 @@ public class ActionDriver : MonoBehaviour
 
     private Func<bool> completionCondition;
     private Action completionCallback;
+    private AnimatorStateQueryStatus queriedAnimatorStateFulfillStatus = AnimatorStateQueryStatus.Uninitialized;
 
     public bool IsBusy => completionCondition != null;
+
+    private string queriedAnimatorStateName = null;
+
+    public string GetQueriedAnimatorStateName()
+    {
+        return queriedAnimatorStateName;
+    }
+
+    private void SetQueriedAnimatorStateName(string value)
+    {
+        queriedAnimatorStateFulfillStatus = AnimatorStateQueryStatus.Uninitialized;
+        queriedAnimatorStateName = value;
+    }
+
+    internal bool QueryAnimatorStateCompletion(string stateName)
+    {
+        if (GetQueriedAnimatorStateName() != stateName)
+        {
+            Debug.Log($"Changed active animator state completion query from({GetQueriedAnimatorStateName()})over to state: {stateName}");
+            SetQueriedAnimatorStateName(stateName);
+            return false;
+        }
+        else
+        {
+            Debug.Log($"Current fulfill status for stateName \"{stateName}\": {queriedAnimatorStateFulfillStatus}");
+            bool res = queriedAnimatorStateFulfillStatus == AnimatorStateQueryStatus.Completed;
+            if (res)
+            {
+                // De-init the query to free up the next possible one.
+                SetQueriedAnimatorStateName(null);
+            }
+            return res;
+        }
+    }
+    public void NotifyStateCompletion(AnimatorStateQueryStatus completion) { queriedAnimatorStateFulfillStatus = completion; }
 
 
 #if UNITY_EDITOR
@@ -173,7 +218,6 @@ public class ActionDriver : MonoBehaviour
     {
         if (!IsBusy)
         {
-            IdleUpdate();
             return;
         }
 
@@ -190,17 +234,6 @@ public class ActionDriver : MonoBehaviour
         callback?.Invoke();
     }
 
-    private float idleEmoteTimer;
-    private float idleTime;
-
-    private void IdleUpdate()
-    {
-        if (idleTime > idleEmoteTimer)
-        {
-            idleEmoteTimer = 10 + UnityEngine.Random.Range(-5, 10);
-            animator.SetTrigger("IdleEmote");
-        }
-    }
 
     #region Internals
     /// <summary>
@@ -323,10 +356,23 @@ public class ActionDriver : MonoBehaviour
         animator.SetTrigger(parameter);
     }
 
-    internal AnimatorStateInfo
-        GetCurrentAnimatorState()
+    internal bool GetBool(string parameter)
+    {
+        return animator.GetBool(parameter);
+    }
+
+    internal AnimatorStateInfo GetCurrentAnimatorState()
     {
         return animator.GetCurrentAnimatorStateInfo(0);
+    }
+    public bool AnimatorIsPlaying()
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).length >
+                animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
+    }
+    public bool AnimatorIsPlaying(string stateName)
+    {
+        return AnimatorIsPlaying() && animator.GetCurrentAnimatorStateInfo(0).IsName(stateName);
     }
 
     public void StartTurnRight()
@@ -347,23 +393,6 @@ public class ActionDriver : MonoBehaviour
     {
         nav.NavigationActive = true;
         animator.SetFloat("vel_ang", 0);
-    }
-
-    #endregion
-
-    #region Emotions
-
-    internal bool TrySetEmotion(string emotionName, float value)
-    {
-        // TODO
-        return false;
-    }
-
-    internal bool TryGetEmotion(string emotionName, out float value)
-    {
-        // TODO
-        value = 0;
-        return false;
     }
 
     #endregion
@@ -426,4 +455,11 @@ public class ActionDriver : MonoBehaviour
         particleController.EmitParticles(particle, count);
     }
     #endregion
+}
+
+public enum AnimatorStateQueryStatus
+{
+    Uninitialized,
+    Entered,
+    Completed
 }

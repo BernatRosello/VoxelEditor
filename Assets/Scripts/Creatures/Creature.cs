@@ -46,6 +46,9 @@ public class Creature : MonoBehaviour
             UnityEditor.EditorUtility.SetDirty(this);
         }
 
+        if (stats != null)
+            stats.BindAnimator(GetComponent<Animator>()); 
+
         bodyMesh.Head = transform.Find("Head").GetComponent<SkinnedMeshRenderer>();
         bodyMesh.Eyes = transform.Find("Eyes").GetComponent<SkinnedMeshRenderer>();
         bodyMesh.Torso = transform.Find("Torso").GetComponent<SkinnedMeshRenderer>();

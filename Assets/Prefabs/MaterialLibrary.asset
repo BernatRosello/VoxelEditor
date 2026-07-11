@@ -28,3 +28,17 @@ MonoBehaviour:
   bro: {fileID: 2100000, guid: 7e3a7dd94afaed943baec228fc2babc0, type: 2}
   pathingMultiple: {fileID: 2100000, guid: 228063ebc668e184c89235ddd4e8129b, type: 2}
   pointHand: {fileID: 2100000, guid: 18fc68b4cc45ba646af1c47d835bd76f, type: 2}
+  puppet: {fileID: 2100000, guid: 9aa5525dd711df245badc51cfa06e702, type: 2}
+  questionMark: {fileID: 2100000, guid: 88774d28112b72748b736d543e1c7493, type: 2}
+  thumbsUp: {fileID: 2100000, guid: ab0de22564abbd24fa0752daf059ecc2, type: 2}
+  thumbsDown: {fileID: 2100000, guid: c7702268f72a61741b06e1b3de9cc60a, type: 2}
+  unkownPerson: {fileID: 2100000, guid: 3a6ca2bc9249e704cba8c0c05818a79e, type: 2}
+  knownPerson: {fileID: 2100000, guid: c6ff9876a2d461d4e92a4073504ac49a, type: 2}
+  musicNotes: {fileID: 2100000, guid: 6024bd7e5a32f40469971fc3602528f4, type: 2}
+  babyNew: {fileID: 2100000, guid: 83b1585fb8603b142888ac7633778e51, type: 2}
+  alien: {fileID: 2100000, guid: 6d2f376d0794da644aa02c818417e9ab, type: 2}
+  investigate: {fileID: 2100000, guid: de5ed3f1d7caa5f4ba865d56c74416cd, type: 2}
+  handshake: {fileID: 2100000, guid: d6159040b3d963d4bb0b60dd89393d46, type: 2}
+  partyHat: {fileID: 2100000, guid: c6e359f1f993fa94c8ac3126885272e8, type: 2}
+  joke: {fileID: 2100000, guid: a2a50e8c772bb6848ac5c037eab87900, type: 2}
+  receivingHands: {fileID: 2100000, guid: e07350b7e04a28041be1daa54009eb6c, type: 2}

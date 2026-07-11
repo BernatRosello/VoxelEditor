@@ -40,7 +40,7 @@ public class UserMoveInteraction : ACreatureInteraction<UserMoveParams>
 
     protected override bool CheckLeave(CreatureData participantData)
     {
-        bool result = StateOf(participantData).ActionIndex > 0;
+        bool result = ParticipantFinishedAction(participantData, 5);
 
         // Debug.Log(
         //     $"{participantData.Identity} leave check = {result} " +
@@ -55,7 +55,16 @@ public class UserMoveInteraction : ACreatureInteraction<UserMoveParams>
         switch (StateOf(p).ActionIndex)
         {
             case 0:
-                DispatchAction(p, DriverActions.MoveTo(Parameters.position));
+                DispatchAction(p, DriverActions.EmitParticle(CreatureParticle.Puppet));             // Action 0
+                DispatchAction(p, DriverActions.MoveTo(Parameters.position));                       // Action 1
+                break;
+            case 2:
+                DispatchAction(p, DriverActions.EmitParticle(CreatureParticle.QuestionMark));       // Action 2
+                DispatchAction(p, DriverActions.FacePosition(Camera.main.transform.position), 2);   // Action 3
+                break;
+            case 4:
+                DispatchAction(p, DriverActions.EmitParticle(CreatureParticle.Handshake));          // Action 4
+                DispatchAction(p, DriverActions.SetTrigger("GreetTrigger", "Greet Emote"));         // Action 5
                 break;
         }
     }

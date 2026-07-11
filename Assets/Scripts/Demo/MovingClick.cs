@@ -13,7 +13,8 @@ public class MoveToClickPoint : MonoBehaviour
         UserMove,
         Dance,
         Wander,
-        Idle
+        Idle,
+        Talk
     }
 
     [SerializeField] private RequestMode activeRequest;
@@ -101,6 +102,7 @@ Participant[{creature.Identity}] State
 $@"{interaction.Name} Interaction
   Interaction Priority: {interaction.Priority}
   N_Participants: {interaction.ActiveParticipants.Count}
+  {(interaction.DebugInfo != "" ? $"Debug Info: {interaction.DebugInfo}" : "")}
 
 Participant[{creature.Identity}] State
   Phase: {state?.Phase ?? 0}
@@ -296,14 +298,24 @@ Participant[{creature.Identity}] State
 
             case RequestMode.Idle:
 
-                IdleParams p = new()
+                IdleParams idleParams = new()
                 {
-                    duration = 120, avgEmotesPerMinute = m_avgEmotesPerMinute
+                    duration = 30,
+                    avgEmotesPerMinute = m_avgEmotesPerMinute
                 };
                 foreach (var c in selectedCreatures)
                 {
-                    InteractionManager.CreateRequest(new IdleInteractionRequest(p, c.Identity));
+                    InteractionManager.CreateRequest(new IdleInteractionRequest(idleParams, c.Identity));
                 }
+                break;
+
+            case RequestMode.Talk:
+
+                TalkParams talkParams = new()
+                {
+                    duration = 20,
+                };
+                InteractionManager.CreateRequest(new TalkInteractionRequest(talkParams, selectedCreatures.Select(c => c.Identity)));
                 break;
 
         }
