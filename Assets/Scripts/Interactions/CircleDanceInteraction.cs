@@ -77,7 +77,7 @@ public class CircleDanceInteraction : ACreatureInteraction<CircleDanceParams>
 
     protected override bool IsSynchronizedAction(int actionIndex) { return actionIndex == 1; }
 
-    protected override void UpdateInteraction(CreatureData p)
+    protected override void UpdateInteraction(CreatureData p, float deltaTime)
     {
         float rad;
         Vector3 participantSlot;

@@ -48,7 +48,7 @@ public class TalkInteraction : ACreatureInteraction<TalkParams>
 
     protected override bool CheckLeave(CreatureData participantData)
     {
-        return base.CheckLeave(participantData) && (TotalEllapsedTime >= Parameters.duration);
+        return base.CheckLeave(participantData) || (TotalEllapsedTime >= Parameters.duration);
     }
 
     protected override void PostTick(float deltaTime)
@@ -94,7 +94,7 @@ public class TalkInteraction : ACreatureInteraction<TalkParams>
         return true;//ParticipantFinishedAction(participant, 1);
     }
 
-    protected override void UpdateInteraction(CreatureData participant)
+    protected override void UpdateInteraction(CreatureData participant, float deltaTime)
     {
         if (trigger)
         {
@@ -113,14 +113,17 @@ public class TalkInteraction : ACreatureInteraction<TalkParams>
                     StateOf(participant).ActionIndex = 2;
                     break;
                 default:
-                    var mod = rnd.Range(-0.1f, 0.1f);
-                    participant.Stats.Happiness += mod;
-                    List<CreatureParticle> particles = new() { CreatureParticle.Happy };
-                    if (mod > 0)
-                        particles.Add(CreatureParticle.UpArrow);
-                    else
-                        particles.Add(CreatureParticle.DownArrow);
-                    DispatchAction(participant, DriverActions.EmitParticles(particles));
+                    if (rnd.value < (avgEmotesPerMinute / 60f * deltaTime))
+                    {
+                        var mod = rnd.Range(-0.1f, 0.1f);
+                        participant.Stats.Happiness += mod;
+                        List<CreatureParticle> particles = new() { CreatureParticle.Happy };
+                        if (mod > 0)
+                            particles.Add(CreatureParticle.UpArrow);
+                        else
+                            particles.Add(CreatureParticle.DownArrow);
+                        DispatchAction(participant, DriverActions.EmitParticles(particles));
+                    }
                     break;
             }
         }

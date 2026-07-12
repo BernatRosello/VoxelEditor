@@ -6,16 +6,16 @@ using UnityEngine;
 
 public static class CreatureParticleEnumGenerator
 {
-    private const string SpriteFolder = "Assets/Sprites/CreatureParticles";
-    private const string OutputFile = "Assets/Scripts/CreatureParticle.cs";
+    private const string SpriteFolder = "Assets/Sprites/CreatureParticles/";
+    private const string OutputFile = "Assets/Scripts/Creatures/CreatureParticle.cs";
 
     [MenuItem("Tools/Regenerate Creature Particle Enum")]
     public static void Generate()
     {
-        var guids = AssetDatabase.FindAssets("t:Sprite", new[] { SpriteFolder });
+        var guids = AssetDatabase.FindAssets("t:texture2D", new[] { SpriteFolder });
 
         var names = guids
-            .Select(g => AssetDatabase.LoadAssetAtPath<Sprite>(AssetDatabase.GUIDToAssetPath(g)).name)
+            .Select(g => AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(g), typeof(Texture2D)).name)
             .Distinct()
             .OrderBy(n => n)
             .ToList();

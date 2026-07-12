@@ -264,7 +264,7 @@ public sealed class InteractionManager : MonoBehaviour
         {
             return false;
         }
-        if (!participants.TryGetValue(p, out var curr))
+        if (participants.TryGetValue(p, out var curr))
         {
             return inter.TryJoin(p);
         }
@@ -272,8 +272,8 @@ public sealed class InteractionManager : MonoBehaviour
         {
             return inter.InterruptLowerPriorityInteractions &&
                     curr.Priority < inter.Priority &&
-                    curr.TryLeave(p) &&
-                    inter.TryJoin(p);
+                    inter.TryJoin(p) &&
+                    curr.TryLeave(p); // Important that try leave is checked last to avoid orphanage and current interaction leave->join
         }
     }
 

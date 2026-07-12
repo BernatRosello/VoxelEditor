@@ -52,7 +52,7 @@ public class WanderingInteraction : ACreatureInteraction<WanderingParams>
         return TotalEllapsedTime >= Parameters.duration;
     }
 
-    protected override void UpdateInteraction(CreatureData p)
+    protected override void UpdateInteraction(CreatureData p, float deltaTime)
     {
         // Must Check taking into account the fact that ActionIndex increments
         // by 2 every tick because of the immediate EmitParticle actions!

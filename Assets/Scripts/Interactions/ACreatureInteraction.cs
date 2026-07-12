@@ -146,8 +146,9 @@ public abstract class ACreatureInteraction
     /// <para> Manual increment/decrement of ActionIndex → participant.ActionIndex = ...
     ///     </para>
     /// </summary>
-    /// <param name="participant"></param>
-    protected abstract void UpdateInteraction(CreatureData participant);
+    /// <param name="participant"> The active participant in the interaction that's being currently dispatched (ticked). </param>
+    /// <param name="deltaTime"> The frequency at which the UpdateInteraction is being ticked at, in the form of seconds since the last tick (usually fixed throughout the interaction lifetime). </param>
+    protected abstract void UpdateInteraction(CreatureData participant, float deltaTime);
     protected virtual void LeaveInteraction(CreatureData participant) { if (DebugBaseClass) Debug.Log($"C[{participant.Identity}] Leaving..."); }
 
     // Base must be called if overriden to ensure that interaction manager is correctly notified of internal participant abandoment of interaction
@@ -323,7 +324,7 @@ public abstract class ACreatureInteraction
                             bool previousContinueUpdateTick = continueUpdateTick;
 #endif
 
-                            UpdateInteraction(p);
+                            UpdateInteraction(p, deltaTime);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                             state = participantStates[p];
@@ -546,7 +547,7 @@ public abstract class ACreatureInteraction
     /// </para>
     /// <para>
     /// This method is intended to be called from
-    /// <see cref="UpdateInteraction(CreatureData)"/> implementations.
+    /// <see cref="UpdateInteraction(CreatureData,float)"/> implementations.
     /// </para>
     /// </summary>
     /// <param name="participant">
@@ -610,7 +611,7 @@ public abstract class ACreatureInteraction
     /// </para>
     /// <para>
     /// This method is intended to be called from
-    /// <see cref="UpdateInteraction(CreatureData)"/> implementations.
+    /// <see cref="UpdateInteraction(CreatureData,float)"/> implementations.
     /// </para>
     /// </summary>
     /// <param name="participant">

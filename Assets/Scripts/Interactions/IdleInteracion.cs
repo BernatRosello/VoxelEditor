@@ -46,7 +46,7 @@ public class IdleInteraction : ACreatureInteraction<IdleParams>
 
     protected override bool CheckLeave(CreatureData participantData)
     {
-        return base.CheckLeave(participantData) && (TotalEllapsedTime >= Parameters.duration);
+        return base.CheckLeave(participantData) || (TotalEllapsedTime >= Parameters.duration);
     }
 
     protected override void PostTick(float deltaTime)
@@ -54,7 +54,7 @@ public class IdleInteraction : ACreatureInteraction<IdleParams>
         trigger = rnd.value < (Parameters.avgEmotesPerMinute / 60f * deltaTime);
     }
 
-    protected override void UpdateInteraction(CreatureData participant)
+    protected override void UpdateInteraction(CreatureData participant, float deltaTime)
     {
         if (trigger)
         {

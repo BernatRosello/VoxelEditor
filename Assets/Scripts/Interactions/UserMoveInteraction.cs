@@ -42,15 +42,10 @@ public class UserMoveInteraction : ACreatureInteraction<UserMoveParams>
     {
         bool result = ParticipantFinishedAction(participantData, 5);
 
-        // Debug.Log(
-        //     $"{participantData.Identity} leave check = {result} " +
-        //     $"index={StateOf(participantData).ActionIndex} " +
-        //     $"complete={StateOf(participantData).ActionComplete}");
-
         return result;
     }
 
-    protected override void UpdateInteraction(CreatureData p)
+    protected override void UpdateInteraction(CreatureData p, float deltaTime)
     {
         switch (StateOf(p).ActionIndex)
         {

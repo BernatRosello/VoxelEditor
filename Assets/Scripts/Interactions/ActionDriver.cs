@@ -79,7 +79,7 @@ public static class DriverActions
             CompletionCondition = waitOnState != "" ? driver =>
             {
                 var res = driver.QueryAnimatorStateCompletion(waitOnState);
-                Debug.Log($"[{driver.GetComponent<Creature>().Identity}] completion of waitOnState \"{waitOnState}\" triggered by \"{trigger}\": {res}");
+                // Debug.Log($"[{driver.GetComponent<Creature>().Identity}] completion of waitOnState \"{waitOnState}\" triggered by \"{trigger}\": {res}");
                 return res;
             }
             : null
@@ -166,7 +166,7 @@ public class ActionDriver : MonoBehaviour
         }
         else
         {
-            Debug.Log($"Current fulfill status for stateName \"{stateName}\": {queriedAnimatorStateFulfillStatus}");
+            // Debug.Log($"Current fulfill status for stateName \"{stateName}\": {queriedAnimatorStateFulfillStatus}");
             bool res = queriedAnimatorStateFulfillStatus == AnimatorStateQueryStatus.Completed;
             if (res)
             {

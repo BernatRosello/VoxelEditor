@@ -45,7 +45,7 @@ public class FollowTransformInteraction : ACreatureInteraction<FollowTransformPa
         return (TotalEllapsedTime >= Parameters.duration) || Parameters.followTarget == null;
     }
        
-    protected override void UpdateInteraction(CreatureData p)
+    protected override void UpdateInteraction(CreatureData p, float deltaTime)
     {
         Vector3 targetPos = Parameters.followTarget.position;
         Vector3 moveVec = p.Driver.GetPosition() - targetPos;
