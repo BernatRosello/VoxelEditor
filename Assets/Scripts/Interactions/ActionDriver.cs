@@ -16,12 +16,12 @@ public sealed class DriverActionDefinition
 
 public static class DriverActions
 {
-    public static DriverActionDefinition MoveTo(Vector3 destination, float? maxSpeed = null)
+    public static DriverActionDefinition MoveTo(Vector3 destination, float? maxSpeed = null, float stoppingDistance = 0)
     {
         return new()
         {
             Action = driver => driver.MoveTo(destination, maxSpeed),
-            CompletionCondition = driver => driver.HasReachedDestination()
+            CompletionCondition = driver => driver.HasReachedDestination(stoppingDistance)
         };
     }
 
@@ -160,7 +160,7 @@ public class ActionDriver : MonoBehaviour
     {
         if (GetQueriedAnimatorStateName() != stateName)
         {
-            Debug.Log($"Changed active animator state completion query from({GetQueriedAnimatorStateName()})over to state: {stateName}");
+            // Debug.Log($"Changed active animator state completion query from({GetQueriedAnimatorStateName()})over to state: {stateName}");
             SetQueriedAnimatorStateName(stateName);
             return false;
         }
@@ -257,7 +257,7 @@ public class ActionDriver : MonoBehaviour
     {
         if (IsBusy)
         {
-            throw new InvalidOperationException($"{name} is already executing an action.");
+            throw new InvalidOperationException($"Creature[{GetComponent<Creature>().Identity}] is already executing an action(curr. completion cond.: {completionCondition}).");
         }
 
         driverAction(this);
@@ -282,16 +282,15 @@ public class ActionDriver : MonoBehaviour
         nav.SetDestination(destination);
     }
 
-    internal bool HasReachedDestination(
-        float tolerance = -1.0f)
+    internal bool HasReachedDestination(float stoppingDistance = 0f)
     {
         if (!nav.HasDestination())
             return true;
 
-        if (tolerance == -1.0f)
-            tolerance = Mathf.Min(nav.MoveStartThreshold, nav.MoveStopThreshold);
+        if (stoppingDistance == 0f)
+            stoppingDistance = Mathf.Min(nav.MoveStartThreshold, nav.MoveStopThreshold);
 
-        return nav.GetRemainingDistance() < tolerance;
+        return nav.GetRemainingDistance() <= stoppingDistance;
     }
 
     internal Vector3 GetPosition()

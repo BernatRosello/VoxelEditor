@@ -65,7 +65,7 @@ public class CircleDanceInteraction : ACreatureInteraction<CircleDanceParams>
 
     protected override bool CheckLeave(CreatureData participantData)
     {
-        bool result = AllParticipantsPastAction(5);//&& base.CheckLeave(participantData);
+        bool result = base.CheckLeave(participantData) || AllParticipantsPastAction(5);
 
         // Debug.Log(
         //     $"{participantData.Identity} leave check = {result} " +

@@ -38,7 +38,7 @@ public class DemoCharacterBehaviour : MonoBehaviour
     {
         timer = 0;
 
-        timeToRequest = rnd.Range(minReqTime, maxReqTime);
+        timeToRequest = rnd.Range(minReqTime/InteractionManager.Creatures.Count, maxReqTime/InteractionManager.Creatures.Count);
 
         requestPool[InteractionRequest.CircleDance] = CreateCircleDanceRequest;
         requestPool[InteractionRequest.Wander] = CreateWanderRequest;
@@ -76,7 +76,7 @@ public class DemoCharacterBehaviour : MonoBehaviour
         }
 
         timer = 0;
-        timeToRequest = rnd.Range(minReqTime, maxReqTime);
+        timeToRequest = rnd.Range(minReqTime/InteractionManager.Creatures.Count, maxReqTime/InteractionManager.Creatures.Count);
 
 
         float totalWeight = 0f;
@@ -98,7 +98,7 @@ public class DemoCharacterBehaviour : MonoBehaviour
         }
         else
         {
-            Debug.Log("Interaction Request UnImplemented for : " + request);
+            Debug.LogWarning("Interaction Request UnImplemented for : " + request);
         }
     }
     private InteractionRequest GetRandomInteraction()
@@ -221,6 +221,6 @@ public class DemoCharacterBehaviour : MonoBehaviour
         var ongoing = InteractionManager.Interactions.OrderBy(_ => rnd.value).First();
         var allowed = InteractionManager.Instance.TryJoinInteraction(ongoing, p);
         
-        Debug.Log($"Creature({p.Identity}) attempted to join Interaction({ongoing})");
+        // Debug.Log($"Creature({p.Identity}) attempted to join Interaction({ongoing})");
     }
 }

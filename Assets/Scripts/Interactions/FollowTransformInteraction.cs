@@ -51,7 +51,7 @@ public class FollowTransformInteraction : ACreatureInteraction<FollowTransformPa
         Vector3 moveVec = p.Driver.GetPosition() - targetPos;
         Vector3 movePos = targetPos - moveVec.normalized * 0.5f;
         DispatchAction(p, DriverActions.EmitParticle(CreatureParticle.PathingMultiple));
-        DispatchAction(p, DriverActions.MoveTo(movePos));
+        DispatchAction(p, DriverActions.MoveTo(movePos, p.Stats.GetSpeed(), 2.5f));
     }
     
     protected override void LeaveInteraction(CreatureData p)

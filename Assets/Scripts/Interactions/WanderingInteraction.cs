@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using rnd = UnityEngine.Random;
 
 public class WanderingParams : AInteractionParams
 {
@@ -54,40 +55,29 @@ public class WanderingInteraction : ACreatureInteraction<WanderingParams>
 
     protected override void UpdateInteraction(CreatureData p, float deltaTime)
     {
-        // Must Check taking into account the fact that ActionIndex increments
-        // by 2 every tick because of the immediate EmitParticle actions!
-        if (StateOf(p).ActionIndex % 4 == 0)
+        float currentMoveDuration = Parameters.frequency + Random.Range(-1f, 1f) * Parameters.frequencyVariance;
+        var dir = new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f)).normalized;
+        switch (StateOf(p).ActionIndex)
         {
-            float currentMoveDuration = Parameters.frequency + Random.Range(-1f, 1f) * Parameters.frequencyVariance;
-            var dir = new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f)).normalized;
-            if (Random.Range(0f, 1f) <= Parameters.moveChance)
-            {
+            case 0:
                 DispatchAction(p, DriverActions.EmitParticle(CreatureParticle.Pathing));
                 Vector3 nextPosition = p.Driver.GetPosition() + dir * Random.Range(Parameters.minDistance, Parameters.maxDistance);
-                // Version A - Makes sure that the character takes AT LEAST as much 
-                //          currentMoveDuration time before moving again.
-                // DispatchAction(p, DriverActions.MoveTo(nextPosition),
-                //     AllOf(
-                //         () => (lastMoveTime - totalEllapsedTime) >= currentMoveDuration,
-                //         () => p.Driver.HasReachedDestination()
-                //     ));
-
-                // Version B - Changes target position as soon as the target either 
-                // reaches the target position, OR the currentMoveDuration runs out.
-                DispatchAction(p, DriverActions.MoveTo(nextPosition, p.Stats.Energy * 1.5f), currentMoveDuration);
-            }
-            else
-            {
+                DispatchAction(p, DriverActions.MoveTo(nextPosition, p.Stats.GetSpeed()), currentMoveDuration);
+                break;
+            case 1:
                 DispatchAction(p, DriverActions.EmitParticle(CreatureParticle.PointHand));
                 DispatchAction(p, DriverActions.FaceDirection(dir), currentMoveDuration);
-            }
-        }
-        else
-        {
-            DispatchAction(p, DriverActions.EmitParticle(CreatureParticle.EnergyLow));
-            // After each move decrease the energy as it is "used up"
-            p.Stats.Energy -= 0.1f;
-            DispatchAction(p, DriverActions.SetFloat("CalmEnergetic", p.Stats.Energy));
+                break;
+            case 2:
+
+                List<CreatureParticle> particles = new() { CreatureParticle.EnergyHigh, CreatureParticle.DownArrow };
+                DispatchAction(p, DriverActions.EmitParticles(particles));
+                p.Stats.Energy -= rnd.value * 0.1f;
+                break;
+            default:
+                if (Random.Range(0f, 1f) <= Parameters.moveChance)
+                    StateOf(p).ActionIndex = 0;
+                    break;
         }
     }
 

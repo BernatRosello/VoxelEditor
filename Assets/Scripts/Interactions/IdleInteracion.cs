@@ -59,8 +59,14 @@ public class IdleInteraction : ACreatureInteraction<IdleParams>
         if (trigger)
         {
             DispatchAction(participant, DriverActions.EmitParticle(CreatureParticle.Cancel, 2));
-            Debug.Log($"[{participant.Identity}] Triggered an emote");
+            // Debug.Log($"[{participant.Identity}] Triggered an emote");
             DispatchAction(participant, DriverActions.SetTrigger("EmoteTrigger", waitOnState:"Idle Emote"));
+        }
+        else if (rnd.value < (Parameters.avgEmotesPerMinute / 60f * deltaTime))
+        {
+            List<CreatureParticle> particles = new(){CreatureParticle.EnergyHigh, CreatureParticle.UpArrow};
+            DispatchAction(participant, DriverActions.EmitParticles(particles));
+            participant.Stats.Energy += rnd.value * 0.1f;
         }
         continueUpdateTick = false;
         trigger = false;

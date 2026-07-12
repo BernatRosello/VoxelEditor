@@ -102,7 +102,7 @@ public sealed class InteractionManager : MonoBehaviour
     }
     public static ACreatureInteraction TryGetInteraction(CreatureData creature)
     {
-        if (!Instance)  return null;
+        if (!Instance) return null;
         Instance.participants.TryGetValue(creature, out var interaction);
         return interaction;
     }
@@ -264,7 +264,8 @@ public sealed class InteractionManager : MonoBehaviour
         {
             return false;
         }
-        if (participants.TryGetValue(p, out var curr))
+
+        if (!participants.TryGetValue(p, out var curr))
         {
             return inter.TryJoin(p);
         }
@@ -272,7 +273,7 @@ public sealed class InteractionManager : MonoBehaviour
         {
             return inter.InterruptLowerPriorityInteractions &&
                     curr.Priority < inter.Priority &&
-                    inter.TryJoin(p) &&
+                    inter.CanJoin(p) &&
                     curr.TryLeave(p); // Important that try leave is checked last to avoid orphanage and current interaction leave->join
         }
     }

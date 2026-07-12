@@ -45,24 +45,17 @@ public class ParticleController : MonoBehaviour
     {
         startSize = scale,
     };
-
     particleSystem.Emit(emit, count);
-
     particleSystem.GetCustomParticleData(customData, ParticleSystemCustomData.Custom1);
-
-    Debug.Log($"CustomData.Count = {customData.Count}");
-
     int start = Mathf.Max(0, customData.Count - count);
-
     for (int i = start; i < customData.Count; i++)
     {
         Vector4 v = customData[i];
         v.x = (float)particle;
         customData[i] = v;
 
-        Debug.Log($"Setting particle {i} to {(int)particle}");
+        // Debug.Log($"Setting particle {i} to {(int)particle}");
     }
-
     particleSystem.SetCustomParticleData(customData, ParticleSystemCustomData.Custom1);
 }
 }

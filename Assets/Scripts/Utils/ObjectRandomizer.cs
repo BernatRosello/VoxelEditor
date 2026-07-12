@@ -20,7 +20,7 @@ public static class ObjectRandomizer
         // Debug.Log($"Randomizing obj({obj}) of type({(obj?.GetType())})");
         if (obj == null)
         {
-            Debug.Log("Skipping null");
+            // Debug.Log("Skipping null");
             return;
         }
         Type type = obj.GetType();

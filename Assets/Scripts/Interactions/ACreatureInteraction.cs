@@ -155,7 +155,6 @@ public abstract class ACreatureInteraction
     protected virtual void OnParticipantLeft(CreatureData left)
     {
         if (DebugBaseClass) Debug.Log($"C[{left.Identity}] LEFT the interaction[{this.Name}]");
-        InteractionManager.NotifyParticipantLeft(this, left);
     }
 
     protected virtual void PostTick(float deltaTime) { }
@@ -194,35 +193,34 @@ public abstract class ACreatureInteraction
         return TotalParticipantCount >= MinParticipants;
     }
 
+    public bool CanJoin(CreatureData creature)
+    {
+        if (!AllowLateJoining ||
+            pendingJoin.Contains(creature) ||
+            participants.Contains(creature) ||
+            pendingLeave.Contains(creature) ||
+            TotalParticipantCount >= MaxParticipants)
+        {
+            return false;
+        }
+        return LateJoinCheck(creature);
+    }
+
     /// <summary>
     /// User configurable preconditions for a creature to be allowed to join into an interaction.
     /// </summary>
     /// <param name="c"></param>
     /// <returns> true when allowed to join, false when otherwise</returns>
-    public virtual bool CanJoin(CreatureData c) => true;
+    protected virtual bool LateJoinCheck(CreatureData c) => true;
     public bool TryJoin(CreatureData participant)
     {
-        if (!AllowLateJoining ||
-            pendingJoin.Contains(participant) ||
-            participants.Contains(participant) ||
-            pendingLeave.Contains(participant) ||
-            TotalParticipantCount >= MaxParticipants)
-        {
-            return false;
-        }
         if (!CanJoin(participant)) return false;
 
         pendingJoin.Enqueue(participant);
         return true;
     }
 
-    /// <summary>
-    /// User configurable preconditions for a creature to be allowed to leave an interaction.
-    /// </summary>
-    /// <param name="c"></param>
-    /// <returns> true when allowed to join, false when otherwise</returns>
-    public virtual bool CanLeave(CreatureData c) => true;
-    public bool TryLeave(CreatureData participant)
+    public bool CanLeave(CreatureData participant)
     {
         if (!AllowEarlyLeaving ||
             pendingLeave.Contains(participant) ||
@@ -232,10 +230,21 @@ public abstract class ACreatureInteraction
         {
             return false;
         }
+        return EarlyLeaveCheck(participant);
+    }
+
+    /// <summary>
+    /// User configurable preconditions for a creature to be allowed to leave an interaction.
+    /// </summary>
+    /// <param name="c"></param>
+    /// <returns> true when allowed to join, false when otherwise</returns>
+    protected virtual bool EarlyLeaveCheck(CreatureData c) => true;
+    public bool TryLeave(CreatureData participant)
+    {
         if (!CanLeave(participant)) return false;
 
         participantStates[participant].Phase = InteractionPhase.Leave;
-        return true;
+        return pendingLeave.Contains(participant);
     }
 
     public virtual void ForceLeave(CreatureData participant)
@@ -372,6 +381,7 @@ public abstract class ACreatureInteraction
                     if (participantStates[p].ActionComplete && LeaveFinished(p))
                     {
                         OnParticipantLeft(p);
+
                         pendingLeave.Enqueue(p);
                     }
 
@@ -381,7 +391,9 @@ public abstract class ACreatureInteraction
 
         while (pendingLeave.Count > 0)
         {
-            BaseRemoveParticipant(pendingLeave.Dequeue());
+            var left = pendingLeave.Dequeue();
+            BaseRemoveParticipant(left);
+            InteractionManager.NotifyParticipantLeft(this, left);
         }
 
         ellapsed += deltaTime;
@@ -418,9 +430,9 @@ public abstract class ACreatureInteraction
 
     private void BaseRemoveParticipant(CreatureData participant)
     {
+        RemoveParticipantData(participant);
         participants.Remove(participant);
         participantStates.Remove(participant);
-        RemoveParticipantData(participant);
     }
 
     /// <summary>

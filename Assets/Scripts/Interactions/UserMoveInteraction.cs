@@ -51,7 +51,7 @@ public class UserMoveInteraction : ACreatureInteraction<UserMoveParams>
         {
             case 0:
                 DispatchAction(p, DriverActions.EmitParticle(CreatureParticle.Puppet));             // Action 0
-                DispatchAction(p, DriverActions.MoveTo(Parameters.position));                       // Action 1
+                DispatchAction(p, DriverActions.MoveTo(Parameters.position, p.Stats.GetSpeed()));                       // Action 1
                 break;
             case 2:
                 DispatchAction(p, DriverActions.EmitParticle(CreatureParticle.QuestionMark));       // Action 2

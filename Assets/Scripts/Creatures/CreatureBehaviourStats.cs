@@ -61,5 +61,12 @@ public sealed class CreatureBehaviourStats
     {
         Happiness = other.Happiness;
         Energy = other.Energy;
+
+        UpdateAnimator();
+    }
+
+    public float GetSpeed()
+    {
+        return energy * 1.75f;
     }
 }
