@@ -225,8 +225,7 @@ public abstract class ACreatureInteraction
         if (!AllowEarlyLeaving ||
             pendingLeave.Contains(participant) ||
             pendingJoin.Contains(participant) ||
-            !participants.Contains(participant) ||
-            participantStates[participant].Phase == InteractionPhase.Leave)
+            !participants.Contains(participant))
         {
             return false;
         }
@@ -244,7 +243,7 @@ public abstract class ACreatureInteraction
         if (!CanLeave(participant)) return false;
 
         participantStates[participant].Phase = InteractionPhase.Leave;
-        return pendingLeave.Contains(participant);
+        return true;
     }
 
     public virtual void ForceLeave(CreatureData participant)

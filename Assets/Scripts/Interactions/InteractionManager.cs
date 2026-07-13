@@ -11,6 +11,7 @@ public sealed class InteractionManager : MonoBehaviour
 
     private readonly Dictionary<CreatureIdentity, CreatureData> creatureData = new();
     private readonly Dictionary<CreatureData, ACreatureInteraction> participants = new();
+    private readonly Dictionary<CreatureData, ACreatureInteraction> waitingToJoin = new();
 
     public static IReadOnlyCollection<CreatureIdentity> Creatures => Instance.creatureData.Keys;
 
@@ -77,6 +78,7 @@ public sealed class InteractionManager : MonoBehaviour
         }
         tickTimer = 0;
 
+        ProcessLateJoins();
         ProcessRequests();
 
         for (int i = interactions.Count - 1; i >= 0; i--)
@@ -90,6 +92,40 @@ public sealed class InteractionManager : MonoBehaviour
                 Debug.Log($"Removed '{interaction.Name}' Interaction in no longer valid state");
                 interactions.RemoveAt(i);
             }
+        }
+    }
+
+    private void ProcessLateJoins()
+    {
+        List<CreatureData> remove = new();
+        foreach (var kvp in waitingToJoin)
+        {
+            if (!interactions.Contains(kvp.Value))
+            {
+                Debug.Log($"Interaction [{kvp.Value}] got resolved before [{kvp.Key.Identity}] could complete LateJoining.");
+                remove.Add(kvp.Key);
+            }
+            else if (!participants.ContainsKey(kvp.Key)) // Check if the participant has left it's prev interaction yet (thats how he ended up in the waiting Map)
+            {
+                if (kvp.Value.TryJoin(kvp.Key))
+                {
+                    Debug.Log($"Creature [{kvp.Key.Identity}] succesfully LateJoined Interaction [{kvp.Value}]");
+                    participants[kvp.Key] = kvp.Value;
+                    remove.Add(kvp.Key);
+                }
+                else
+                {
+                    Debug.Log($"Creature [{kvp.Key.Identity}] can't LateJoin Interaction [{kvp.Value}] (failed CanJoin() check...) TODO: Consider evaluating the waitingToJoin status for discard if it fails to join consistently");
+                }
+            }
+            else
+            {
+                Debug.Log($"Creature [{kvp.Key.Identity}] can't LateJoin Interaction [{kvp.Value}] yet, it's still occupied with the previous interaction's ({participants[kvp.Key].TryReadState(kvp.Key).Phase})!");
+            }
+        }
+        foreach (var fail in remove)
+        {
+            waitingToJoin.Remove(fail);
         }
     }
 
@@ -190,6 +226,7 @@ public sealed class InteractionManager : MonoBehaviour
             // return out if any participant is still busy in another interaction
             if (participants.ContainsKey(p))
             {
+                Debug.Log($"Tried to add promised participant[{p.Identity}] that is still busy with other action!");
                 return false;
             }
 
@@ -230,16 +267,12 @@ public sealed class InteractionManager : MonoBehaviour
                 availableParticipants.Add(p);
                 continue;
             }
-            if (!tempInter.InterruptLowerPriorityInteractions ||
-                currentInteraction.Priority > tempInter.Priority) // allows same priority to be overridden
+            if (tempInter.InterruptLowerPriorityInteractions &&
+                currentInteraction.Priority <= tempInter.Priority && // <= allows same priority currentInteraction to be interrupted
+                tempInter.CanJoin(p)) // Preemptive check to avoid participant "orphanage"
             {
-                continue;
+                TryLeaveInteraction(p);
             }
-            if (!TryLeaveInteraction(p))
-            {
-                continue;
-            }
-            availableParticipants.Add(p);
         }
 
         // Parameters are passed into the creation internally by the request holding them
@@ -258,24 +291,47 @@ public sealed class InteractionManager : MonoBehaviour
 
     #region Join
 
-    public bool TryJoinInteraction(ACreatureInteraction inter, CreatureData p)
+    private bool CanJoin(CreatureData participant, ACreatureInteraction joiningInteraction)
     {
-        if (!interactions.Contains(inter) || !creatureData.ContainsKey(p.Identity))
+        if (!creatureData.ContainsKey(participant.Identity))
         {
             return false;
         }
+        else if (waitingToJoin.ContainsKey(participant))
+        {
+            return waitingToJoin[participant] != joiningInteraction;
+        }
+        if (!participants.TryGetValue(participant, out var currentInteraction))
+        {
+            return joiningInteraction.CanJoin(participant);
+        }
 
-        if (!participants.TryGetValue(p, out var curr))
+        return joiningInteraction.InterruptLowerPriorityInteractions &&
+            currentInteraction.Priority < joiningInteraction.Priority &&
+            joiningInteraction.CanJoin(participant) &&
+            currentInteraction.CanLeave(participant);
+    }
+
+    public bool TryJoinInteraction(ACreatureInteraction inter, CreatureData p)
+    {
+        if (!CanJoin(p, inter)) return false;
+
+        if (participants.TryGetValue(p, out var curr))
         {
-            return inter.TryJoin(p);
+            if (waitingToJoin.ContainsKey(p) && waitingToJoin[p] == inter) Debug.Log($"[{p.Identity}] Edge case that was half-expected: HIT when trying to join {inter}");
+            if (curr.TryLeave(p))
+            {
+                waitingToJoin[p] = inter;
+                return true;
+            }
         }
-        else
-        {
-            return inter.InterruptLowerPriorityInteractions &&
-                    curr.Priority < inter.Priority &&
-                    inter.CanJoin(p) &&
-                    curr.TryLeave(p); // Important that try leave is checked last to avoid orphanage and current interaction leave->join
-        }
+        
+        bool joined = inter.TryJoin(p);
+            if (joined)
+            {
+                participants[p] = inter;
+            }
+            return joined;
     }
 
     #endregion
