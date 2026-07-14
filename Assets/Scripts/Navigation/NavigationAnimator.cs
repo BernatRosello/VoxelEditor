@@ -271,7 +271,7 @@ public class NavigationAnimator : MonoBehaviour
             animatedTransform.forward,
             direction.normalized);
 
-        Debug.Log(angle);
+        Debug.Log("Testing angle: " + angle);
 
         tolerance ??= turningThreshold.Stop;
 
@@ -472,6 +472,8 @@ public class NavigationAnimator : MonoBehaviour
             Mathf.Clamp(angle / 180f, -1f, 1f),
             0.1f,
             Time.deltaTime);
+
+        Debug.Log("Angle: " + angle);
 
         if (IsFacingDirection(requestedFacingDirection))
         {
