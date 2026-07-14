@@ -102,7 +102,7 @@ public static class DriverActions
         };
     }
 
-    public static DriverActionDefinition EmitParticle(CreatureParticle particle,  int count = 1)
+    public static DriverActionDefinition EmitParticle(CreatureParticle particle, int count = 1)
     {
         return new()
         {
@@ -310,7 +310,7 @@ public class ActionDriver : MonoBehaviour
 
     public void FaceDirection(Vector3 dir)
     {
-        nav.SetDestination(GetPosition() + dir * 0.1f);
+        nav.FaceDirection(dir);
     }
 
     internal void FacePosition(Vector3 position)
@@ -318,25 +318,14 @@ public class ActionDriver : MonoBehaviour
         FaceDirection(position - GetPosition());
     }
 
-    public bool IsFacingDirection(Vector3 dir, float toleranceDegrees = -1.0f, bool verticalCheck = false)
+    public bool IsFacingDirection(Vector3 dir)
     {
-        if (dir.sqrMagnitude < 0.0001f)
-            return true;
-
-        if (!verticalCheck)
-            dir.y = 0;
-
-        float angle = Vector3.Angle(CachedTransform.forward, dir.normalized);
-
-        if (toleranceDegrees == -1.0f)
-            toleranceDegrees = Mathf.Min(nav.TurnStartThreshold, nav.TurnStopThreshold);
-
-        return angle <= toleranceDegrees;
+        return nav.IsFacingDirection(dir);
     }
 
-    public bool IsFacingPosition(Vector3 position, float toleranceDegrees = 5f)
+    public bool IsFacingPosition(Vector3 position)
     {
-        return IsFacingDirection(position - GetPosition(), toleranceDegrees);
+        return IsFacingDirection(position - GetPosition());
     }
 
     #endregion

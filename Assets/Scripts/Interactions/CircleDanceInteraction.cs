@@ -65,7 +65,11 @@ public class CircleDanceInteraction : ACreatureInteraction<CircleDanceParams>
 
     protected override bool CheckLeave(CreatureData participantData)
     {
-        bool result = base.CheckLeave(participantData) || AllParticipantsPastAction(5);
+        bool result = base.CheckLeave(participantData)
+        || AllParticipantsPastAction(5)
+        || (TotalEllapsedTime < Parameters.duration
+        && ParticipantFinishedAction(participantData, 3));// If timer is overrun let go participants that are finished dancing
+        
 
         // Debug.Log(
         //     $"{participantData.Identity} leave check = {result} " +

@@ -131,12 +131,11 @@ public class TalkInteraction : ACreatureInteraction<TalkParams>
         }
         continueUpdateTick = false;
         trigger = false;
-        leaveActionIndex[participant.Identity] = StateOf(participant).ActionIndex + 1;
     }
 
     protected override void LeaveInteraction(CreatureData participant)
     {
-        if (StateOf(participant).ActionIndex == leaveActionIndex[participant.Identity])
+        if (leaveActionIndex[participant.Identity] == 0)
         {
             DispatchAction(participant, DriverActions.EmitParticle(CreatureParticle.Cancel));   // ActionIndex: leaveActionIndex[participant.Identity]
             Vector3 conversationCenter = new();
@@ -146,14 +145,15 @@ public class TalkInteraction : ACreatureInteraction<TalkParams>
             }
             var leavePos = (conversationCenter - participant.Driver.GetPosition()).normalized * 3;
 
-            // 10 second timeout as a safeguard to avoid stalling the interaction leave
-            DispatchAction(participant, DriverActions.MoveTo(leavePos, participant.Stats.GetSpeed()), 5);               // ActionIndex: leaveActionIndex[participant.Identity] + 1
+            // 5 second timeout as a safeguard to avoid stalling the interaction leave
+            DispatchAction(participant, DriverActions.MoveTo(leavePos, participant.Stats.GetSpeed()), 5);
+            leaveActionIndex[participant.Identity] = StateOf(participant).ActionIndex;
         }
     }
 
     protected override bool LeaveFinished(CreatureData participant)
     {
-        return true;//ParticipantFinishedAction(participant, leaveActionIndex[participant.Identity]);
+        return true;
     }
 
     protected override void RemoveParticipantData(CreatureData p)

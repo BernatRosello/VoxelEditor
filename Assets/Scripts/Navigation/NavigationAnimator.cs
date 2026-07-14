@@ -65,7 +65,10 @@ public class NavigationAnimator : MonoBehaviour
     private Vector3 smoothedSteeringTarget;
     private Vector3 previousPosition;
     private Vector3 actualVelocity;
-    private bool navigationActive;  
+    private bool navigationActive;
+    private bool turnRequestActive;
+    private Vector3 requestedFacingDirection;
+
     public bool NavigationActive { get => navigationActive; set => navigationActive = value; }
 
 
@@ -237,10 +240,64 @@ public class NavigationAnimator : MonoBehaviour
         return finalSpeed;
     }
 
+    public void FaceDirection(Vector3 direction)
+    {
+        direction = Vector3.ProjectOnPlane(direction, surfaceUp);
+
+        if (direction.sqrMagnitude < 0.0001f)
+            return;
+
+        turnRequestActive = true;
+        requestedFacingDirection = direction.normalized;
+
+        // Stop any locomotion cleanly.
+        agent.ResetPath();
+
+        animator.SetBool("IsMoving", false);
+        animator.SetFloat("vel_x", 0f);
+        animator.SetFloat("vel_y", 0f);
+
+        pathCachedFlag = false;
+    }
+
+    public bool IsFacingDirection(Vector3 direction, float? tolerance = null)
+    {
+        direction = Vector3.ProjectOnPlane(direction, surfaceUp);
+
+        if (direction.sqrMagnitude < 0.0001f)
+            return true;
+
+        float angle = Vector3.Angle(
+            animatedTransform.forward,
+            direction.normalized);
+
+        Debug.Log(angle);
+
+        tolerance ??= turningThreshold.Stop;
+
+        return angle <= tolerance.Value;
+    }
+
+    private bool ShouldStartTurning(Vector3 direction)
+    {
+        direction = Vector3.ProjectOnPlane(direction, surfaceUp);
+
+        if (direction.sqrMagnitude < 0.0001f)
+            return false;
+
+        return Vector3.Angle(animatedTransform.forward, direction.normalized) > turningThreshold.Start;
+    }
+
     private void ProcessMovement()
     {
         if (!navigationActive) return;
-        
+
+        if (turnRequestActive)
+        {
+            ProcessTurnRequest();
+            return;
+        }
+
         if (!agent.hasPath)
         {
             pathCachedFlag = false;
@@ -266,8 +323,7 @@ public class NavigationAnimator : MonoBehaviour
         Vector3 desiredForward = toTarget.normalized;
 
         float angleToTarget = Vector3.SignedAngle(animatedTransform.forward, desiredForward, surfaceUp);
-
-        float absAngle = Mathf.Abs(angleToTarget);
+        bool facingTarget = IsFacingDirection(desiredForward);
 
         bool isMoving = animator.GetBool("IsMoving");
         bool isTurning = animator.GetBool("IsTurning");
@@ -278,7 +334,7 @@ public class NavigationAnimator : MonoBehaviour
         if (!isMoving && !isTurning)
         {
             // Debug.Log($"Remaining Distance: {remainingDistance}/{movementThreshold.Start}");
-            if (absAngle > turningThreshold.Start)
+            if (ShouldStartTurning(desiredForward))
             {
                 animator.SetBool("IsTurning", true);
                 animator.SetFloat("vel_ang", Mathf.Clamp(angleToTarget / 180f, -1f, 1f));
@@ -309,13 +365,11 @@ public class NavigationAnimator : MonoBehaviour
 
             float velAng = Mathf.Clamp(angleToTarget / 180f, -1f, 1f);
             animator.SetFloat("vel_ang", velAng, 0.1f, Time.deltaTime);
-
-            if (absAngle < turningThreshold.Stop)
+            if (facingTarget)
             {
                 animator.SetBool("IsTurning", false);
                 animator.SetFloat("vel_ang", 0f);
             }
-
             return;
         }
 
@@ -387,7 +441,7 @@ public class NavigationAnimator : MonoBehaviour
             // NOT desiredVelocity.
             //
             if (remainingDistance > 0.15f &&
-                absAngle > turnWhileMovingThreshold)
+                Mathf.Abs(angleToTarget) > turnWhileMovingThreshold)
             {
                 animator.SetBool("IsMoving", false);
                 animator.SetBool("IsTurning", true);
@@ -397,6 +451,34 @@ public class NavigationAnimator : MonoBehaviour
                 animator.SetFloat("vel_y", 0f, 0.25f, Time.deltaTime);
                 cachedPathLength = remainingDistance;
             }
+        }
+    }
+
+    private void ProcessTurnRequest()
+    {
+        float angle =
+            Vector3.SignedAngle(
+                animatedTransform.forward,
+                requestedFacingDirection,
+                surfaceUp);
+
+        if (!animator.GetBool("IsTurning"))
+        {
+            animator.SetBool("IsTurning", true);
+        }
+
+        animator.SetFloat(
+            "vel_ang",
+            Mathf.Clamp(angle / 180f, -1f, 1f),
+            0.1f,
+            Time.deltaTime);
+
+        if (IsFacingDirection(requestedFacingDirection))
+        {
+            animator.SetBool("IsTurning", false);
+            animator.SetFloat("vel_ang", 0f);
+
+            turnRequestActive = false;
         }
     }
 
@@ -468,6 +550,9 @@ public class NavigationAnimator : MonoBehaviour
             Gizmos.color = Color.blue;
             Vector3 toTarget = smoothedSteeringTarget - animator.rootPosition;
             Gizmos.DrawLine(animator.rootPosition, animator.rootPosition + toTarget);
+
+            Debug.DrawRay(animatedTransform.position, requestedFacingDirection, Color.green);
+            Debug.DrawRay(animatedTransform.position, animatedTransform.forward, Color.blue);
         }
     }
 

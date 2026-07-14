@@ -101,7 +101,7 @@ Participant[{creature.Identity}] State
         hoverText.text =
 $@"{interaction.Name} Interaction
   Interaction Priority: {interaction.Priority}
-  N_Participants: {interaction.ActiveParticipants.Count}
+  TotalParticipants: {interaction.TotalParticipantCount}
   {(interaction.DebugInfo != "" ? $"Debug Info: {interaction.DebugInfo}" : "")}
 
 Participant[{creature.Identity}] State

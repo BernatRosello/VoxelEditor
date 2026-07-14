@@ -45,7 +45,7 @@ public abstract class ACreatureInteraction<TParams> : ACreatureInteraction where
 
 public abstract class ACreatureInteraction
 {
-    protected static bool DebugBaseClass = false;
+    protected static bool DebugBaseClass = true;
     #region COMPILE TIME
     public abstract string Name { get; }
     public abstract string Description { get; }
@@ -65,6 +65,7 @@ public abstract class ACreatureInteraction
     private readonly Queue<CreatureData> pendingLeave = new();
     protected bool continueUpdateTick;
     private float ellapsed;
+    private bool finished;
     #endregion
 
     public ACreatureInteraction(List<CreatureData> participantList)
@@ -75,15 +76,6 @@ public abstract class ACreatureInteraction
 
     #region INTERACTION CONTROL FLOW CHECKS
 
-    /// <summary>
-    /// Determines conditions for when a creature is allowed to join (be it during initialization or late join)
-    /// 
-    /// <para> Base implementation: </para>
-    ///     ParticipantCount &lt; MaxParticipants
-    /// </summary>
-    /// <param name="participant"></param>
-    /// <returns></returns>
-    protected virtual bool CheckJoin(CreatureData participant) { return TotalParticipantCount < MaxParticipants; }
     protected virtual bool JoinFinished(CreatureData participant) { return true; }
 
     /// <summary>
@@ -176,6 +168,9 @@ public abstract class ACreatureInteraction
     ///  depending on the deltaTime and call frequency to the Tick() function. </para>
     /// </summary>
     public float TotalEllapsedTime => ellapsed;
+    public bool IsFinished => finished;
+
+    public bool IsEmpty => TotalParticipantCount == 0;
 
     public CreatureInteractionState TryReadState(CreatureData creature)
     {
@@ -190,7 +185,7 @@ public abstract class ACreatureInteraction
     /// <returns></returns>
     public virtual bool ValidateInteraction()
     {
-        return TotalParticipantCount >= MinParticipants;
+        return !finished && (TotalParticipantCount >= MinParticipants);
     }
 
     public bool CanJoin(CreatureData creature)
@@ -199,7 +194,8 @@ public abstract class ACreatureInteraction
             pendingJoin.Contains(creature) ||
             participants.Contains(creature) ||
             pendingLeave.Contains(creature) ||
-            TotalParticipantCount >= MaxParticipants)
+            OccupiedParticipantSlotCount >= MaxParticipants ||
+            finished)
         {
             return false;
         }
@@ -284,6 +280,10 @@ public abstract class ACreatureInteraction
             //     $"Action={participantStates[p].ActionIndex} " +
             //     $"Complete={participantStates[p].ActionComplete}"
             // );
+            if (finished && participantStates[p].Phase != InteractionPhase.Leave)
+            {
+                participantStates[p].Phase = InteractionPhase.Leave;
+            }
             switch (participantStates[p].Phase)
             {
                 case InteractionPhase.Join:
@@ -397,6 +397,11 @@ public abstract class ACreatureInteraction
 
         ellapsed += deltaTime;
         PostTick(deltaTime);
+
+        if (!finished && !ValidateInteraction())
+        {
+            finished = true;
+        }
     }
 
     #endregion

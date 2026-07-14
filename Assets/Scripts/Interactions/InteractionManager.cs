@@ -87,7 +87,7 @@ public sealed class InteractionManager : MonoBehaviour
 
             interaction.Tick(TickTime);
 
-            if (!interaction.ValidateInteraction())
+            if (interaction.IsEmpty)
             {
                 Debug.Log($"Removed '{interaction.Name}' Interaction in no longer valid state");
                 interactions.RemoveAt(i);
@@ -123,9 +123,9 @@ public sealed class InteractionManager : MonoBehaviour
                 Debug.Log($"Creature [{kvp.Key.Identity}] can't LateJoin Interaction [{kvp.Value}] yet, it's still occupied with the previous interaction's ({participants[kvp.Key].TryReadState(kvp.Key).Phase})!");
             }
         }
-        foreach (var fail in remove)
+        foreach (var r in remove)
         {
-            waitingToJoin.Remove(fail);
+            waitingToJoin.Remove(r);
         }
     }
 
@@ -299,7 +299,7 @@ public sealed class InteractionManager : MonoBehaviour
         }
         else if (waitingToJoin.ContainsKey(participant))
         {
-            return waitingToJoin[participant] != joiningInteraction;
+            return waitingToJoin[participant] == joiningInteraction;
         }
         if (!participants.TryGetValue(participant, out var currentInteraction))
         {
