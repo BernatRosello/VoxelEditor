@@ -1,0 +1,14 @@
+digraph "CircleDanceInteraction.CheckLeave"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="CircleDanceInteraction.Check\lLeave",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Determines conditions for when a creature must leave (internal \"wants to leave\" condition,..."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="ACreatureInteraction\l\< CircleDanceParams \>\l::AllParticipantsPastAction",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_a_creature_interaction.html#a4ced25b728eb4d888cc86359e398ecf8",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="ACreatureInteraction\l\< CircleDanceParams \>\l::ParticipantFinishedAction",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_a_creature_interaction.html#a4e41f0c4610de90628cf43bd63017deb",tooltip=" "];
+}

@@ -1,0 +1,20 @@
+digraph "Creature.OnValidate"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="Creature.OnValidate",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="CreatureBehaviourStats.Bind\lAnimator",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_creature_behaviour_stats.html#a9d30fdfbaac97c9e3f8c68773b6ac6be",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="CreatureBehaviourStats.Update\lAnimator",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_creature_behaviour_stats.html#affdeefe42fd189c4147ab47c32d04367",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="CreatureIdentity.Create",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$struct_creature_identity.html#a361d16458c02f8603ea6292a17e84060",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="CreatureIdentity.Creature\lIdentity",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$struct_creature_identity.html#a5adb86523a575f4c3e31386ef81bcc99",tooltip=" "];
+  Node4 -> Node6 [id="edge5_Node000004_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="CreatureGuidUtility.CreateGuid",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_creature_guid_utility.html#a61c3e6a23a8b5e38b13b3b85ca106d1a",tooltip="Generates a globally unique creature identifier."];
+}

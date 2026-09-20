@@ -1,0 +1,41 @@
+digraph "CreatureEditorManager.OnMaterialChanged"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="CreatureEditorManager.On\lMaterialChanged",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="CreatureVisuals.ApplyMaterials",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_creature_visuals.html#a3051c8be5eee1434c97ca90c2f63d9dd",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="CreatureVisuals.ApplyArms\lMaterial",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_creature_visuals.html#a0db165512457e839ed1b105f606bcb30",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="CreatureVisuals.ApplyAll\lMaterialProperties",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_creature_visuals.html#a32d2a2d58498fdf58b21a6cc7182d670",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="CreatureVisuals.ApplyBSDFProperties",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_creature_visuals.html#a9b3b5f6285915e556b69b65e36bef507",tooltip=" "];
+  Node4 -> Node6 [id="edge5_Node000004_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="CreatureVisuals.ApplyFur\lProperties",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_creature_visuals.html#a0ed00bd43f97b8b026b229c224d93f90",tooltip=" "];
+  Node4 -> Node7 [id="edge6_Node000004_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="MaterialLibrarySingleton.\lGetMaterial",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_material_library_singleton.html#ac671327c74df375a83898aec675fc134",tooltip=" "];
+  Node4 -> Node8 [id="edge7_Node000004_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="CreatureVisuals.InitMaterial\lPropertyBlock",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_creature_visuals.html#ad28efd865247fdb5f644bae6bd7df5cf",tooltip=" "];
+  Node2 -> Node9 [id="edge8_Node000002_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="CreatureVisuals.ApplyEyes\lMaterial",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_creature_visuals.html#a6e3c6b6a7e0e509cc29daba937b577ae",tooltip=" "];
+  Node9 -> Node4 [id="edge9_Node000009_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node10 [id="edge10_Node000002_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="CreatureVisuals.ApplyHead\lMaterial",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_creature_visuals.html#af046cda73aea57e158a5f95246ed8910",tooltip=" "];
+  Node10 -> Node4 [id="edge11_Node000010_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node11 [id="edge12_Node000002_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="CreatureVisuals.ApplyLegs\lMaterial",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_creature_visuals.html#a1cf1793c6487ed7a02b43d135a7e6cde",tooltip=" "];
+  Node11 -> Node4 [id="edge13_Node000011_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node12 [id="edge14_Node000002_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="CreatureVisuals.ApplyTorso\lMaterial",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_creature_visuals.html#ac15f6abf3691439b24b5ce2dbff2a287",tooltip=" "];
+  Node12 -> Node4 [id="edge15_Node000012_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node13 [id="edge16_Node000001_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="CreatureEditorManager.Rebuild\lMaterialProperties",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_creature_editor_manager.html#a1c2457d16944b41fee6cd5e908546bc8",tooltip=" "];
+  Node13 -> Node14 [id="edge17_Node000013_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="CreatureEditorManager.Bind\lMaterialSlider",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_creature_editor_manager.html#ab5372afb10822919d9a8558ffe1d3546",tooltip=" "];
+  Node14 -> Node2 [id="edge18_Node000014_Node000002",color="steelblue1",style="solid",tooltip=" "];
+}
