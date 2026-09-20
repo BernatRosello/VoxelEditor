@@ -1,0 +1,22 @@
+digraph "Creature.DisableBodyPartColliders"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="Creature.DisableBodyPart\lColliders",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="CreatureEditorManager.Set\lCurrentCreature",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_creature_editor_manager.html#a4209e890ea573a1b97d896d87315e8e4",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="CreatureEditorManager.Begin\lEditing",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_creature_editor_manager.html#ab071f0d559d579500fd032ce2a40e4dd",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="CreatureEditorManager.Awake",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_creature_editor_manager.html#a223e4d81ca0cb4fb8703f8936fc20157",tooltip=" "];
+  Node2 -> Node5 [id="edge4_Node000002_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="CreatureEditorManager.On\lClick",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_creature_editor_manager.html#af56ae155321588b8215430f3337e3c71",tooltip=" "];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="CreatureEditorManager.On\lDisable",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_creature_editor_manager.html#a5cf970fa51f38a39038ad17470aaa2e1",tooltip=" "];
+  Node5 -> Node7 [id="edge6_Node000005_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="CreatureEditorManager.On\lEnable",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_creature_editor_manager.html#a27e858d23c260b8669c16301b8c8b4c2",tooltip=" "];
+}

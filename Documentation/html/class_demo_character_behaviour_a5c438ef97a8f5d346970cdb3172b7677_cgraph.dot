@@ -1,0 +1,12 @@
+digraph "DemoCharacterBehaviour.CreateIdleRequest"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="DemoCharacterBehaviour.Create\lIdleRequest",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="InteractionManager.Create\lRequest",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_interaction_manager.html#acafa7eb7bda5f32109c1a622cb9093a9",tooltip=" "];
+}
