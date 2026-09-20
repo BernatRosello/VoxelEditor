@@ -282,7 +282,7 @@ public class CreatureVisuals : ScriptableObject
     private static void ApplyFurProperties(FurSettings settings, MaterialPropertyBlock block)
     {
         block.SetFloat("_Metallic", settings.Metallic);
-        block.SetFloat("_PatternAmount", settings.Pattern);
+        //block.SetFloat("_PatternAmount", settings.Pattern);
         block.SetFloat("_Smoothness", settings.Smoothness);
         block.SetFloat("_ShellStep", settings.FurLength);
         block.SetFloat("_FurScale", settings.FurDensity);
@@ -354,8 +354,8 @@ public class CreatureVisuals : ScriptableObject
         [Range(0, 1)]
         public float Metallic;
 
-        [Range(0, 4)]
-        public float Pattern;
+        //[Range(0, 4)]
+        //public float Pattern;
         
 
         [Range(0, 1)]
@@ -380,7 +380,7 @@ public class CreatureVisuals : ScriptableObject
         [Range(0, 1)]
         public float Smoothness;
 
-        [Range(-0.5f, 1)]
+        [Range(0f, 1)]
         public float Emission;
 
         [Range(0, 1)]

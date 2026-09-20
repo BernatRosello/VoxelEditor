@@ -2,6 +2,9 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+#if UNITY_EDITOR
+
+
 public class EditorActions : MonoBehaviour
 {
     public Transform gridOriginTransform;
@@ -36,3 +39,5 @@ public class EditorActions : MonoBehaviour
     }
 
 }
+
+#endif

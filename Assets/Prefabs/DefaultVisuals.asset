@@ -13,35 +13,35 @@ MonoBehaviour:
   m_Name: DefaultVisuals
   m_EditorClassIdentifier: Assembly-CSharp::CreatureVisuals
   headBlendShapes:
-    Float: 100
-    Shrink: 78.02102
-    Cylinder: -100
-    Sphere: 100
-    Taper: -100
-    PointyEars: 100
-    DroopyEars: 28.225697
-    Unicorn: -6.082642
+    Float: -2.3018777
+    Shrink: 32.889248
+    Cylinder: -1.2239218
+    Sphere: -2.3018777
+    Taper: -0.50528646
+    PointyEars: 0.9319663
+    DroopyEars: -0.8646071
+    Unicorn: -3.0205011
     Spikes: 0.9319663
-    Mohawk: -61.625465
-  headColor: {r: 0.8396226, g: 0.754966, b: 0.5505073, a: 1}
+    Mohawk: 0
+  headColor: {r: 0.5505073, g: 0.8396226, b: 0.75698996, a: 1}
   headMaterial:
-    type: 0
+    type: 1
     furSettings:
-      Metallic: 0.31414342
-      Pattern: 1.0116028
-      Smoothness: 0.6113751
+      Metallic: 0
+      Pattern: 0
+      Smoothness: 0.02
       FurLength: 0.00802
       FurDensity: 4.99
       FurThickness: 0.0233
     bsdfSettings:
-      Metallic: 0.44783738
-      Smoothness: 1
-      Emission: -0.083251685
+      Metallic: 0
+      Smoothness: 0.5
+      Emission: 0
       Opaqueness: 1
   eyesBlendShapes:
-    Size: 197.12927
-    Distance: -16.782646
-    Cylinder: -200
+    Size: 0
+    Distance: 80
+    Cylinder: 0
     Bore: 0
   eyesColor: {r: 0, g: 0, b: 0, a: 1}
   eyesMaterial:
@@ -60,11 +60,11 @@ MonoBehaviour:
       Opaqueness: 1
   torsoBlendShapes:
     Cylinder: 0
-    Taper: -42.65193
-    Qlo: 100
+    Taper: 0
+    Qlo: 0
   torsoColor: {r: 0.54901963, g: 0.8392157, b: 0.75686276, a: 1}
   torsoMaterial:
-    type: 0
+    type: 1
     furSettings:
       Metallic: 0
       Pattern: 0
@@ -78,8 +78,8 @@ MonoBehaviour:
       Emission: 0
       Opaqueness: 1
   armsBlendShapes:
-    Cylinder: -21.434944
-    Taper: -2.3807228
+    Cylinder: 0
+    Taper: 0
   armsColor: {r: 0.54901963, g: 0.8392157, b: 0.75686276, a: 1}
   armsMaterial:
     type: 1
@@ -100,7 +100,7 @@ MonoBehaviour:
     Taper: 0
   legsColor: {r: 0.54901963, g: 0.8392157, b: 0.75686276, a: 1}
   legsMaterial:
-    type: 0
+    type: 1
     furSettings:
       Metallic: 0
       Pattern: 0

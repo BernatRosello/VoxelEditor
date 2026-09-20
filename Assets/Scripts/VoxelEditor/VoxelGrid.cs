@@ -3,6 +3,8 @@ using System.Drawing;
 using UnityEditor;
 using UnityEngine;
 
+#if UNITY_EDITOR
+
 public struct Voxel
 {
 
@@ -214,3 +216,4 @@ public class VoxelGrid : MonoBehaviour
 
 }
 
+#endif

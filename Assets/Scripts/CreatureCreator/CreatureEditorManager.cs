@@ -11,7 +11,7 @@ public class CreatureEditorManager : MonoBehaviour
 {
     public static CreatureEditorManager Instance;
     [SerializeField] private CreatureVisuals defaultVisuals;
-    
+
     public CreatureVisuals DefaultVisuals { get => defaultVisuals; }
     public CreatureVisuals CurrentVisuals { get => currentCreature.Visuals; }
     public BodyMesh CurrentBodyMesh { get => currentCreature.BodyMesh; }
@@ -46,32 +46,53 @@ public class CreatureEditorManager : MonoBehaviour
         }
         else if (Instance != this)
         {
-            Destroy(this);
+            Destroy(gameObject);
+            return;
         }
 
+        // Must happen in Awake, not in a field initializer.
         controls = new PlayerControls();
 
-        // Bind tab toggles
         shapeToggle.onValueChanged.AddListener(_ => OnTabChanged());
         textureToggle.onValueChanged.AddListener(_ => OnTabChanged());
 
         shapeToggle.SetIsOnWithoutNotify(true);
-
         OnTabChanged();
-
-        BeginEditing(FindAnyObjectByType<Creature>());
     }
 
     private void OnEnable()
     {
+        // Normally Awake has already run, but don't allow lifecycle
+        // ordering to produce a null reference here.
+        if (controls == null)
+            controls = new PlayerControls();
+
         controls.Player.Click.canceled += OnClick;
         controls.Player.Enable();
     }
+
     private void OnDisable()
     {
+        if (controls == null)
+            return;
+
         controls.Player.Click.canceled -= OnClick;
         controls.Player.Disable();
     }
+
+    private void Start()
+    {
+        Creature creature = FindAnyObjectByType<Creature>();
+
+        if (creature == null)
+        {
+            Debug.LogError("[CreatureEditorManager] No Creature found in the scene.");
+            return;
+        }
+
+        BeginEditing(creature);
+    }
+
 
     private void OnTabChanged()
     {
@@ -102,7 +123,7 @@ public class CreatureEditorManager : MonoBehaviour
         var ad = currentCreature.GetComponent<ActionDriver>();
         ad.StartTurnLeft();
     }
-    
+
     public void StopTurnCreature()
     {
         var ad = currentCreature.GetComponent<ActionDriver>();

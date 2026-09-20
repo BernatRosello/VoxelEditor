@@ -2,8 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.Cinemachine;
 using UnityEditor;
-using UnityEditor.Actions;
-using UnityEngine.AI;
+#if UNITY_EDITOR
 
 public class InputController : MonoBehaviour
 {
@@ -358,3 +357,5 @@ public class InputController : MonoBehaviour
     }
 
 }
+
+#endif

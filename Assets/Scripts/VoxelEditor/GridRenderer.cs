@@ -1,6 +1,9 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+#if UNITY_EDITOR
+
+
 public class GridRenderer : MonoBehaviour
 {
     public VoxelGrid grid;
@@ -163,3 +166,5 @@ public class GridRenderer : MonoBehaviour
         return true;
     }
 }
+
+#endif

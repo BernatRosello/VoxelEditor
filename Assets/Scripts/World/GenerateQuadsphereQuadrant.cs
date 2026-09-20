@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 
+#if UNITY_EDITOR
+
 public class SphereQuadrantMeshCreator
 {
     [MenuItem("Tools/Create/Sphere Quadrant Mesh")]
@@ -121,3 +123,5 @@ public class SphereQuadrantMeshCreator
         return mesh;
     }
 }
+
+#endif

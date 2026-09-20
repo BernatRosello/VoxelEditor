@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 
+#if UNITY_EDITOR
 
 public class EditorState : MonoBehaviour
 {
@@ -18,3 +19,5 @@ public class EditorState : MonoBehaviour
         Instance = this;
     }
 }
+
+#endif

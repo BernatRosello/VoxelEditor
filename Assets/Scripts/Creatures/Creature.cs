@@ -35,15 +35,16 @@ public class Creature : MonoBehaviour
         identity = CreatureIdentity.Create();
     }
 
-#if UNITY_EDITOR
-
-    private void OnValidate()
+    private void InitializeCreatureVisualsData()
     {
+        
         if (!identity.IsValid)
         {
             identity = CreatureIdentity.Create();
 
+#if UNITY_EDITOR
             UnityEditor.EditorUtility.SetDirty(this);
+#endif
         }
 
         if (stats != null)
@@ -61,6 +62,25 @@ public class Creature : MonoBehaviour
         {
             bp.creature = this;
         }
+    }
+
+#if UNITY_EDITOR
+
+    private void OnValidate()
+    {
+        InitializeCreatureVisualsData();
+    }
+    private void Awake()
+    {
+        LoadVisuals();
+    }
+
+#else
+
+    private void Awake()
+    {
+        InitializeCreatureVisualsData();
+        LoadVisuals();
     }
 
 #endif
@@ -98,10 +118,5 @@ public class Creature : MonoBehaviour
         {
             col.DisableCollider();
         }
-    }
-
-    private void Awake()
-    {
-        LoadVisuals();
     }
 }

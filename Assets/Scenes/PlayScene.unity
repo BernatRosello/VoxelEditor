@@ -187,6 +187,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93f04fa30bbc22e4cb7ff2e68ce50e73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MoveToClickPoint
+  activeRequest: 0
+  raycastDistance: 100
+  raycastMask:
+    serializedVersion: 2
+    m_Bits: 0
+  hoverPanel: {fileID: 0}
+  hoverText: {fileID: 0}
+  hoverOffset: {x: 20, y: -20}
+  minimumSelected: 
+  m_avgEmotesPerMinute: 5
 --- !u!1 &447784684
 GameObject:
   m_ObjectHideFlags: 0
@@ -923,7 +933,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b9120c5162d391940bf6cbeab5da97a2, type: 2}
+  - {fileID: 2100000, guid: 0a5e7cb0864ffc24b8f4aee5bccc88a0, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1828,7 +1838,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7df0c2f9d7c3172459886d24596891ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NavigationAnimator
-  rotationSmoothDegrees: 180
   movementThreshold:
     startThreshold: 0.5
     stopThreshold: 0.1
@@ -1836,6 +1845,7 @@ MonoBehaviour:
     startThreshold: 45
     stopThreshold: 5
   turnWhileMovingThreshold: 91
+  rotationSmoothDegrees: 180
   minimumSpeed: 0.05
   maximumSpeed: 6
   shortPathLength: 2
@@ -1985,6 +1995,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  navSettings: {fileID: 0}
+  navSurfaceTransform: {fileID: 0}
 --- !u!1 &2107283292
 GameObject:
   m_ObjectHideFlags: 0
