@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 using TMPro;
 using Unity.VisualScripting;
 
-public class MoveToClickPoint : MonoBehaviour
+public class InteractionInspectorTool : MonoBehaviour
 {
     public enum RequestMode
     {
